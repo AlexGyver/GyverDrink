@@ -21,9 +21,9 @@ void btnTick() {
     dispMode();
   }
   if (encBtn.holded()) {
-    timeoutReset();
     pumpON();
     while (!digitalRead(ENC_SW));
+    timeoutReset();
     pumpOFF();
   }  
 }

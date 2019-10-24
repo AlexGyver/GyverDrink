@@ -81,6 +81,8 @@ void flowTick() {
         shotStates[i] = EMPTY;                                      // флаг на заправку
         strip.setLED(i, mCOLOR(RED));                               // подсветили
         LEDchanged = true;
+        DEBUG("set glass");
+        DEBUG(i);
       }
       if (digitalRead(SW_pins[i]) && shotStates[i] != NO_GLASS) {   // убрали пустую/полную рюмку
         shotStates[i] = NO_GLASS;                                   // статус - нет рюмки
@@ -93,6 +95,8 @@ void flowTick() {
           pumpOFF();                                                  // помпу выкл
           if (i == curPumping) curPumping = -1;                       // снимаем выбор рюмки
         }
+        DEBUG("take glass");
+        DEBUG(i);
       }
     }
 
@@ -120,6 +124,8 @@ void flowRoutnie() {
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
         servoON();                                        // вкл питание серво
         servo.setTargetDeg(shotPos[curPumping]);          // задаём цель
+        DEBUG("find glass");
+        DEBUG(curPumping);
         break;
       }
     }
@@ -128,6 +134,7 @@ void flowRoutnie() {
       if (servo.tick()) {                                 // едем до упора
         servoOFF();                                       // выключили серво
         systemON = false;                                 // выключили систему
+        DEBUG("no glass");
       }
     }
   } else if (systemState == MOVING) {                     // движение к рюмке
@@ -138,6 +145,8 @@ void flowRoutnie() {
       pumpON();                                           // НАЛИВАЙ!
       strip.setLED(curPumping, mCOLOR(YELLOW));           // зажгли цвет
       strip.show();
+      DEBUG("fill glass");
+      DEBUG(curPumping);
     }
 
   } else if (systemState == PUMPING) {                    // если качаем
@@ -149,10 +158,12 @@ void flowRoutnie() {
       curPumping = -1;                                    // снимаем выбор рюмки
       systemState = WAIT;                                 // режим работы - ждать
       WAITtimer.reset();
+      DEBUG("wait");
     }
   } else if (systemState == WAIT) {
     if (WAITtimer.isReady()) {
       systemState = SEARCH;
+      DEBUG("search");
     }
   }
 }
