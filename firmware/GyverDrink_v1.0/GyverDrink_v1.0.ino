@@ -26,7 +26,7 @@ const int time50ml = 5500;
 
 // =========== ПИНЫ ===========
 #define PUMP_POWER 3
-#define SERVO_POWER 2
+#define SERVO_POWER 4
 #define SERVO_PIN 5
 #define LED_PIN 6
 #define BTN_PIN 7
