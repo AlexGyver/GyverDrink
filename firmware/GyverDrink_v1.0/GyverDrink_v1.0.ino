@@ -13,13 +13,15 @@
 
 // ======== НАСТРОЙКИ ========
 #define NUM_SHOTS 4       // количество рюмок (оно же кол-во светодиодов и кнопок!)
-#define TIMEOUT_OFF 30    // таймаут на выключение (секунд)
+#define TIMEOUT_OFF 5     // таймаут на выключение (перестаёт дёргать привод), минут
 
 // положение серво над центрами рюмок
 const byte shotPos[] = {25, 60, 95, 145, 60, 60};
 
 // время заполнения 50 мл
 const int time50ml = 5500;
+
+#define KEEP_POWER 1    // 1 - система поддержания питания ПБ, чтобы он не спал
 
 // отладка
 #define DEBUG_UART 0
@@ -65,7 +67,8 @@ timerMinim LEDtimer(100);
 timerMinim FLOWdebounce(20);
 timerMinim FLOWtimer(2000);
 timerMinim WAITtimer(300);
-timerMinim TIMEOUTtimer(TIMEOUT_OFF * 1000);
+timerMinim TIMEOUTtimer(15000);   // таймаут дёргания приводом
+timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
 
 bool LEDchanged = false;
 bool pumping = false;

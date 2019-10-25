@@ -123,6 +123,7 @@ void flowRoutnie() {
         systemState = MOVING;                             // режим - движение
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
         servoON();                                        // вкл питание серво
+        servo.attach(SERVO_PIN);
         servo.setTargetDeg(shotPos[curPumping]);          // задаём цель
         DEBUG("find glass");
         DEBUG(curPumping);
@@ -130,6 +131,7 @@ void flowRoutnie() {
       }
     }
     if (noGlass) {                                        // если не нашли ни одной рюмки
+      servoON();
       servo.setTargetDeg(0);                              // цель серво - 0
       if (servo.tick()) {                                 // едем до упора
         servoOFF();                                       // выключили серво
@@ -187,6 +189,30 @@ void timeoutReset() {
 void timeoutTick() {
   if (timeoutState && TIMEOUTtimer.isReady()) {
     timeoutState = false;
+    disp.brightness(1);
+    POWEROFFtimer.reset();
+    jerkServo();
+  }
+
+  // дёргаем питание серво, это приводит к скачку тока и powerbank не отключает систему
+  if (!timeoutState && TIMEOUTtimer.isReady()) {
+    if (!POWEROFFtimer.isReady()) {   // пока не сработал таймер полного отключения
+      jerkServo();
+    } else {
+      disp.clear();
+    }
+  }
+}
+
+void jerkServo() {
+  if (KEEP_POWER) {
+    disp.brightness(7);
+    servoON();
+    servo.attach(SERVO_PIN);
+    servo.write(random(0, 4));
+    delay(200);
+    servo.detach();
+    servoOFF();
     disp.brightness(1);
   }
 }
