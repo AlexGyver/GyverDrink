@@ -69,7 +69,10 @@ void serviceMode() {
 void dispMode() {
   disp.displayInt(thisVolume);
   if (workMode) disp.displayByte(0, _A);
-  else disp.displayByte(0, _P);
+  else {
+	  disp.displayByte(0, _P);
+	  pumpOFF();
+  }
 }
 
 // наливайка, опрос кнопок
