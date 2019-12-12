@@ -9,13 +9,14 @@
   https://github.com/AlexGyver
   https://AlexGyver.ru/
   alex@alexgyver.ru
+  Fork by VICLER https://github.com/VICLER/GyverDrink
 */
 
 /*
-   Версия 1.1:
-   - Поправлена работа системы при выборе некорректного объёма
-   - Исправлены ошибки при наливании больших объёмов
-   - Исправлен баг с остановкой наливания при убирании другой рюмки
+   Версия 1.2:
+   - Использование библиотек GyverEncoder v4.2, GyverButton v3.0, GyverTimer 3.2 и MicroLED v2.1
+   - Исправленны некорректные отображения объёма (отрицательные и больше 1000мл)
+   - Исправлен баг с остановкой наливания при убирании рюмки во время движения сервопривода
 */
 
 // ======== НАСТРОЙКИ ========
@@ -50,14 +51,14 @@ const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};
 // =========== ЛИБЫ ===========
 #include <GyverTM1637.h>
 #include <ServoSmooth.h>
-#include <microLED.h>
-#include "encUniversalMinim.h"
-#include "buttonMinim.h"
-#include "timer2Minim.h"
+#include <GyverEncoder.h>
+#include <GyverButton.h>
+#include <GyverTimer.h>
 
 // =========== ДАТА ===========
 #define ORDER_GRB       // порядок цветов ORDER_GRB / ORDER_RGB / ORDER_BRG
 #define COLOR_DEBTH 2   // цветовая глубина: 1, 2, 3 (в байтах)
+#include <microLED.h>
 LEDdata leds[NUM_SHOTS];  // буфер ленты типа LEDdata (размер зависит от COLOR_DEBTH)
 microLED strip(leds, NUM_SHOTS, LED_PIN);  // объект лента
 
@@ -68,14 +69,14 @@ encMinim enc(ENC_CLK, ENC_DT, ENC_SW, 1, 1);
 
 ServoSmooth servo;
 
-buttonMinim btn(BTN_PIN);
-buttonMinim encBtn(ENC_SW);
-timerMinim LEDtimer(100);
-timerMinim FLOWdebounce(20);
-timerMinim FLOWtimer(2000);
-timerMinim WAITtimer(300);
-timerMinim TIMEOUTtimer(15000);   // таймаут дёргания приводом
-timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
+GButton btn(BTN_PIN, HIGH_PULL, NORM_OPEN);
+GButton encBtn(ENC_SW, HIGH_PULL, NORM_OPEN);
+GTimer LEDtimer(MS, 100);
+GTimer FLOWdebounce(MS, 20);
+GTimer FLOWtimer(MS, 2000);
+GTimer WAITtimer(MS, 300);
+GTimer TIMEOUTtimer(MS, 15000);   // таймаут дёргания приводом
+GTimer POWEROFFtimer(MS, TIMEOUT_OFF * 60000L);
 
 bool LEDchanged = false;
 bool pumping = false;
