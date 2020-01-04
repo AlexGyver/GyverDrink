@@ -70,8 +70,8 @@ void dispMode() {
   disp.displayInt(thisVolume);
   if (workMode) disp.displayByte(0, _A);
   else {
-	  disp.displayByte(0, _P);
-	  pumpOFF();
+    disp.displayByte(0, _P);
+    pumpOFF();
   }
 }
 
@@ -119,16 +119,17 @@ void flowTick() {
 
 // поиск и заливка
 void flowRoutnie() {
-  if (systemState == SEARCH) {                            // если поиск рюмки
+  if (systemState == SEARCH) {                            // если поиск рюмки    
     bool noGlass = true;
     for (byte i = 0; i < NUM_SHOTS; i++) {
-      if (shotStates[i] == EMPTY && i != curPumping) {    // поиск рюмки
+      if (shotStates[i] == EMPTY && i != curPumping) {    // поиск 
+        TIMEOUTtimer.stop();
         noGlass = false;                                  // флаг что нашли хоть одну рюмку
         curPumping = i;                                   // запоминаем выбор
         systemState = MOVING;                             // режим - движение
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
         servoON();                                        // вкл питание серво
-        servo.attach(SERVO_PIN);
+        servo.attach();
         servo.setTargetDeg(shotPos[curPumping]);          // задаём цель
         DEBUG("find glass");
         DEBUG(curPumping);
@@ -142,7 +143,7 @@ void flowRoutnie() {
         servoOFF();                                       // выключили серво
         systemON = false;                                 // выключили систему
         DEBUG("no glass");
-        TIMEOUTtimer.start();
+        //timeoutReset();
       }
     }
   } else if (systemState == MOVING) {                     // движение к рюмке
@@ -188,16 +189,23 @@ void LEDtick() {
 void timeoutReset() {
   if (!timeoutState) disp.brightness(7);
   timeoutState = true;
-  TIMEOUTtimer.stop();
+  TIMEOUTtimer.reset();
+  TIMEOUTtimer.start();
+  DEBUG("timeout reset");
 }
 
 // сам таймаут
 void timeoutTick() {
   if (timeoutState && TIMEOUTtimer.isReady()) {
+    DEBUG("timeout");
     timeoutState = false;
     disp.brightness(1);
     POWEROFFtimer.reset();
     jerkServo();
+    if (volumeChanged) {
+      volumeChanged = false;
+      EEPROM.put(0, thisVolume);
+    }
   }
 
   // дёргаем питание серво, это приводит к скачку тока и powerbank не отключает систему
@@ -214,7 +222,7 @@ void jerkServo() {
   if (KEEP_POWER) {
     disp.brightness(7);
     servoON();
-    servo.attach(SERVO_PIN);
+    servo.attach();
     servo.write(random(0, 4));
     delay(200);
     servo.detach();

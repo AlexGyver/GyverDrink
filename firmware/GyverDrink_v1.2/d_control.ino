@@ -3,6 +3,7 @@
 void encTick() {
   enc.tick();
   if (enc.isTurn()) {
+    volumeChanged = true;
     timeoutReset();
     if (enc.isLeft()) {
       thisVolume += 5;

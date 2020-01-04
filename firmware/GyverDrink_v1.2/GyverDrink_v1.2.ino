@@ -19,6 +19,8 @@
 
    Версия 1.2:
    - Исправлено ограничение выбора объёма
+   - Исправлены ошибки (обновите библиотеки из архива! servoSmooth v1.8, microLED v2.3)
+   - Добавлено хранение в памяти выбранного объёма
 */
 
 // ======== НАСТРОЙКИ ========
@@ -48,18 +50,17 @@ const long time50ml = 5500;
 #define DISP_DIO 11
 #define DISP_CLK 12
 const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};
-#define LED_PIN 6
 
 // =========== ЛИБЫ ===========
 #include <GyverTM1637.h>
 #include <ServoSmooth.h>
 #include <microLED.h>
+#include <EEPROM.h>
 #include "encUniversalMinim.h"
 #include "buttonMinim.h"
 #include "timer2Minim.h"
 
 // =========== ДАТА ===========
-#define ORDER_GRB       // порядок цветов ORDER_GRB / ORDER_RGB / ORDER_BRG
 #define COLOR_DEBTH 2   // цветовая глубина: 1, 2, 3 (в байтах)
 LEDdata leds[NUM_SHOTS];  // буфер ленты типа LEDdata (размер зависит от COLOR_DEBTH)
 microLED strip(leds, NUM_SHOTS, LED_PIN);  // объект лента
@@ -90,6 +91,7 @@ bool workMode = false;  // 0 manual, 1 auto
 int thisVolume = 50;
 bool systemON = false;
 bool timeoutState = false;
+bool volumeChanged = false;
 
 // =========== МАКРО ===========
 #define servoON() digitalWrite(SERVO_POWER, 1)
@@ -98,7 +100,7 @@ bool timeoutState = false;
 #define pumpOFF() digitalWrite(PUMP_POWER, 0)
 
 #if (DEBUG_UART == 1)
-#define DEBUG(x) uart.println(x)
+#define DEBUG(x) Serial.println(x)
 #else
 #define DEBUG(x)
 #endif
