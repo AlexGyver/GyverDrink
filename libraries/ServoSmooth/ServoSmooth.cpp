@@ -104,7 +104,10 @@ boolean ServoSmooth::tickManual() {
 			_servo.writeMicroseconds((int)_newPos);									// отправляем на серво
 		}			
 	}
-	if (abs(_servoTargetPos - (int)_newPos) < SS_DEADZONE) {		
+	if (abs(_servoTargetPos - (int)_newPos) < SS_DEADZONE) {	
+		if (_servoTargetPos == (int)_newPos){						//Случай когда текущая позиция совпадает с позицией таргета
+			_servoState = true;										//tick() не когда не вернет true, режим вечного доезжания
+		}	
 		if (_autoDetach && _servoState) {			
 			if (_timeoutCounter > SS_TIMEOUT) {
 				_newPos = _servoTargetPos;
@@ -127,9 +130,9 @@ boolean ServoSmooth::tickManual() {
 }
 
 boolean ServoSmooth::tick() {
-	if (millis() - _prevServoTime >= SS_SERVO_PERIOD) {
-		_prevServoTime = millis();
-		if (ServoSmooth::tickManual()) return true;
-		else return false;
-	}
+    if (millis() - _prevServoTime >= SS_SERVO_PERIOD) {
+        _prevServoTime = millis();
+        return ServoSmooth::tickManual();
+    }
+    return false;
 }
