@@ -30,7 +30,9 @@ void setup() {
 
   // настройка серво
   servoON();
-  servo.attach(SERVO_PIN);
+  servo.attach(SERVO_PIN, 600, 2400);
+  if (INVERSE_SERVO) servo.setDirection(REVERSE);
+   
   servo.write(0);
   delay(800);
   servo.setTargetDeg(0);
