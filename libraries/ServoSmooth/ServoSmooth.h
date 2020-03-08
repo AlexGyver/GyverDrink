@@ -22,13 +22,13 @@
 	v1.8 - улучшена стабильность
 	v1.9 - добавлена настройка макс. угла серво
 	v1.10 - исправлен баг когда текущая позиция совпадает с позицией таргета
+	v2.0 - упрощён алгоритм
 	
 	2019 by AlexGyver
 */
 
 #define SS_SERVO_PERIOD 20		// период работы tick(), мс
-#define SS_DEADZONE 30			// мёртвая зона
-#define SS_TIMEOUT 15			// таймаут мёртвой зоны (в количестве периодов SS_SERVO_PERIOD!!!)
+#define SS_DEADZONE 15			// мёртвая зона
 
 class ServoSmooth {
 public:

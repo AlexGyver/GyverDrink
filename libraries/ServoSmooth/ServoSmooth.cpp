@@ -116,15 +116,11 @@ boolean ServoSmooth::tickManual() {
 	}
 	if (abs(_servoTargetPos - (int)_newPos) < SS_DEADZONE) {
 		if (_autoDetach && _servoState) {		
-			if (_timeoutCounter > SS_TIMEOUT) {
-				_newPos = _servoTargetPos;
-				_servoCurrentPos = _servoTargetPos;
-				_servoState = false;
-				_servo.detach();
-			} else {
-				_timeoutCounter++;
-			}
-		}		
+			//_newPos = _servoTargetPos;
+			_servoCurrentPos = _servoTargetPos;
+			_servoState = false;
+			_servo.detach();
+		}			
 		return !_servoState;	// приехали
 	} else {
 		if (_autoDetach && !_servoState) {
