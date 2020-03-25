@@ -1,0 +1,38 @@
+#######################################
+# Syntax Coloring Map StepMot
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+StepMot	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+setMode		KEYWORD2
+autoPower	KEYWORD2
+setRPM		KEYWORD2
+enable		KEYWORD2
+disable		KEYWORD2
+setDir		KEYWORD2
+invertDir	KEYWORD2
+setSteps	KEYWORD2
+setAngle	KEYWORD2
+rotate		KEYWORD2
+getAngle	KEYWORD2
+resetPos	KEYWORD2
+move		KEYWORD2
+step		KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+RELATIVE	LITERAL1
+ABSOLUTE	LITERAL1
+CW		LITERAL1
+CCW		LITERAL1
+ON		LITERAL1
+OFF		LITERAL2
