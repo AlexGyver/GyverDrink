@@ -127,7 +127,7 @@ void flowRoutnie() {
         curPumping = i;                                   // запоминаем выбор
         systemState = MOVING;                             // режим - движение
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
-        #ifndef STEPPER_AUTO_POWER
+        #ifndef STEPPER_POWERSAFE
         stepper.enable();
         #endif
         stepper.setAngle(shotPos[curPumping]);            // задаём цель
