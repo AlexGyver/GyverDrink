@@ -28,18 +28,18 @@ void setup() {
   DEBUG("disp init");
 
   // настройка шагового двигателя
-  stepper.autoPower(STEPPER_AUTO_POWER);
-  stepper.setMode(ABSOLUTE);
+  stepper.autoPower(STEPPER_POWERSAFE);
   stepper.invertDir(INVERT_STEPPER);
+  stepper.setMode(ABSOLUTE);
   stepper.setRPM(5);    // скорость движения в домашнее положение
-  #ifdef STEPPER_ENDSTOP
+#ifdef STEPPER_ENDSTOP
   pinMode(STEPPER_ENDSTOP, INPUT_PULLUP);
   stepper.enable();
   stepper.rotate(CCW);
-  while(digitalRead(STEPPER_ENDSTOP) && stepper.update()) {}  // двигаемся пока не сработал концевик
+  while (digitalRead(STEPPER_ENDSTOP) && stepper.update()) {} // двигаемся пока не сработал концевик
   stepper.resetPos();
-  #endif
-  stepper.setRPM(10); // скорость движения двигателя в рабочем состоянии
+#endif
+  stepper.setRPM(10); // скорость движения двигателя в обычном режиме
   stepper.disable();
 
 

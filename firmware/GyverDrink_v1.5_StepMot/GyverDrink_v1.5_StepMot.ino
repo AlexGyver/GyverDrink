@@ -40,20 +40,20 @@
 #define INVERT_STEPPER 0                  // инвертировать направление вращения шагового двигателя
 #define STEPS_PER_REVOLUTION 2037.88642   // количество шагов на оборот двигателя
 #define MICROSTEPS  1                     // значение микрошага, выставленного на драйвере двигателя
-#define STEPPER_POWERSAFE                 // автоматическое управление питанием шагового двигателя
+#define STEPPER_POWERSAFE OFF              // автоматическое управление питанием шагового двигателя (питание включается только при движении)
 
 // положение крана над центрами рюмок в градусах от нулевой точки
 const byte shotPos[] = {0, 45, 90, 135, 180};
 
-#define HOME_POS 0       // положение домашней позиции в градусах
+#define PARKING_POS 0       // положение парковочной позиции в градусах
 
 // время заполнения 50 мл
 const long time50ml = 5500;
 
-#define KEEP_POWER 0    // 1 - система поддержания питания ПБ, чтобы он не спал
+#define KEEP_POWER OFF    // ON - система поддержания питания ПБ, чтобы он не спал
 
 // отладка
-#define DEBUG_UART 1
+#define DEBUG_UART OFF
 
 // =========== ПИНЫ Arduino Nano===========
 #define PUMP_POWER 3
@@ -80,7 +80,7 @@ const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};
 //#define STEPPER_STEP    6
 //#define STEPPER_DIR     7
 //#define STEPPER_EN      8
-////#define STEPPER_ENDSTOP 9
+//#define STEPPER_ENDSTOP 9
 //#define ENC_SW          10
 //#define ENC_DT          14
 //#define ENC_CLK         16

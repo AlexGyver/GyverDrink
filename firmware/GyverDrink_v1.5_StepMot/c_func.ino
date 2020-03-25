@@ -6,9 +6,9 @@ void serviceMode() {
     disp.runningString(serviceText, sizeof(serviceText), 150);
     while (!digitalRead(BTN_PIN));  // ждём отпускания
     delay(200);
-    #ifndef STEPPER_AUTO_POWER
+#ifndef STEPPER_POWERSAFE
     stepper.enable();
-    #endif
+#endif
     int stepperPos = 0;
     long pumpTime = 0;
     timerMinim timer100(100);
@@ -55,13 +55,13 @@ void serviceMode() {
     }
   }
   disp.clear();
-  #ifdef STEPPER_ENDSTOP
-    stepper.rotate(CCW);
-    while (digitalRead(STEPPER_ENDSTOP) && stepper.update()) {} // двигаемся пока не сработал концевик
-  #else
-    stepper.setAngle(0);
-    while(stepper.update());
-  #endif
+#ifdef STEPPER_ENDSTOP
+  stepper.rotate(CCW);
+  while (digitalRead(STEPPER_ENDSTOP) && stepper.update()) {} // двигаемся пока не сработал концевик
+#else
+  stepper.setAngle(0);
+  while (stepper.update());
+#endif
   stepper.disable();
 }
 
@@ -123,28 +123,28 @@ void flowRoutnie() {
     for (byte i = 0; i < NUM_SHOTS; i++) {
       if (shotStates[i] == EMPTY && i != curPumping) {    // поиск
         noGlass = false;                                  // флаг что нашли хоть одну рюмку
-        parking = false;
         curPumping = i;                                   // запоминаем выбор
         systemState = MOVING;                             // режим - движение
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
-        #ifndef STEPPER_POWERSAFE
-        stepper.enable();
-        #endif
-        stepper.setAngle(shotPos[curPumping]);            // задаём цель
+        if (shotPos[curPumping] != stepper.getAngle()) {  // если цель отличается от актуальной позиции
+          stepper.enable();
+          stepper.setAngle(shotPos[curPumping]);          // задаём цель
+          parking = false;
+        }
         DEBUG("find glass");
         DEBUG(curPumping);
         break;
       }
     }
     if (noGlass && !parking) {                            // если не нашли ни одной рюмки
-      #ifdef STEPPER_ENDSTOP
-        stepper.rotate(CCW);
-        if (!digitalRead(STEPPER_ENDSTOP)) {              // едем до активации концевика
+#ifdef STEPPER_ENDSTOP
+      stepper.rotate(CCW);
+      if (!digitalRead(STEPPER_ENDSTOP)) {              // едем до активации концевика
         stepper.resetPos();                               // сбросили начальную позицию
-      #else
-        stepper.setAngle(HOME_POS);                       // цель -> домашнее положение
-        if (stepper.ready()) {                            // приехали
-      #endif
+#else
+      stepper.setAngle(PARKING_POS);                       // цель -> домашнее положение
+      if (stepper.ready()) {                            // приехали
+#endif
         stepper.disable();                                // выключили шаговик
         systemON = false;                                 // выключили систему
         parking = 1;
