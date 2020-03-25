@@ -37,10 +37,11 @@
 #define NUM_SHOTS 5                       // количество рюмок (оно же кол-во светодиодов и кнопок!)
 #define TIMEOUT_OFF 5                     // таймаут на выключение (перестаёт дёргать привод), минут
 #define SWITCH_LEVEL 0                    // кнопки 1 - высокий сигнал при замыкании, 0 - низкий
+#define STEPPER_ENDSTOP_INVERT  0         // 1 - высокий сигнал при замыкании, 0 - низкий
 #define INVERT_STEPPER 0                  // инвертировать направление вращения шагового двигателя
 #define STEPS_PER_REVOLUTION 2037.88642   // количество шагов на оборот двигателя
 #define MICROSTEPS  1                     // значение микрошага, выставленного на драйвере двигателя
-#define STEPPER_POWERSAFE OFF              // автоматическое управление питанием шагового двигателя (питание включается только при движении)
+#define STEPPER_POWERSAFE OFF             // автоматическое управление питанием шагового двигателя (питание включается только при движении)
 
 // положение крана над центрами рюмок в градусах от нулевой точки
 const byte shotPos[] = {0, 45, 90, 135, 180};
@@ -133,4 +134,12 @@ bool parking = false;
 #define DEBUG(x) Serial.println(x)
 #else
 #define DEBUG(x)
+#endif
+
+#ifdef STEPPER_ENDSTOP
+#if (STEPPER_ENDSTOP_INVERT == 1)
+#define ENDSTOP_STATUS !digitalRead(STEPPER_ENDSTOP)
+#else 
+#define ENDSTOP_STATUS digitalRead(STEPPER_ENDSTOP)
+#endif
 #endif

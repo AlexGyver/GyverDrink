@@ -57,7 +57,7 @@ void serviceMode() {
   disp.clear();
 #ifdef STEPPER_ENDSTOP
   stepper.rotate(CCW);
-  while (digitalRead(STEPPER_ENDSTOP) && stepper.update()) {} // двигаемся пока не сработал концевик
+  while (ENDSTOP_STATUS && stepper.update()) {} // двигаемся пока не сработал концевик
 #else
   stepper.setAngle(0);
   while (stepper.update());
@@ -139,7 +139,7 @@ void flowRoutnie() {
     if (noGlass && !parking) {                            // если не нашли ни одной рюмки
 #ifdef STEPPER_ENDSTOP
       stepper.rotate(CCW);
-      if (!digitalRead(STEPPER_ENDSTOP)) {              // едем до активации концевика
+      if (ENDSTOP_STATUS == 0) {              // едем до активации концевика
         stepper.resetPos();                               // сбросили начальную позицию
 #else
       stepper.setAngle(PARKING_POS);                       // цель -> домашнее положение
