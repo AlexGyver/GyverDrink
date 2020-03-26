@@ -40,7 +40,9 @@ void setup() {
 #endif
   stepper.enable();
   stepper.rotate(CCW);
+  stepper.setRPM(STEPPER_SPEED / 2);
   while (ENDSTOP_STATUS && stepper.update()) {} // двигаемся пока не сработал концевик
+  stepper.setRPM(STEPPER_SPEED);
   stepper.resetPos();
 #endif
   stepper.disable();
