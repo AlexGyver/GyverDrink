@@ -16,6 +16,7 @@ void serviceMode() {
     bool flag;
     while (1) {
       enc.tick();
+      stepper.update();
 
       if (timer100.isReady()) {   // период 100 мс
         // работа помпы со счётчиком

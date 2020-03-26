@@ -50,5 +50,4 @@ void setup() {
   dispMode();       // выводим на дисплей стандартные значения
   timeoutReset();   // сброс таймаута
   TIMEOUTtimer.start();
-  DEBUG("Start");
 }
