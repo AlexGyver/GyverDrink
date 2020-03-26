@@ -31,7 +31,7 @@ void setup() {
   stepper.autoPower(STEPPER_POWERSAFE);
   stepper.invertDir(INVERT_STEPPER);
   stepper.setMode(ABSOLUTE);
-  stepper.setRPM(5);    // скорость движения в домашнее положение
+  stepper.setRPM(STEPPER_SPEED);    // скорость движения в домашнее положение
 #ifdef STEPPER_ENDSTOP
 #if (STEPPER_ENDSTOP_INVERT == 1) 
   pinMode(STEPPER_ENDSTOP, INPUT);
@@ -43,7 +43,6 @@ void setup() {
   while (ENDSTOP_STATUS && stepper.update()) {} // двигаемся пока не сработал концевик
   stepper.resetPos();
 #endif
-  stepper.setRPM(10); // скорость движения двигателя в обычном режиме
   stepper.disable();
 
 
