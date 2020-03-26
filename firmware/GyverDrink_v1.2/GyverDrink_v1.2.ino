@@ -41,20 +41,32 @@ const long time50ml = 5300;
 // отладка
 #define DEBUG_UART 0
 
-// =========== ПИНЫ ===========
-#define DRIVER_STBY 21      //для драйвера TB6612
-#define PUMP_POWER 4
-#define SERVO_POWER 16
-#define SERVO_PIN 6
-#define LED_PIN 5
-#define BTN_PIN 10
-#define ENC_SW 9
-#define ENC_DT 7
-#define ENC_CLK 8
-#define DISP_DIO 2
-#define DISP_CLK 3
-const byte SW_pins[] = {14, 15, 18, 19, 20};
+// =========== ПИНЫ Arduino Nano ===========
+#define PUMP_POWER 3
+#define SERVO_POWER 4
+#define SERVO_PIN 5
+#define LED_PIN 6
+#define BTN_PIN 7
+#define ENC_SW 8
+#define ENC_DT 9
+#define ENC_CLK 10
+#define DISP_DIO 11
+#define DISP_CLK 12
+const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};
 
+//// =========== ПИНЫ Arduino Micro ===========
+//#define DRIVER_STBY 21      //для драйвера TB6612
+//#define PUMP_POWER 4
+//#define SERVO_POWER 16
+//#define SERVO_PIN 6
+//#define LED_PIN 5
+//#define BTN_PIN 10
+//#define ENC_SW 9
+//#define ENC_DT 7
+//#define ENC_CLK 8
+//#define DISP_DIO 2
+//#define DISP_CLK 3
+//const byte SW_pins[] = {14, 15, 18, 19, 20};
 
 // =========== ЛИБЫ ===========
 #include <GyverTM1637.h>
@@ -108,7 +120,12 @@ bool timeoutState = false;
 #define servoOFF() digitalWrite(SERVO_POWER, 0)
 #define pumpON() digitalWrite(PUMP_POWER, 1)
 #define pumpOFF() digitalWrite(PUMP_POWER, 0)
+
+#ifdef DRIVER_STBY
 #define driverSTBY(x) digitalWrite(DRIVER_STBY, !x)
+#else 
+#define driverSTBY(x)
+#endif
 
 #if (DEBUG_UART == 1)
 #define DEBUG(x) Serial.println(x)

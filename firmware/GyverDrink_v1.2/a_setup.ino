@@ -9,13 +9,16 @@ void setup() {
     EEPROM.put(0, thisVolume);
   }
   EEPROM.get(0, thisVolume);
-  
+
   // тыкаем ленту
   strip.setBrightness(255);
   strip.clear();
   DEBUG("strip init");
 
   // настройка пинов
+#ifdef DRIVER_STBY
+  pinMode(DRIVER_STBY, OUTPUT);
+#endif
   pinMode(PUMP_POWER, 1);
   pinMode(SERVO_POWER, 1);
   for (byte i = 0; i < NUM_SHOTS; i++) {
@@ -31,11 +34,11 @@ void setup() {
   servo.setAccel(0.6);
   servoOFF();
 
-// старт дисплея
+  // старт дисплея
   disp.clear();
   disp.brightness(7);
   DEBUG("disp init");
-  
+
   serviceMode();
 
   // animation
@@ -60,8 +63,8 @@ void setup() {
   strip.clear();
   strip.setBrightness(255);
 
-  
-  
+
+
   timeoutReset();   // сброс таймаута
   TIMEOUTtimer.start();
   dispMode();       // выводим на дисплей стандартные значения
