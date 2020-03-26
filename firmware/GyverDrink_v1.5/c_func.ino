@@ -60,7 +60,6 @@ void serviceMode() {
   stepper.rotate(CCW);
   stepper.setRPM(STEPPER_SPEED / 2);
   while (ENDSTOP_STATUS && stepper.update()) {} // двигаемся пока не сработал концевик
-  stepper.setRPM(STEPPER_SPEED);
 #else
   stepper.setAngle(0);
   while (stepper.update());
@@ -131,6 +130,7 @@ void flowRoutnie() {
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
         if (shotPos[curPumping] != stepper.getAngle()) {  // если цель отличается от актуальной позиции
           stepper.enable();
+          stepper.setRPM(STEPPER_SPEED);
           stepper.setAngle(shotPos[curPumping]);          // задаём цель
           parking = false;
         }
@@ -145,7 +145,6 @@ void flowRoutnie() {
       stepper.setRPM(STEPPER_SPEED / 2);
       if (ENDSTOP_STATUS == 0) {                          // едем до активации концевика
         stepper.resetPos();                               // сбросили начальную позицию
-        stepper.setRPM(STEPPER_SPEED);
 #else
       stepper.setAngle(PARKING_POS);                      // цель -> домашнее положение
       if (stepper.ready()) {                              // приехали
