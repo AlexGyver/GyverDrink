@@ -109,9 +109,6 @@ void flowTick() {
         shotStates[i] = EMPTY;                                      // флаг на заправку
         strip.setLED(i, mCOLOR(ORANGE));                               // подсветили
         LEDchanged = true;
-
-
-
         DEBUG("set glass");
         DEBUG(i);
       }
@@ -128,7 +125,6 @@ void flowTick() {
           dispMode();
           countVolume = 0;
         }
-        //}
         DEBUG("take glass");
         DEBUG(i);
       }
@@ -180,7 +176,6 @@ void flowRoutnie() {
           servoOFF();                                       // выключили серво
           systemON = false;                                 // выключили систему
           DEBUG("no glass");
-          //timeoutReset();
         }
       }
     }
