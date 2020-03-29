@@ -134,7 +134,7 @@ void flowRoutnie() {
           stepper.setAngle(shotPos[curPumping]);          // задаём цель
           parking = false;
         }
-        DEBUG("find glass");
+        DEBUG("found glass");
         DEBUG(curPumping);
         break;
       }
@@ -229,7 +229,7 @@ void timeoutTick() {
 }
 
 void jerkServo() {
-  if (KEEP_POWER) {
+  if (KEEP_POWER == ON) {
     disp.brightness(7);
     stepper.enable();
     delay(200);
