@@ -42,7 +42,7 @@
 #define STEPS_PER_REVOLUTION 2037.88642   // количество шагов на оборот двигателя
 #define STEPPER_ENDSTOP_INVERT  0         // 1 - высокий сигнал при замыкании, 0 - низкий
 #define STEPPER_POWERSAFE 0               // автоматическое управление питанием шагового двигателя (питание включается только при движении)
-#define INVERT_STEPPER 1                  // инвертировать направление вращения шагового двигателя
+#define INVERT_STEPPER 0                  // инвертировать направление вращения шагового двигателя
 #define STEPPER_SPEED 15                  // скорость двигателя в оборотах в минуту
 #define MICROSTEPS  2                     // значение микрошага, выставленного на драйвере двигателя
 
@@ -61,35 +61,35 @@ const long time50ml = 5500;
 #define DEBUG_UART ON
 
 // =========== ПИНЫ Arduino Nano===========
-//#define PUMP_POWER 3
-//#define STEPPER_STEP  5
-//#define STEPPER_DIR 4
-//#define STEPPER_EN  2
-//#define STEPPER_ENDSTOP 13
-//#define LED_PIN 6
-//#define BTN_PIN 7
-//#define ENC_SW 8
-//#define ENC_DT 9
-//#define ENC_CLK 10
-//#define DISP_DIO 11
-//#define DISP_CLK 12
-//const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};
+#define PUMP_POWER 3
+#define STEPPER_STEP  5
+#define STEPPER_DIR 4
+#define STEPPER_EN  2
+#define STEPPER_ENDSTOP 13
+#define LED_PIN 6
+#define BTN_PIN 7
+#define ENC_SW 8
+#define ENC_DT 9
+#define ENC_CLK 10
+#define DISP_DIO 11
+#define DISP_CLK 12
+const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};
 
 // =========== ПИНЫ Arduino Micro===========
-#define PUMP_POWER      0
-#define BTN_PIN         1
-#define DISP_DIO        2
-#define DISP_CLK        3
-#define BAT_PIN         4
-#define LED_PIN         5
-#define STEPPER_STEP    6
-#define STEPPER_DIR     7
-#define STEPPER_EN      8
-//#define STEPPER_ENDSTOP 9
-#define ENC_SW          10
-#define ENC_DT          14
-#define ENC_CLK         16
-const byte SW_pins[] = {15, 18, 19, 20, 21};
+//#define PUMP_POWER      0
+//#define BTN_PIN         1
+//#define DISP_DIO        2
+//#define DISP_CLK        3
+//#define BAT_PIN         4
+//#define LED_PIN         5
+//#define STEPPER_STEP    6
+//#define STEPPER_DIR     7
+//#define STEPPER_EN      8
+////#define STEPPER_ENDSTOP 9
+//#define ENC_SW          10
+//#define ENC_DT          14
+//#define ENC_CLK         16
+//const byte SW_pins[] = {15, 18, 19, 20, 21};
 
 // =========== ЛИБЫ ===========
 #include <GyverTM1637.h>
