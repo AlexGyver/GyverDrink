@@ -31,7 +31,6 @@ void setup() {
   stepper.autoPower(STEPPER_POWERSAFE);
   stepper.invertDir(INVERT_STEPPER);
   stepper.setMode(ABSOLUTE);
-  stepper.setRPM(STEPPER_SPEED);    // скорость движения в домашнее положение
 #ifdef STEPPER_ENDSTOP
 #if (STEPPER_ENDSTOP_INVERT == 1) 
   pinMode(STEPPER_ENDSTOP, INPUT);
