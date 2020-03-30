@@ -2,9 +2,9 @@
 void dispNum(int num, uint8_t type) {
   u8g2.setFontDirection(0);
 
+  char outStr[] = "";
+
   if (type == ml) {
-    char outStr[] = "";
-    char postStr[] = "ml";
     uint8_t gap = 0; // u8g2.getStrWidth(mlStr);
 
     sprintf_P(outStr, (PGM_P)F("%d"), num);
@@ -16,8 +16,6 @@ void dispNum(int num, uint8_t type) {
   }
 
   else if (type == ms) {
-    char outStr[] = "";
-    char postStr[] = "ms";
     uint8_t gap = 0; // u8g2.getStrWidth(mlStr);
 
     sprintf_P(outStr, (PGM_P)F("%d"), num);
@@ -29,8 +27,6 @@ void dispNum(int num, uint8_t type) {
   }
 
   else if (type == deg) {
-    char outStr[] = "";
-    char postStr[] = "°";
     uint8_t gap = 0; // u8g2.getStrWidth(mlStr);
 
     sprintf_P(outStr, (PGM_P)F("%d"), num);
@@ -41,8 +37,6 @@ void dispNum(int num, uint8_t type) {
     u8g2.print(F("°"));
   }
   else {
-    char outStr[] = "";
-    char postStr[] = "°";
     uint8_t gap = 0; // u8g2.getStrWidth(mlStr);
 
     sprintf_P(outStr, (PGM_P)F("%d"), num);

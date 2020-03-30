@@ -57,7 +57,7 @@ const byte SW_pins[] = {9, 10, 11, 12, 13};
 #include "buttonMinim.h"
 #include "timer2Minim.h"
 #include <U8g2lib.h>
-#include <CFilter.h>
+#include "CFilter.h"
 // =========== ДАТА ===========
 
 LEDdata leds[NUM_SHOTS];  // буфер ленты типа LEDdata (размер зависит от COLOR_DEBTH)
