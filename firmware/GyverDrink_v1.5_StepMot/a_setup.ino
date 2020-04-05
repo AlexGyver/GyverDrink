@@ -32,9 +32,9 @@ void setup() {
   stepper.invertDir(INVERT_STEPPER);
   stepper.setMode(ABSOLUTE);
 #ifdef STEPPER_ENDSTOP
-#if (STEPPER_ENDSTOP_INVERT == 1) 
+#if (STEPPER_ENDSTOP_INVERT == 1)
   pinMode(STEPPER_ENDSTOP, INPUT);
-#else 
+#else
   pinMode(STEPPER_ENDSTOP, INPUT_PULLUP);
 #endif
   stepper.enable();
@@ -42,8 +42,9 @@ void setup() {
   stepper.setRPM(STEPPER_SPEED / 2);
   while (ENDSTOP_STATUS && stepper.update()) {} // двигаемся пока не сработал концевик
   stepper.resetPos();
-#endif
   stepper.disable();
+#endif
+  
 
 
   serviceMode();    // калибровка
