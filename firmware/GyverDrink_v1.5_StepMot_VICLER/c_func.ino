@@ -128,6 +128,7 @@ void flowRoutnie() {
         curPumping = i;                                   // запоминаем выбор
         systemState = MOVING;                             // режим - движение
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
+
         if (shotPos[curPumping] != stepper.getAngle()) {  // если цель отличается от актуальной позиции
           stepper.enable();
           stepper.setRPM(STEPPER_SPEED);
@@ -141,8 +142,8 @@ void flowRoutnie() {
     }
     if (noGlass && !parking) {                            // если не нашли ни одной рюмки
 #ifdef STEPPER_ENDSTOP
-      stepper.rotate(CCW);
       stepper.setRPM(STEPPER_SPEED / 2);
+      stepper.rotate(CCW);
       if (ENDSTOP_STATUS == 0) {                          // едем до активации концевика
         stepper.resetPos();                               // сбросили начальную позицию
 #else

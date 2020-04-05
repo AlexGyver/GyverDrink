@@ -42,8 +42,9 @@ void setup() {
   stepper.setRPM(STEPPER_SPEED / 2);
   while (ENDSTOP_STATUS && stepper.update()) {} // двигаемся пока не сработал концевик
   stepper.resetPos();
-#endif
   stepper.disable();
+#endif
+  
 
 
   serviceMode();    // калибровка
