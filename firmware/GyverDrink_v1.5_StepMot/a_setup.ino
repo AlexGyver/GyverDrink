@@ -38,8 +38,8 @@ void setup() {
   pinMode(STEPPER_ENDSTOP, INPUT_PULLUP);
 #endif
   stepper.enable();
-  stepper.rotate(CCW);
   stepper.setRPM(STEPPER_SPEED / 2);
+  stepper.rotate(CCW);
   while (ENDSTOP_STATUS && stepper.update()) {} // двигаемся пока не сработал концевик
   stepper.resetPos();
   stepper.disable();
