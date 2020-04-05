@@ -75,22 +75,6 @@ const long time50ml = 5500;
 #define DISP_CLK 12
 const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};
 
-// =========== ПИНЫ Arduino Micro===========
-//#define PUMP_POWER      0
-//#define BTN_PIN         1
-//#define DISP_DIO        2
-//#define DISP_CLK        3
-//#define BAT_PIN         4
-//#define LED_PIN         5
-//#define STEPPER_STEP    6
-//#define STEPPER_DIR     7
-//#define STEPPER_EN      8
-////#define STEPPER_ENDSTOP 9
-//#define ENC_SW          10
-//#define ENC_DT          14
-//#define ENC_CLK         16
-//const byte SW_pins[] = {15, 18, 19, 20, 21};
-
 // =========== ЛИБЫ ===========
 #include <GyverTM1637.h>
 #include <microLED.h>
@@ -123,7 +107,7 @@ int8_t curPumping = -1;
 
 enum {NO_GLASS, EMPTY, IN_PROCESS, READY} shotStates[NUM_SHOTS];
 enum {SEARCH, MOVING, WAIT, PUMPING} systemState;
-bool workMode = 1;  // 0 manual, 1 auto
+bool workMode = 0;  // 0 manual, 1 auto
 uint8_t thisVolume = 50;
 bool systemON = false;
 bool timeoutState = false;
