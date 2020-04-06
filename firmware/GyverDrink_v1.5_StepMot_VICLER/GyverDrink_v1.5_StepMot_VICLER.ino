@@ -43,12 +43,11 @@
 #define STEPPER_ENDSTOP_INVERT  0         // 1 - высокий сигнал при замыкании, 0 - низкий
 #define STEPPER_POWERSAFE 0               // автоматическое управление питанием шагового двигателя (питание включается только при движении)
 #define INVERT_STEPPER 0                  // инвертировать направление вращения шагового двигателя
-#define STEPPER_SPEED 10                  // скорость двигателя в оборотах в минуту
+#define STEPPER_SPEED 20                  // скорость двигателя в оборотах в минуту
 #define MICROSTEPS  2                     // значение микрошага, выставленного на драйвере двигателя
 
-
 // положение крана над центрами рюмок в градусах от нулевой точки
-const byte shotPos[] = {0, 45, 90, 135, 180};
+const byte shotPos[] = {0, 46, 93, 138, 185};
 
 #define PARKING_POS 0       // положение парковочной позиции в градусах
 
@@ -80,13 +79,13 @@ const long time50ml = 5500;
 #define VALVE_PIN       1
 #define DISP_DIO        2
 #define DISP_CLK        3
-#define BTN_PIN         4
+#define BTN_PIN         10
 #define LED_PIN         5
 #define STEPPER_STEP    6
 #define STEPPER_DIR     7
 #define STEPPER_EN      8
 #define STEPPER_ENDSTOP 9
-#define ENC_SW          10
+#define ENC_SW          4
 #define ENC_DT          14
 #define ENC_CLK         16
 const byte SW_pins[] = {15, 18, 19, 20, 21};
@@ -99,11 +98,12 @@ const byte SW_pins[] = {15, 18, 19, 20, 21};
 #include "encUniversalMinim.h"
 #include "buttonMinim.h"
 #include "timer2Minim.h"
+#include "TM1637_Animation.h"
 
 // =========== ДАТА ===========
 #define COLOR_DEBTH 2                         // цветовая глубина: 1, 2, 3 (в байтах)
-LEDdata leds[NUM_SHOTS];                      // буфер ленты типа LEDdata (размер зависит от COLOR_DEBTH)
-microLED strip(leds, NUM_SHOTS, LED_PIN);     // объект лента
+LEDdata leds[NUM_SHOTS + 1];                      // буфер ленты типа LEDdata (размер зависит от COLOR_DEBTH)
+microLED strip(leds, NUM_SHOTS + 1, LED_PIN);     // объект лента
 GyverTM1637 disp(DISP_CLK, DISP_DIO);
 encMinim enc(ENC_CLK, ENC_DT, ENC_SW, 1, 1);  // пин clk, пин dt, пин sw, направление (0/1), тип (0/1)
 StepMot stepper(STEPS_PER_REVOLUTION * MICROSTEPS, STEPPER_STEP, STEPPER_DIR, STEPPER_EN);
@@ -147,3 +147,11 @@ bool parking = false;
 #define ENDSTOP_STATUS digitalRead(STEPPER_ENDSTOP)
 #endif
 #endif
+
+#ifdef VALVE_PIN
+#define drinkSelect(x) digitalWrite(VALVE_PIN, x)
+#else
+#define drinkSelect(x)
+#endif
+
+#define headLight(x) strip.setLED(NUM_SHOTS, x); LEDchanged = true

@@ -6,7 +6,7 @@ void serviceMode() {
     disp.runningString(serviceText, sizeof(serviceText), 150);
     while (!digitalRead(BTN_PIN));  // ждём отпускания
     delay(200);
-#ifndef STEPPER_POWERSAFE
+#if (STEPPER_POWERSAFE == 0)
     stepper.enable();
 #endif
     int stepperPos = 0;
@@ -17,6 +17,7 @@ void serviceMode() {
     while (1) {
       enc.tick();
       stepper.update();
+      DEBUG(stepper.getAngle());
 
       if (timer100.isReady()) {   // период 100 мс
         // работа помпы со счётчиком
@@ -57,9 +58,10 @@ void serviceMode() {
   }
   disp.clear();
 #ifdef STEPPER_ENDSTOP
+  stepper.setRPM(STEPPER_SPEED / 4);
   stepper.rotate(CCW);
-  stepper.setRPM(STEPPER_SPEED / 2);
   while (ENDSTOP_STATUS && stepper.update()) {} // двигаемся пока не сработал концевик
+  stepper.resetPos();
 #else
   stepper.setAngle(0);
   while (stepper.update());
@@ -85,7 +87,8 @@ void flowTick() {
       if (swState && shotStates[i] == NO_GLASS) {  // поставили пустую рюмку
         timeoutReset();                                             // сброс таймаута
         shotStates[i] = EMPTY;                                      // флаг на заправку
-        strip.setLED(i, mCOLOR(RED));                               // подсветили
+        strip.setLED(i, mCOLOR(ORANGE));                               // подсветили
+        headLight(ORANGE);
         LEDchanged = true;
         DEBUG("set glass");
         DEBUG(i);
@@ -142,7 +145,7 @@ void flowRoutnie() {
     }
     if (noGlass && !parking) {                            // если не нашли ни одной рюмки
 #ifdef STEPPER_ENDSTOP
-      stepper.setRPM(STEPPER_SPEED / 2);
+      stepper.setRPM(STEPPER_SPEED / 4);
       stepper.rotate(CCW);
       if (ENDSTOP_STATUS == 0) {                          // едем до активации концевика
         stepper.resetPos();                               // сбросили начальную позицию
@@ -153,12 +156,14 @@ void flowRoutnie() {
         stepper.disable();                                // выключили шаговик
         systemON = false;                                 // выключили систему
         parking = 1;
+        headLight(WHITE);
         DEBUG("no glass");
       }
     }
   } else if (systemState == MOVING) {                     // движение к рюмке
-    if (stepper.ready()) {                                   // если приехали
+    if (stepper.ready()) {                                   // если приехали      
       systemState = PUMPING;                              // режим - наливание
+      delay(300);
       FLOWtimer.setInterval((long)thisVolume * time50ml / 50);  // перенастроили таймер
       FLOWtimer.reset();                                  // сброс таймера
       pumpON();                                           // НАЛИВАЙ!
@@ -171,8 +176,9 @@ void flowRoutnie() {
   } else if (systemState == PUMPING) {                    // если качаем
     if (FLOWtimer.isReady()) {                            // если налили (таймер)
       pumpOFF();                                          // помпа выкл
+      delay(300);
       shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
-      strip.setLED(curPumping, mCOLOR(LIME));             // подсветили
+      strip.setLED(curPumping, mCOLOR(AQUA));             // подсветили
       strip.show();
       curPumping = -1;                                    // снимаем выбор рюмки
       systemState = WAIT;                                 // режим работы - ждать
@@ -236,5 +242,37 @@ void jerkServo() {
     delay(200);
     stepper.disable();
     disp.brightness(1);
+  }
+}
+
+void showAnimation(byte mode) {
+  static byte i = 0;
+  if (mode == 0) {
+    if (i >= 20) i = 0;
+    disp.displayByte(AnimationData_0[i++]);
+  }
+  else if (mode == 1) {
+    if (i >= 12) i = 0;
+    disp.displayByte(AnimationData_1[i++]);
+  }
+  else if (mode == 2) {
+    if (i >= 12) i = 0;
+    disp.displayByte(AnimationData_2[i++]);
+  }
+  else if (mode == 3) {
+    if (i >= 60) i = 0;
+    disp.displayByte(AnimationData_3[i++]);
+  }
+  else if (mode == 4) {
+    if (i >= 2) i = 0;
+    disp.displayByte(AnimationData_4[i++]);
+  }
+  else if (mode == 5) {
+    if (i >= 6) i = 0;
+    disp.displayByte(AnimationData_5[i++]);
+  }
+  else if (mode == 6) {
+    if (i >= 8) i = 0;
+    disp.displayByte(AnimationData_6[i++]);
   }
 }

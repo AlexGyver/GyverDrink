@@ -5,8 +5,8 @@ void encTick() {
   if (enc.isTurn()) {
     volumeChanged = true;
     timeoutReset();
-    if (enc.isLeft()) thisVolume += 5;
-    if (enc.isRight())  thisVolume -= 5;
+    if (enc.isLeft()) thisVolume += 1;
+    if (enc.isRight())  thisVolume -= 1;
     thisVolume = constrain(thisVolume, 5, 1000);
     dispMode();
   }
