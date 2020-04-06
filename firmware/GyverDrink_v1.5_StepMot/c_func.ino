@@ -6,7 +6,7 @@ void serviceMode() {
     disp.runningString(serviceText, sizeof(serviceText), 150);
     while (!digitalRead(BTN_PIN));  // ждём отпускания
     delay(200);
-#ifndef STEPPER_POWERSAFE
+#if (STEPPER_POWERSAFE == 0)
     stepper.enable();
 #endif
     int stepperPos = 0;
@@ -57,9 +57,10 @@ void serviceMode() {
   }
   disp.clear();
 #ifdef STEPPER_ENDSTOP
-  stepper.rotate(CCW);
   stepper.setRPM(STEPPER_SPEED / 2);
+  stepper.rotate(CCW);
   while (ENDSTOP_STATUS && stepper.update()) {} // двигаемся пока не сработал концевик
+  stepper.resetPos();
 #else
   stepper.setAngle(0);
   while (stepper.update());
