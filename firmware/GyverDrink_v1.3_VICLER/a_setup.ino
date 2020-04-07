@@ -35,7 +35,7 @@ void setup() {
   servoOFF();
 
   // старт дисплея
-  disp.clear();
+  disp.displayByte(0x00, 0x00, 0x00, 0x00);
   disp.brightness(7);
   DEBUG("disp init");
 

@@ -100,9 +100,6 @@ timerMinim FLOWdebounce(20);
 timerMinim FLOWtimer(2000);
 timerMinim WAITtimer(300);
 timerMinim TIMEOUTtimer(10000);   // таймаут дёргания приводом
-
-timerMinim RAINBOWtimer(10000); // время подсветки для дёргания powerbank
-
 timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
 timerMinim delayTimer(1000);
 

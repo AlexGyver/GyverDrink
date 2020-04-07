@@ -57,7 +57,7 @@ void serviceMode() {
       }
     }
   }
-  disp.clear();
+  disp.displayByte(0x00, 0x00, 0x00, 0x00);
   while (!servo.tick());
   servoOFF();
 }
@@ -254,7 +254,7 @@ void timeoutTick() {
     if (!POWEROFFtimer.isReady()) {   // пока не сработал таймер полного отключения
       jerkServo();
     } else {
-      disp.clear();
+      disp.displayByte(0x00, 0x00, 0x00, 0x00);
     }
   }
 }
