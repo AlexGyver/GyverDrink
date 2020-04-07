@@ -12,8 +12,9 @@ void setup() {
 
   // тыкаем ленту
   strip.clear();
-  strip.setBrightness(255);
   strip.show();
+  strip.setBrightness(255);
+  
   DEBUG("strip init");
 
   // настройка пинов
@@ -26,7 +27,7 @@ void setup() {
   }
 
   // старт дисплея
-  disp.displayByte(0x00, 0x00, 0x00, 0x00);
+  disp.clear();
   disp.brightness(7);
   DEBUG("disp init");
 
@@ -51,11 +52,10 @@ void setup() {
   while(stepper.update());
   stepper.resetPos(PARKING_POS);
   stepper.disable();
+  parking = true;
 #else 
   stepper.resetPos(PARKING_POS);
 #endif
-  headLight(BLACK);
-
 
   // animation
   timerMinim durationTimer(5110); //5110
@@ -65,8 +65,8 @@ void setup() {
     if (timer20.isReady()) {
       static byte counter = 0;
       strip.setBrightness(counter);
-      for (byte i = 0; i < NUM_SHOTS; i++) {
-        leds[i] = mHSV(counter + i * (255 / NUM_SHOTS), 255, 255);
+      for (byte i = 0; i < NUM_SHOTS + 1; i++) {
+        leds[i] = mHSV(counter + i * (255 / NUM_SHOTS + 1), 255, 255);
       }
       strip.setBrightness(255 - counter);
       strip.show();
@@ -77,7 +77,6 @@ void setup() {
   strip.clear();
   strip.setBrightness(255);
   headLight(WHITE);
-
 
   serviceMode();    // калибровка
   dispMode();       // выводим на дисплей стандартные значения

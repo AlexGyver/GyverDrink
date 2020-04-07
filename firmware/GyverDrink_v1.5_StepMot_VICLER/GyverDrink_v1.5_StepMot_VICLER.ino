@@ -37,7 +37,7 @@
 
 // ======== НАСТРОЙКИ ========
 #define NUM_SHOTS 5                       // количество рюмок (оно же кол-во светодиодов и кнопок!)
-#define TIMEOUT_OFF 1                     // таймаут на выключение (перестаёт дёргать привод), минут
+#define TIMEOUT_OFF 5                     // таймаут на выключение (перестаёт дёргать привод), минут
 #define SWITCH_LEVEL 0                    // кнопки 1 - высокий сигнал при замыкании, 0 - низкий
 #define STEPS_PER_REVOLUTION 2037.88642   // количество шагов на оборот двигателя
 #define STEPPER_ENDSTOP_INVERT  0         // 1 - высокий сигнал при замыкании, 0 - низкий
@@ -114,7 +114,7 @@ timerMinim LEDtimer(100);
 timerMinim FLOWdebounce(20);
 timerMinim FLOWtimer(2000);
 timerMinim WAITtimer(400);
-timerMinim TIMEOUTtimer(5000);   // таймаут дёргания приводом
+timerMinim TIMEOUTtimer(10000);   // таймаут дёргания приводом
 timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
 
 bool LEDchanged = false;

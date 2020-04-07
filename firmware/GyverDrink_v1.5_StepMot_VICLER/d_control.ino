@@ -20,17 +20,16 @@ void btnTick() {
   }
   if (encBtn.holded()) {
     int8_t pumpingShot = -1;
-    for(byte i = 0; i < NUM_SHOTS; i++){
-      if(shotStates[i] == EMPTY){
+    for (byte i = 0; i < NUM_SHOTS; i++) {
+      if (!digitalRead(SW_pins[i])) {
         stepper.enable();
         stepper.setAngle(shotPos[i]);
         pumpingShot = i;
-        Serial.println(i);
       }
     }
-    if(pumpingShot == -1) return;
-    while(stepper.update());
-    delay(500);
+    if (pumpingShot == -1) return;
+    while (stepper.update());
+    delay(300);
     pumpON();
     while (!digitalRead(SW_pins[pumpingShot]) && !digitalRead(ENC_SW));
     pumpOFF();
@@ -38,5 +37,6 @@ void btnTick() {
     stepper.setAngle(PARKING_POS);
     stepper.disable();
     timeoutReset();
-  }  
+    systemState = WAIT;
+  }
 }
