@@ -4,14 +4,9 @@ void encTick() {
   enc.tick();
   if (enc.isTurn()) {
     timeoutReset();
-    if (enc.isLeft()) {
-      thisVolume += 5;
-      thisVolume = constrain(thisVolume, 10, 200);
-    }
-    if (enc.isRight()) {
-      thisVolume -= 5;
-      thisVolume = constrain(thisVolume, 10, 200);
-    }
+    if (enc.isLeft()) thisVolume += 1;
+    if (enc.isRight()) thisVolume -= 1;
+    thisVolume = constrain(thisVolume, 1, 200);
     dispMode();
     EEPROM.put(0, thisVolume);
   }
@@ -24,21 +19,24 @@ void btnTick() {
     dispMode();
   }
   if (encBtn.holded()) {
-    if (digitalRead(SW_pins[PUMPING_SHOT])) return;
-    driverSTBY(0);
-    servoON();
-    servo.write(shotPos[PUMPING_SHOT]);
-    servo.setTargetDeg(shotPos[PUMPING_SHOT]);
-    delay(500);
-    pumpON();
-    
-    while (!digitalRead(ENC_SW) && !digitalRead(SW_pins[PUMPING_SHOT]));
+    int8_t pumpingShot = -1;
+    for (byte i = 0; i < NUM_SHOTS; i++) {    // поиск наличия рюмки
+      if (!digitalRead(SW_pins[i])) {         // нашли рюмку
+        servoON();
+        servo.attach(SERVO_PIN, shotPos[i]);  // едем к ней
+        pumpingShot = i;
+      }
+    }
+    if (pumpingShot == -1) return; // нет рюмок -> нет прокачки, ищем заново ^
+    delay(500); // дадим немного времени для серво
+    pumpON(); // включаем помпу
+    while (!digitalRead(SW_pins[pumpingShot]) && !digitalRead(ENC_SW)); // пока стоит рюмка и зажат энкодер, продолжаем наливать
     pumpOFF();
     delay(300);
-    servoON();
     servo.write(HOME_POS);
-    delay(100);
+    delay(300);
     servoOFF();
     timeoutReset();
+    systemState = WAIT;
   }
 }
