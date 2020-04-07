@@ -55,27 +55,55 @@ void serviceMode() {
 
       if (btn.holded()) break;
     }
-  }
-  disp.clear();
+    disp.displayByte(0x00, 0x00, 0x00, 0x00);
 #ifdef STEPPER_ENDSTOP
-  stepper.setRPM(STEPPER_SPEED / 4);
-  stepper.rotate(CCW);
-  while (ENDSTOP_STATUS && stepper.update()) {} // двигаемся пока не сработал концевик
-  stepper.resetPos();
+    stepper.setRPM(STEPPER_SPEED / 4);
+    stepper.rotate(CCW);
+    while (ENDSTOP_STATUS && stepper.update()) {} // двигаемся пока не сработал концевик
+    stepper.resetPos();
 #else
-  stepper.setAngle(0);
-  while (stepper.update());
+    stepper.setAngle(0);
+    while (stepper.update());
 #endif
-  stepper.disable();
+    stepper.disable();
+  }
 }
 
 // выводим объём и режим
 void dispMode() {
-  disp.displayInt(thisVolume);
-  if (workMode) disp.displayByte(0, _A);
+  if (thisVolume < 100) {
+    disp.displayByte(0, 0x00);
+    disp.display(1, thisVolume / 10);
+    disp.display(2, thisVolume % 10);
+    disp.displayByte(3, 0x00);
+  }
   else {
-    disp.displayByte(0, _P);
+    disp.display(0, thisVolume / 100);
+    disp.display(1, (thisVolume % 100) / 10);
+    disp.display(2, thisVolume % 10);
+    disp.displayByte(3, 0x00);
+  }
+
+  if (workMode) {
+    disp.point(true);
+  }
+  else {
+    disp.point(false);
+    DEBUG("MANUAL MODE");
     pumpOFF();
+  }
+}
+
+void dispMode(uint8_t num) {
+  if (num < 100) {
+    disp.displayByte(0, 0x00);
+    disp.display(1, num / 10);
+    disp.display(2, num % 10);
+  }
+  else {
+    disp.display(0, num / 100);
+    disp.display(1, (num % 100) / 10);
+    disp.display(2, num % 10);
   }
 }
 
@@ -88,12 +116,11 @@ void flowTick() {
         timeoutReset();                                             // сброс таймаута
         shotStates[i] = EMPTY;                                      // флаг на заправку
         strip.setLED(i, mCOLOR(ORANGE));                               // подсветили
-        headLight(ORANGE);
         LEDchanged = true;
         DEBUG("set glass");
         DEBUG(i);
       }
-      if (!swState && shotStates[i] != NO_GLASS) {   // убрали пустую/полную рюмку
+      else if (!swState && shotStates[i] != NO_GLASS) {   // убрали пустую/полную рюмку
         shotStates[i] = NO_GLASS;                                   // статус - нет рюмки
         strip.setLED(i, mCOLOR(BLACK));                             // нигра
         LEDchanged = true;
@@ -103,6 +130,7 @@ void flowTick() {
           systemState = WAIT;                                       // режим работы - ждать
           WAITtimer.reset();
           pumpOFF();                                                // помпу выкл
+          dispMode();
         }
         DEBUG("take glass");
         DEBUG(i);
@@ -137,6 +165,8 @@ void flowRoutnie() {
           stepper.setRPM(STEPPER_SPEED);
           stepper.setAngle(shotPos[curPumping]);          // задаём цель
           parking = false;
+          homing = false;
+          headLight(ORANGE);
         }
         DEBUG("found glass");
         DEBUG(curPumping);
@@ -145,14 +175,25 @@ void flowRoutnie() {
     }
     if (noGlass && !parking) {                            // если не нашли ни одной рюмки
 #ifdef STEPPER_ENDSTOP
-      stepper.setRPM(STEPPER_SPEED / 4);
-      stepper.rotate(CCW);
-      if (ENDSTOP_STATUS == 0) {                          // едем до активации концевика
-        stepper.resetPos();                               // сбросили начальную позицию
+      if (!homing) {
+        stepper.setRPM(STEPPER_SPEED / 4);
+        stepper.rotate(CCW);
+        if (ENDSTOP_STATUS == 0) {                           // едем до активации концевика
+          stepper.resetPos();                               // сбросили начальную позицию
+          homing = true;
+        }
+      }
+      if (homing)  {
+        stepper.setRPM(STEPPER_SPEED);
+        stepper.setAngle(PARKING_POS);
+      }
+      if (stepper.ready()) {                              // приехали
+        stepper.resetPos(PARKING_POS);
 #else
       stepper.setAngle(PARKING_POS);                      // цель -> домашнее положение
       if (stepper.ready()) {                              // приехали
 #endif
+
         stepper.disable();                                // выключили шаговик
         systemON = false;                                 // выключили систему
         parking = 1;
@@ -160,8 +201,10 @@ void flowRoutnie() {
         DEBUG("no glass");
       }
     }
+    else if (!workMode && noGlass) systemON = false;      // если в ручном режиме, припаркованны и нет рюмок - отключаемся нахрен
+
   } else if (systemState == MOVING) {                     // движение к рюмке
-    if (stepper.ready()) {                                   // если приехали      
+    if (stepper.ready()) {                                   // если приехали
       systemState = PUMPING;                              // режим - наливание
       delay(300);
       FLOWtimer.setInterval((long)thisVolume * time50ml / 50);  // перенастроили таймер
@@ -174,8 +217,11 @@ void flowRoutnie() {
     }
 
   } else if (systemState == PUMPING) {                    // если качаем
+    static float volumeCount = 0;
+    dispMode(volumeCount += 20 * msVolume);
     if (FLOWtimer.isReady()) {                            // если налили (таймер)
       pumpOFF();                                          // помпа выкл
+      volumeCount = 0;
       delay(300);
       shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
       strip.setLED(curPumping, mCOLOR(AQUA));             // подсветили
@@ -200,11 +246,18 @@ void LEDtick() {
     LEDchanged = false;
     strip.show();
   }
+
 }
 
 // сброс таймаута
 void timeoutReset() {
-  if (!timeoutState) disp.brightness(7);
+  if (!timeoutState) {
+    disp.brightness(7);
+    dispMode();
+  }
+  strip.setBrightness(255);
+  
+  LEDchanged = true;
   timeoutState = true;
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
@@ -216,7 +269,9 @@ void timeoutTick() {
   if (systemState == SEARCH && timeoutState && TIMEOUTtimer.isReady()) {
     DEBUG("timeout");
     timeoutState = false;
-    disp.brightness(1);
+    disp.brightness(0);
+    strip.setBrightness(50);
+    LEDchanged = true;
     POWEROFFtimer.reset();
     jerkServo();
     if (volumeChanged) {
@@ -230,7 +285,9 @@ void timeoutTick() {
     if (!POWEROFFtimer.isReady()) {   // пока не сработал таймер полного отключения
       jerkServo();
     } else {
-      disp.clear();
+      disp.displayByte(0x00, 0x00, 0x00, 0x00);
+      strip.setBrightness(0);
+      LEDchanged = true;
     }
   }
 }

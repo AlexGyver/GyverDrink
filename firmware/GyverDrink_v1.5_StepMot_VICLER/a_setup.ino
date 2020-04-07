@@ -11,10 +11,8 @@ void setup() {
   EEPROM.get(0, thisVolume);
 
   // тыкаем ленту
-  strip.setBrightness(255);
   strip.clear();
-  //strip.setLED(5, ORANGE);
-  headLight(RED);
+  strip.setBrightness(255);
   strip.show();
   DEBUG("strip init");
 
@@ -28,7 +26,7 @@ void setup() {
   }
 
   // старт дисплея
-  disp.clear();
+  disp.displayByte(0x00, 0x00, 0x00, 0x00);
   disp.brightness(7);
   DEBUG("disp init");
 
@@ -45,21 +43,25 @@ void setup() {
   stepper.enable();
   stepper.setRPM(STEPPER_SPEED / 4);
   stepper.rotate(CCW);
+  headLight(ORANGE);
   while (ENDSTOP_STATUS && stepper.update()) {} // двигаемся пока не сработал концевик
   stepper.resetPos();
+  stepper.setRPM(STEPPER_SPEED);
+  stepper.setAngle(PARKING_POS);
+  while(stepper.update());
+  stepper.resetPos(PARKING_POS);
   stepper.disable();
+#else 
+  stepper.resetPos(PARKING_POS);
 #endif
+  headLight(BLACK);
 
-  headLight(WHITE);
-  //strip.show();
 
   // animation
   timerMinim durationTimer(5110); //5110
   timerMinim timer20(20);
   timerMinim timer60(60);
-  strip.setBrightness(255);
-  while (1) {
-    if (durationTimer.isReady()) break;
+  while (!durationTimer.isReady()) {
     if (timer20.isReady()) {
       static byte counter = 0;
       strip.setBrightness(counter);
@@ -74,10 +76,12 @@ void setup() {
   }
   strip.clear();
   strip.setBrightness(255);
-  
+  headLight(WHITE);
+
 
   serviceMode();    // калибровка
   dispMode();       // выводим на дисплей стандартные значения
   timeoutReset();   // сброс таймаута
   TIMEOUTtimer.start();
+  DEBUG("ready");
 }

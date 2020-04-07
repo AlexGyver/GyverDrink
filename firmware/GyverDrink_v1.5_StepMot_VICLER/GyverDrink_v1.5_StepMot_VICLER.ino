@@ -37,11 +37,11 @@
 
 // ======== НАСТРОЙКИ ========
 #define NUM_SHOTS 5                       // количество рюмок (оно же кол-во светодиодов и кнопок!)
-#define TIMEOUT_OFF 5                     // таймаут на выключение (перестаёт дёргать привод), минут
+#define TIMEOUT_OFF 1                     // таймаут на выключение (перестаёт дёргать привод), минут
 #define SWITCH_LEVEL 0                    // кнопки 1 - высокий сигнал при замыкании, 0 - низкий
 #define STEPS_PER_REVOLUTION 2037.88642   // количество шагов на оборот двигателя
 #define STEPPER_ENDSTOP_INVERT  0         // 1 - высокий сигнал при замыкании, 0 - низкий
-#define STEPPER_POWERSAFE 0               // автоматическое управление питанием шагового двигателя (питание включается только при движении)
+#define STEPPER_POWERSAFE 1               // автоматическое управление питанием шагового двигателя (питание включается только при движении)
 #define INVERT_STEPPER 0                  // инвертировать направление вращения шагового двигателя
 #define STEPPER_SPEED 20                  // скорость двигателя в оборотах в минуту
 #define MICROSTEPS  2                     // значение микрошага, выставленного на драйвере двигателя
@@ -49,7 +49,7 @@
 // положение крана над центрами рюмок в градусах от нулевой точки
 const byte shotPos[] = {0, 46, 93, 138, 185};
 
-#define PARKING_POS 0       // положение парковочной позиции в градусах
+#define PARKING_POS 93       // положение парковочной позиции в градусах
 
 // время заполнения 50 мл
 const long time50ml = 5500;
@@ -79,13 +79,13 @@ const long time50ml = 5500;
 #define VALVE_PIN       1
 #define DISP_DIO        2
 #define DISP_CLK        3
-#define BTN_PIN         10
+#define BTN_PIN         4
 #define LED_PIN         5
 #define STEPPER_STEP    6
 #define STEPPER_DIR     7
 #define STEPPER_EN      8
 #define STEPPER_ENDSTOP 9
-#define ENC_SW          4
+#define ENC_SW          10
 #define ENC_DT          14
 #define ENC_CLK         16
 const byte SW_pins[] = {15, 18, 19, 20, 21};
@@ -114,7 +114,7 @@ timerMinim LEDtimer(100);
 timerMinim FLOWdebounce(20);
 timerMinim FLOWtimer(2000);
 timerMinim WAITtimer(400);
-timerMinim TIMEOUTtimer(15000);   // таймаут дёргания приводом
+timerMinim TIMEOUTtimer(5000);   // таймаут дёргания приводом
 timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
 
 bool LEDchanged = false;
@@ -123,12 +123,15 @@ int8_t curPumping = -1;
 
 enum {NO_GLASS, EMPTY, IN_PROCESS, READY} shotStates[NUM_SHOTS];
 enum {SEARCH, MOVING, WAIT, PUMPING} systemState;
-bool workMode = 1;  // 0 manual, 1 auto
+bool workMode = 0;  // 0 manual, 1 auto
 uint8_t thisVolume = 50;
+//uint8_t thisVolume_2 = 50;
+float msVolume = 50.0 / time50ml;
 bool systemON = false;
 bool timeoutState = false;
 bool volumeChanged = false;
 bool parking = false;
+bool homing = false;
 
 // =========== МАКРО ===========
 #define pumpON() digitalWrite(PUMP_POWER, 1)
@@ -154,4 +157,4 @@ bool parking = false;
 #define drinkSelect(x)
 #endif
 
-#define headLight(x) strip.setLED(NUM_SHOTS, x); LEDchanged = true
+#define headLight(x) strip.setLED(NUM_SHOTS, x); strip.show()
