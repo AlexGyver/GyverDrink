@@ -6,13 +6,12 @@ void serviceMode() {
     disp.runningString(serviceText, sizeof(serviceText), 150);
     while (!digitalRead(BTN_PIN));  // ждём отпускания
     delay(200);
-#if (STEPPER_POWERSAFE == 0)
+    stepper.autoPower(OFF);
     stepper.enable();
-#endif
-    int stepperPos = 0;
+    int stepperPos = PARKING_POS;
     long pumpTime = 0;
     timerMinim timer100(100);
-    disp.displayInt(0);
+    disp.displayInt(PARKING_POS);
     bool flag;
     while (1) {
       enc.tick();
@@ -47,25 +46,29 @@ void serviceMode() {
         pumpTime = 0;
         if (enc.isLeft()) stepperPos += 1;
         if (enc.isRight())  stepperPos -= 1;
-        stepperPos = constrain(stepperPos, 0, 180);
+        stepperPos = constrain(stepperPos, 0, 360);
         disp.displayInt(stepperPos);
         stepper.setAngle(stepperPos);
       }
 
       if (btn.holded()) break;
     }
-  }
-  disp.clear();
+    disp.clear();
 #ifdef STEPPER_ENDSTOP
-  stepper.setRPM(STEPPER_SPEED / 2);
-  stepper.rotate(CCW);
-  while (ENDSTOP_STATUS && stepper.update()) {} // двигаемся пока не сработал концевик
-  stepper.resetPos();
+    stepper.setRPM(STEPPER_SPEED / 2);
+    stepper.rotate(CCW);
+    while (ENDSTOP_STATUS && stepper.update()); // двигаемся пока не сработал концевик
+    stepper.resetPos();
+    stepper.setRPM(STEPPER_SPEED);
+    stepper.setAngle(PARKING_POS);
+    while (stepper.update());
 #else
-  stepper.setAngle(0);
-  while (stepper.update());
+    stepper.setAngle(PARKING_POS);
+    while (stepper.update());
 #endif
-  stepper.disable();
+    stepper.disable();
+    stepper.autoPower(STEPPER_POWERSAFE);
+  }
 }
 
 // выводим объём и режим
@@ -141,15 +144,8 @@ void flowRoutnie() {
       }
     }
     if (noGlass && !parking) {                            // если не нашли ни одной рюмки
-#ifdef STEPPER_ENDSTOP
-      stepper.setRPM(STEPPER_SPEED / 2);
-      stepper.rotate(CCW);
-      if (ENDSTOP_STATUS == 0) {                          // едем до активации концевика
-        stepper.resetPos();                               // сбросили начальную позицию
-#else
       stepper.setAngle(PARKING_POS);                      // цель -> домашнее положение
       if (stepper.ready()) {                              // приехали
-#endif
         stepper.disable();                                // выключили шаговик
         systemON = false;                                 // выключили систему
         parking = 1;

@@ -60,7 +60,7 @@ const long time50ml = 5500;
 // отладка
 #define DEBUG_UART ON
 
- =========== ПИНЫ Arduino Nano===========
+// =========== ПИНЫ Arduino Nano===========
 #define PUMP_POWER 3
 #define STEPPER_STEP  5
 #define STEPPER_DIR 4
