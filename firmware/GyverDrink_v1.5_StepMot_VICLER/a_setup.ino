@@ -1,5 +1,5 @@
 void setup() {
-#if (DEBUG_UART == 1)
+#if (DEBUG_UART == ON)
   Serial.begin(9600);
   DEBUG("start");
 #endif
@@ -14,7 +14,6 @@ void setup() {
   strip.clear();
   strip.show();
   strip.setBrightness(255);
-  
   DEBUG("strip init");
 
   // настройка пинов
@@ -23,7 +22,7 @@ void setup() {
   pinMode(VALVE_PIN, OUTPUT);
 #endif
   for (byte i = 0; i < NUM_SHOTS; i++) {
-    if (SWITCH_LEVEL == 0) pinMode(SW_pins[i], INPUT_PULLUP);
+    if (SWITCH_LEVEL == 0) pinMode(SW_pins[i], INPUT);
   }
 
   // старт дисплея
@@ -44,8 +43,8 @@ void setup() {
   stepper.enable();
   stepper.setRPM(STEPPER_SPEED / 4);
   stepper.rotate(CCW);
-  headLight(ORANGE);
-  while (ENDSTOP_STATUS && stepper.update()) {} // двигаемся пока не сработал концевик
+  HeadLED = ORANGE;
+  while (ENDSTOP_STATUS && stepper.update()); // двигаемся пока не сработал концевик
   stepper.resetPos();
   stepper.setRPM(STEPPER_SPEED);
   stepper.setAngle(PARKING_POS);
@@ -76,7 +75,7 @@ void setup() {
   }
   strip.clear();
   strip.setBrightness(255);
-  headLight(WHITE);
+  HeadLED = WHITE;
 
   serviceMode();    // калибровка
   dispMode();       // выводим на дисплей стандартные значения

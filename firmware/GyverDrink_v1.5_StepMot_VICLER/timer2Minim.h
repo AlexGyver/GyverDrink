@@ -28,8 +28,10 @@ void timerMinim::setInterval(uint32_t interval) {
 }
 
 void timerMinim::start() {
-  _status = true;
-  _timer = millis();
+  if(!_status) {
+    _status = true;
+    _timer = millis();
+  }
 }
 
 void timerMinim::stop() {

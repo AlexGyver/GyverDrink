@@ -30,9 +30,19 @@ void btnTick() {
     if (pumpingShot == -1) return;
     while (stepper.update());
     delay(300);
+    timerMinim timer100(100);
     pumpON();
-    while (!digitalRead(SW_pins[pumpingShot]) && !digitalRead(ENC_SW));
+    while (!digitalRead(SW_pins[pumpingShot]) && !digitalRead(ENC_SW)) {
+      if (!service) {
+        if (timer100.isReady()) {
+          volumeCount += round(100 * 50.0 / time50ml);
+          dispNum(volumeCount);
+        }
+      }
+    }
     pumpOFF();
+    dispMode();
+    volumeCount = 0;
     delay(300);
     stepper.setAngle(PARKING_POS);
     stepper.disable();
