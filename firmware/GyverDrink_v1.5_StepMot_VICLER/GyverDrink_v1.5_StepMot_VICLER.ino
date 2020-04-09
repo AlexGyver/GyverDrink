@@ -44,7 +44,7 @@
 #define STEPPER_ENDSTOP_INVERT  0         // 1 - высокий сигнал при замыкании, 0 - низкий
 #define STEPPER_POWERSAFE 1               // автоматическое управление питанием шагового двигателя (питание включается только при движении)
 #define INVERT_STEPPER 0                  // инвертировать направление вращения шагового двигателя
-#define STEPPER_SPEED 10                  // скорость двигателя в оборотах в минуту
+#define STEPPER_SPEED 20                  // скорость двигателя в оборотах в минуту
 #define MICROSTEPS  2                     // значение микрошага, выставленного на драйвере двигателя
 #define STEPER_BACKLASH 3.5
 
@@ -142,7 +142,7 @@ float volumeCount = 0.0f;
 bool systemON = false;
 bool timeoutState = false;
 bool volumeChanged = false;
-bool parking = false;
+bool parking = true;
 bool homing = false;
 bool service = false;
 

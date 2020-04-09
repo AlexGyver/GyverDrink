@@ -48,14 +48,15 @@ void setup() {
   while (ENDSTOP_STATUS && stepper.update()); // двигаемся пока не сработал концевик
   stepper.resetPos();
   stepper.setRPM(STEPPER_SPEED);
-  stepper.setAngle(PARKING_POS);
-  while(stepper.update());
-  stepper.disable();
-  parking = true;
+  if(PARKING_POS != 0){
+   stepper.setAngle(PARKING_POS);
+   while(stepper.update()); 
+  }
 #else 
   stepper.setRPM(STEPPER_SPEED);
   stepper.resetPos(PARKING_POS);
 #endif
+  stepper.disable();
 
   // animation
   timerMinim durationTimer(5110); //5110
