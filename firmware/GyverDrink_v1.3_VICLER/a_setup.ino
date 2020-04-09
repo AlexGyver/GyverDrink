@@ -25,7 +25,6 @@ void setup() {
     pinMode(SW_pins[i], INPUT_PULLUP);
   }
   // настройка серво
-  driverSTBY(0);
   servoON();
   servo.attach(SERVO_PIN, HOME_POS);
   delay(1000);

@@ -137,8 +137,9 @@ void flowTick() {
           systemState = WAIT;                                       // режим работы - ждать
           WAITtimer.reset();
           pumpOFF();                                                // помпу выкл
-          dispMode();
+          //dispMode();
         }
+        dispMode();
         shotCount -= 1;
         DEBUG("take glass");
         DEBUG(i);

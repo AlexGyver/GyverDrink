@@ -41,12 +41,9 @@ void btnTick() {
       }
     }
     pumpOFF();
-    dispMode();
-    volumeCount = 0;
     delay(300);
     stepper.setAngle(PARKING_POS);
-    stepper.disable();
     timeoutReset();
-    systemState = WAIT;
+    if(workMode) systemState = WAIT;
   }
 }

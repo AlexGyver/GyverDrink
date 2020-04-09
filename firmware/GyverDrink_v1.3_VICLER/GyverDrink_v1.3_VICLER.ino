@@ -58,7 +58,6 @@ const long time50ml = 5300;
 const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};
 
 //// =========== ПИНЫ Arduino Micro ===========
-//#define DRIVER_STBY 21      //для драйвера TB6612
 //#define PUMP_POWER 4
 //#define SERVO_POWER 16
 //#define SERVO_PIN 6
@@ -115,19 +114,12 @@ float volumeTick = 20.0f * 50.0f / time50ml;
 float volumeCount = 0.0f;
 bool systemON = false;
 bool timeoutState = false;
-bool service = true;
 
 // =========== МАКРО ===========
 #define servoON() digitalWrite(SERVO_POWER, 1)
 #define servoOFF() digitalWrite(SERVO_POWER, 0)
 #define pumpON() digitalWrite(PUMP_POWER, 1)
 #define pumpOFF() digitalWrite(PUMP_POWER, 0)
-
-#ifdef DRIVER_STBY
-#define driverSTBY(x) digitalWrite(DRIVER_STBY, !x)
-#else 
-#define driverSTBY(x)
-#endif
 
 #if (DEBUG_UART == 1)
 #define DEBUG(x) Serial.println(x)

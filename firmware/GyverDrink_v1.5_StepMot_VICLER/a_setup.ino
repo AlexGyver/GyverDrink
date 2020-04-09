@@ -62,7 +62,6 @@ void setup() {
   timerMinim durationTimer(5110); //5110
   timerMinim timer20(20);
   timerMinim timer60(60);
-  byte anim = random(0, 6);
   while (!durationTimer.isReady()) {
     if (timer20.isReady()) {
       static byte counter = 0;
@@ -74,7 +73,7 @@ void setup() {
       strip.show();
       counter++;
     }
-    if (timer60.isReady()) showAnimation(anim);
+    if (timer60.isReady()) showAnimation(6);
   }
   strip.clear();
   strip.setBrightness(255);

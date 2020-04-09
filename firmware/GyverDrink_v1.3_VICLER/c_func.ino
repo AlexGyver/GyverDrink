@@ -2,12 +2,10 @@
 
 void serviceMode() {
   if (!digitalRead(BTN_PIN)) {
-    service = true;
     byte serviceText[] = {_S, _E, _r, _U, _i, _C, _E};
     disp.runningString(serviceText, sizeof(serviceText), 150);
     while (!digitalRead(BTN_PIN));  // ждём отпускания
     delay(200);
-    driverSTBY(0);
     servoON();
     int servoPos = HOME_POS;
     long pumpTime = 0;
@@ -61,7 +59,6 @@ void serviceMode() {
   disp.displayByte(0x00, 0x00, 0x00, 0x00);
   while (!servo.tick());
   servoOFF();
-  service = false;
 }
 
 // выводим объём и режим
@@ -188,6 +185,7 @@ void flowRoutnie() {
       FLOWtimer.setInterval((long)thisVolume * time50ml / 50);  // перенастроили таймер
       FLOWtimer.reset();                                  // сброс таймера
       pumpON();                                           // НАЛИВАЙ!
+      volumeCount = 0;
       servoOFF();
       strip.setLED(curPumping, mCOLOR(OLIVE));           // зажгли цвет
       strip.show();
@@ -199,7 +197,6 @@ void flowRoutnie() {
     dispMode(volumeCount += volumeTick);
     if (FLOWtimer.isReady()) {                            // если налили (таймер)
       pumpOFF();                                          // помпа выкл
-      volumeCount = 0;
       dispMode();
       delay(300);
       shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
@@ -230,7 +227,6 @@ void LEDtick() {
 void timeoutReset() {
   if (!timeoutState) disp.brightness(7);
   timeoutState = true;
-  driverSTBY(0);
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
   DEBUG("timeout reset");
@@ -242,7 +238,6 @@ void timeoutTick() {
     DEBUG("timeout");
     timeoutState = false;
     disp.brightness(1);
-    driverSTBY(1);
     servoOFF();
     systemON = false;
     POWEROFFtimer.reset();

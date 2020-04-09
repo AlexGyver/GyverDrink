@@ -35,22 +35,18 @@ void btnTick() {
     timerMinim timer100(100);
     while (!digitalRead(SW_pins[pumpingShot]) && !digitalRead(ENC_SW)) // пока стоит рюмка и зажат энкодер, продолжаем наливать
     {
-      if (!service) {
-        if (timer100.isReady()) {
-          volumeCount += round(100 * 50.0 / time50ml);
-          disp.displayInt(volumeCount);
-        }
+      if (timer100.isReady()) {
+        volumeCount += round(100 * 50.0 / time50ml);
+        disp.displayInt(volumeCount);
       }
     }
     pumpOFF();
-    dispMode();
-    volumeCount = 0;
     delay(300);
     servo.setTargetDeg(0);
     while (!servo.tick()); // едем назад в нулевое положение
     servoOFF();
     servo.detach();
     timeoutReset();
-    systemState = WAIT;
+    if (workMode) systemState = WAIT;
   }
 }
