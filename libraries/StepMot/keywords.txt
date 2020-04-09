@@ -14,6 +14,7 @@ StepMot	KEYWORD1
 
 setMode		KEYWORD2
 autoPower	KEYWORD2
+setBacklash KEYWORD2
 setRPM		KEYWORD2
 enable		KEYWORD2
 disable		KEYWORD2
@@ -24,8 +25,9 @@ setAngle	KEYWORD2
 rotate		KEYWORD2
 getAngle	KEYWORD2
 resetPos	KEYWORD2
-move		KEYWORD2
 step		KEYWORD2
+ready       KEYWORD2
+update      KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

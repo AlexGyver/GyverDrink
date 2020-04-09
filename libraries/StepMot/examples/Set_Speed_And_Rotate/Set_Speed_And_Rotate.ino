@@ -22,8 +22,7 @@ void loop() {
 
   while (Serial.available() > 0){
     int rpm = Serial.parseInt();
-    motor.setRPM(rpm);
-    motor.rotate(CW);
+    motor.setRPM(rpm);  // positive numbers -> clockwise direction, negative -> counterclockwise
     Serial.println(rpm);
   }
 

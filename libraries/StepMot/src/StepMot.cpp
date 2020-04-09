@@ -26,9 +26,21 @@ void StepMot::autoPower(bool status) {
   _autoPower = status;
 }
 
+void StepMot::setBacklash(float angle){
+  _backlash = angle;
+}
+
 void StepMot::setRPM(float rpm) {
-  if (rpm > 0)
-    _stepPeriod = 1000000.0 / (_stepsPerRevolution * rpm / 60.0);
+  if(rpm == 0){
+    _stop = true;
+    if (_autoPower && _enabled) StepMot::disable();
+    return;
+  }
+  else if (rpm > 0)  StepMot::setDir(CW);
+  else if (rpm < 0)  StepMot::setDir(CCW);
+  _stepPeriod = 1000000.0 / (_stepsPerRevolution * abs(rpm) / 60.0);
+  if (_autoPower && !_enabled && !_ready)  StepMot::enable();
+  _stop = false;
 }
 
 void StepMot::enable() {
@@ -62,26 +74,29 @@ void StepMot::setSteps(uint32_t steps) {
 }
 
 void StepMot::setAngle(float newAngle) {
-  if (_mode == ABSOLUTE) {
-    if (newAngle > StepMot::getAngle()) {
-      _targetAngle = newAngle - StepMot::getAngle();
-      StepMot::setDir(CW);
-    }
-    else if (newAngle < StepMot::getAngle()) {
-      _targetAngle = StepMot::getAngle() - newAngle;
-      StepMot::setDir(CCW);
-    }
-    else {
-      _targetAngle = 0;
-    }
-    _targetSteps = round(_targetAngle * _stepsPerAngle);
+  _currentAngle = _currentSteps * _anglePerStep;
+
+  if (_mode == RELATIVE)
+  {
+    if(newAngle == 0) return;
+    else newAngle = _lastAngle + newAngle;
   }
-  else if (_mode == RELATIVE) {
-    _targetSteps = round(abs(newAngle * _stepsPerAngle));
-    if (newAngle > 0) StepMot::setDir(CW);
-    else if (newAngle < 0) StepMot::setDir(CCW);
+      
+  if (_dir == CW)
+  {
+    _lastAngle = newAngle;
+    newAngle += _backlash;
   }
-  if (_targetSteps > 0) _ready = 0;
+  else  _lastAngle = newAngle;
+
+  if (newAngle > _currentAngle) StepMot::setDir(CW);
+  if (newAngle < _currentAngle) StepMot::setDir(CCW);
+
+  _targetAngle = abs(newAngle - _currentAngle);
+  _targetSteps = round(_targetAngle * _stepsPerAngle);
+
+  if (_targetSteps > 0)
+    _ready = 0;
 }
 
 void StepMot::rotate(bool dir) {
@@ -89,13 +104,19 @@ void StepMot::rotate(bool dir) {
   _ready = 0;
 }
 
-float StepMot::getAngle() {
-  return _currentSteps * _anglePerStep; // current Angle
+void StepMot::rotate()
+{
+  _ready = 0;
 }
 
-void StepMot::resetPos() {
+float StepMot::getAngle() {
+    return _currentAngle = _currentSteps * _anglePerStep;
+}
+
+void StepMot::resetPos(float pos = 0.0) {
+  _currentAngle = pos;
+  _currentSteps = pos * _stepsPerAngle;
   _targetSteps = 0;
-  _currentSteps = 0;
   _ready = 1;
 }
 
@@ -111,11 +132,11 @@ bool StepMot::ready() {
 }
 
 bool StepMot::update() {
-  if (_ready) return 0;
+  if (_ready || _stop) return 0;
 
   if (micros() - _prevStepTime >= _stepPeriod) {
     _prevStepTime = micros();
-    
+
     StepMot::step();
 
     if (_targetSteps) {

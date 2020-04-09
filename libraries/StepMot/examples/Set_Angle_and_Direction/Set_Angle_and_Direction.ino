@@ -24,5 +24,5 @@ void loop() {
     motor.setAngle(angle);
   }
 
-  motor.update();
+  if(!motor.update()) motor.setAngle(motor.getAngle() * -1);
 }
