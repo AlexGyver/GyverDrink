@@ -22,7 +22,7 @@ void setup() {
   pinMode(VALVE_PIN, OUTPUT);
 #endif
   for (byte i = 0; i < NUM_SHOTS; i++) {
-    if (SWITCH_LEVEL == 0) pinMode(SW_pins[i], INPUT);
+    if (SWITCH_LEVEL == 0) pinMode(SW_pins[i], INPUT_PULLUP);
   }
 
   // старт дисплея

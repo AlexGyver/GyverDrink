@@ -129,7 +129,7 @@ int8_t curPumping = -1;
 
 enum {NO_GLASS, EMPTY, IN_PROCESS, READY} shotStates[NUM_SHOTS];
 enum {SEARCH, MOVING, WAIT, PUMPING} systemState;
-bool workMode = 1;  // 0 manual, 1 auto
+bool workMode = 0;  // 0 manual, 1 auto
 uint8_t thisVolume = 50;
 //uint8_t thisVolume_2 = 50;
 float volumeTick = 50.0f * 50.0f / time50ml;
