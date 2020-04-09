@@ -6,5 +6,5 @@ void loop() {
   flowTick();
   LEDtick();
   timeoutTick();
-  stepper.update();
+  if(stepper.update()) DEBUG(stepper.getAngle());
 }

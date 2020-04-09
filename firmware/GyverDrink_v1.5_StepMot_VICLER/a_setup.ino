@@ -33,6 +33,7 @@ void setup() {
   // настройка шагового двигателя
   stepper.autoPower(STEPPER_POWERSAFE);
   stepper.invertDir(INVERT_STEPPER);
+  stepper.setBacklash(STEPER_BACKLASH);
   stepper.setMode(ABSOLUTE);
 #ifdef STEPPER_ENDSTOP
 #if (STEPPER_ENDSTOP_INVERT == 1)
@@ -41,7 +42,7 @@ void setup() {
   pinMode(STEPPER_ENDSTOP, INPUT_PULLUP);
 #endif
   stepper.enable();
-  stepper.setRPM(STEPPER_SPEED / 4);
+  stepper.setRPM(5);
   stepper.rotate(CCW);
   HeadLED = ORANGE;
   while (ENDSTOP_STATUS && stepper.update()); // двигаемся пока не сработал концевик
@@ -49,10 +50,10 @@ void setup() {
   stepper.setRPM(STEPPER_SPEED);
   stepper.setAngle(PARKING_POS);
   while(stepper.update());
-  stepper.resetPos(PARKING_POS);
   stepper.disable();
   parking = true;
 #else 
+  stepper.setRPM(STEPPER_SPEED);
   stepper.resetPos(PARKING_POS);
 #endif
 
@@ -60,6 +61,7 @@ void setup() {
   timerMinim durationTimer(5110); //5110
   timerMinim timer20(20);
   timerMinim timer60(60);
+  byte anim = random(0, 6);
   while (!durationTimer.isReady()) {
     if (timer20.isReady()) {
       static byte counter = 0;
@@ -71,7 +73,7 @@ void setup() {
       strip.show();
       counter++;
     }
-    if (timer60.isReady()) showAnimation(2);
+    if (timer60.isReady()) showAnimation(anim);
   }
   strip.clear();
   strip.setBrightness(255);

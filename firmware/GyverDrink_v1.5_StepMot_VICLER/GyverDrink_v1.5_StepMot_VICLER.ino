@@ -32,7 +32,8 @@
    Версия 1.5:
    - Добавлена инверсия сервопривода (ОБНОВИТЕ БИБЛИОТЕКУ ИЗ АРХИВА)
 
-   Версия 1.5 с шаговым двигателем и драйвером StepStick (STEP/DIR)
+   Версия 1.5 by VICLER
+   - для шагового двигателя с драйвером типа StepStick
 */
 
 // ======== НАСТРОЙКИ ========
@@ -41,15 +42,16 @@
 #define SWITCH_LEVEL 0                    // кнопки 1 - высокий сигнал при замыкании, 0 - низкий
 #define STEPS_PER_REVOLUTION 2037.88642   // количество шагов на оборот двигателя
 #define STEPPER_ENDSTOP_INVERT  0         // 1 - высокий сигнал при замыкании, 0 - низкий
-#define STEPPER_POWERSAFE 0               // автоматическое управление питанием шагового двигателя (питание включается только при движении)
+#define STEPPER_POWERSAFE 1               // автоматическое управление питанием шагового двигателя (питание включается только при движении)
 #define INVERT_STEPPER 0                  // инвертировать направление вращения шагового двигателя
-#define STEPPER_SPEED 20                  // скорость двигателя в оборотах в минуту
+#define STEPPER_SPEED 10                  // скорость двигателя в оборотах в минуту
 #define MICROSTEPS  2                     // значение микрошага, выставленного на драйвере двигателя
+#define STEPER_BACKLASH 3.5
 
 // положение крана над центрами рюмок в градусах от нулевой точки
-const byte shotPos[] = {0, 46, 93, 138, 185};
+const byte shotPos[] = {0, 45, 90, 135, 180};
 
-#define PARKING_POS 93       // положение парковочной позиции в градусах
+#define PARKING_POS 90       // положение парковочной позиции в градусах
 
 // время заполнения 50 мл
 const long time50ml = 5500;
@@ -59,7 +61,25 @@ const long time50ml = 5500;
 // отладка
 #define DEBUG_UART OFF
 
+// =========== ПИНЫ Arduino Micro===========
+#if defined(ARDUINO_AVR_MICRO)
+#define PUMP_POWER      0
+#define VALVE_PIN       1
+#define DISP_DIO        2
+#define DISP_CLK        3
+#define BTN_PIN         10
+#define LED_PIN         5
+#define STEPPER_STEP    6
+#define STEPPER_DIR     7
+#define STEPPER_EN      8
+#define STEPPER_ENDSTOP 9
+#define ENC_SW          4
+#define ENC_DT          14
+#define ENC_CLK         16
+const byte SW_pins[] = {15, 18, 19, 20, 21};
+
 // =========== ПИНЫ Arduino Nano===========
+#elif defined(ARDUINO_AVR_NANO)
 #define PUMP_POWER 3
 #define STEPPER_STEP  5
 #define STEPPER_DIR 4
@@ -73,22 +93,7 @@ const long time50ml = 5500;
 #define DISP_DIO 11
 #define DISP_CLK 12
 const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};
-
-//// =========== ПИНЫ Arduino Micro===========
-//#define PUMP_POWER      0
-//#define VALVE_PIN       1
-//#define DISP_DIO        2
-//#define DISP_CLK        3
-//#define BTN_PIN         4
-//#define LED_PIN         5
-//#define STEPPER_STEP    6
-//#define STEPPER_DIR     7
-//#define STEPPER_EN      8
-//#define STEPPER_ENDSTOP 9
-//#define ENC_SW          10
-//#define ENC_DT          14
-//#define ENC_CLK         16
-//const byte SW_pins[] = {15, 18, 19, 20, 21};
+#endif
 
 // =========== ЛИБЫ ===========
 #include <GyverTM1637.h>

@@ -48,7 +48,7 @@ void serviceMode() {
         if (enc.isLeft()) stepperPos += 1;
         if (enc.isRight())  stepperPos -= 1;
         stepperPos = constrain(stepperPos, 0, 360);
-        disp.displayInt(stepperPos);
+        dispNum(stepperPos);
         stepper.setAngle(stepperPos);
       }
 
@@ -57,7 +57,7 @@ void serviceMode() {
     disp.clear();
     HeadLED = ORANGE;
 #ifdef STEPPER_ENDSTOP
-    stepper.setRPM(STEPPER_SPEED / 4);
+    stepper.setRPM(5);
     stepper.rotate(CCW);
     while (ENDSTOP_STATUS && stepper.update()); // двигаемся пока не сработал концевик
     stepper.resetPos();
@@ -177,7 +177,6 @@ void flowRoutnie() {
 
         if (shotPos[curPumping] != (int)stepper.getAngle()) {  // если цель отличается от актуальной позиции
           stepper.enable();
-          stepper.setRPM(STEPPER_SPEED);
           stepper.setAngle(shotPos[curPumping]);          // задаём цель
           parking = false;
           homing = false;
@@ -191,24 +190,6 @@ void flowRoutnie() {
       }
     }
     if (noGlass && !parking) {                            // если не нашли ни одной рюмки
-      //#ifdef STEPPER_ENDSTOP
-      //      if (!homing) {
-      //        stepper.setRPM(STEPPER_SPEED / 4);
-      //        stepper.rotate(CCW);
-      //        if (ENDSTOP_STATUS == 0) {                           // едем до активации концевика
-      //          stepper.resetPos();                               // сбросили начальную позицию
-      //          homing = true;
-      //        }
-      //      }
-      //      if (homing)  {
-      //        stepper.setRPM(STEPPER_SPEED);
-      //        stepper.setAngle(PARKING_POS);
-      //      }
-      //      if (stepper.ready()) {                              // приехали
-      //#else
-      //      stepper.setAngle(PARKING_POS);                      // цель -> домашнее положение
-      //      if (stepper.ready()) {                              // приехали
-      //#endif
       stepper.setAngle(PARKING_POS);                      // цель -> домашнее положение
       HeadLED = ORANGE;
       if (stepper.ready()) {                              // приехали
@@ -230,6 +211,7 @@ void flowRoutnie() {
       delay(300);
       FLOWtimer.setInterval((long)thisVolume * time50ml / 50);  // перенастроили таймер
       FLOWtimer.reset();                                  // сброс таймера
+      volumeCount = 0;
       pumpON();                                           // НАЛИВАЙ!
       DEBUG("fill glass");
       DEBUG(curPumping);
@@ -243,7 +225,6 @@ void flowRoutnie() {
 
     if (FLOWtimer.isReady()) {                            // если налили (таймер)
       pumpOFF();                                          // помпа выкл
-      volumeCount = 0;
       shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
       curPumping = -1;                                    // снимаем выбор рюмки
       systemState = WAIT;                                 // режим работы - ждать
