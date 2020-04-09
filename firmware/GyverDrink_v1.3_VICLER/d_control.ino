@@ -23,19 +23,33 @@ void btnTick() {
     for (byte i = 0; i < NUM_SHOTS; i++) {    // поиск наличия рюмки
       if (!digitalRead(SW_pins[i])) {         // нашли рюмку
         servoON();
-        servo.attach(SERVO_PIN, shotPos[i]);  // едем к ней
+        servo.attach(SERVO_PIN);
+        servo.setTargetDeg(shotPos[i]);
         pumpingShot = i;
       }
     }
     if (pumpingShot == -1) return; // нет рюмок -> нет прокачки, ищем заново ^
-    delay(500); // дадим немного времени для серво
+    while (!servo.tick()); // едем к рюмке
+    delay(300); // небольшая задержка перед наливом
     pumpON(); // включаем помпу
-    while (!digitalRead(SW_pins[pumpingShot]) && !digitalRead(ENC_SW)); // пока стоит рюмка и зажат энкодер, продолжаем наливать
+    timerMinim timer100(100);
+    while (!digitalRead(SW_pins[pumpingShot]) && !digitalRead(ENC_SW)) // пока стоит рюмка и зажат энкодер, продолжаем наливать
+    {
+      if (!service) {
+        if (timer100.isReady()) {
+          volumeCount += round(100 * 50.0 / time50ml);
+          disp.displayInt(volumeCount);
+        }
+      }
+    }
     pumpOFF();
+    dispMode();
+    volumeCount = 0;
     delay(300);
-    servo.write(HOME_POS);
-    delay(300);
+    servo.setTargetDeg(0);
+    while (!servo.tick()); // едем назад в нулевое положение
     servoOFF();
+    servo.detach();
     timeoutReset();
     systemState = WAIT;
   }

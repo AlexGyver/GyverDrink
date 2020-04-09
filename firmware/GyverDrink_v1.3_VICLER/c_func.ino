@@ -2,6 +2,7 @@
 
 void serviceMode() {
   if (!digitalRead(BTN_PIN)) {
+    service = true;
     byte serviceText[] = {_S, _E, _r, _U, _i, _C, _E};
     disp.runningString(serviceText, sizeof(serviceText), 150);
     while (!digitalRead(BTN_PIN));  // ждём отпускания
@@ -60,6 +61,7 @@ void serviceMode() {
   disp.displayByte(0x00, 0x00, 0x00, 0x00);
   while (!servo.tick());
   servoOFF();
+  service = false;
 }
 
 // выводим объём и режим
@@ -123,7 +125,7 @@ void flowTick() {
           WAITtimer.reset();
           pumpOFF();                                                  // помпу выкл
           dispMode();
-          countVolume = 0;
+          volumeCount = 0;
         }
         DEBUG("take glass");
         DEBUG(i);
@@ -194,10 +196,10 @@ void flowRoutnie() {
     }
 
   } else if (systemState == PUMPING) {                    // если качаем
-    dispMode(countVolume += 20 * msVolume);
+    dispMode(volumeCount += volumeTick);
     if (FLOWtimer.isReady()) {                            // если налили (таймер)
       pumpOFF();                                          // помпа выкл
-      countVolume = 0;
+      volumeCount = 0;
       dispMode();
       delay(300);
       shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов

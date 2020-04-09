@@ -111,10 +111,11 @@ enum {NO_GLASS, EMPTY, IN_PROCESS, READY} shotStates[NUM_SHOTS];
 enum {SEARCH, MOVING, WAIT, PUMPING} systemState;
 bool workMode = 0;  // 0 manual, 1 auto
 uint8_t thisVolume = 50;
-float msVolume = 50.0 / time50ml;
-float countVolume = 0;
+float volumeTick = 20.0f * 50.0f / time50ml;
+float volumeCount = 0.0f;
 bool systemON = false;
 bool timeoutState = false;
+bool service = true;
 
 // =========== МАКРО ===========
 #define servoON() digitalWrite(SERVO_POWER, 1)
