@@ -54,7 +54,7 @@ const byte shotPos[] = {0, 45, 90, 135, 180};
 #define PARKING_POS 90       // положение парковочной позиции в градусах
 
 // время заполнения 50 мл
-const long time50ml = 5500;
+const long time50ml = 5000;
 
 #define KEEP_POWER OFF    // ON - система поддержания питания ПБ, чтобы он не спал
 
@@ -116,7 +116,7 @@ StepMot stepper(STEPS_PER_REVOLUTION * MICROSTEPS, STEPPER_STEP, STEPPER_DIR, ST
 #define ORANGE mHEX(0xFF4000)
 #define MIN_COLOR 64  // ORANGE mWHEEL
 #define MAX_COLOR 765 // AQUA mWHEEL
-#define COLOR_DIFF (MAX_COLOR - MIN_COLOR)
+#define COLOR_SCALE (MAX_COLOR - MIN_COLOR)
 
 buttonMinim btn(BTN_PIN);
 buttonMinim encBtn(ENC_SW);
@@ -143,7 +143,6 @@ bool systemON = false;
 bool timeoutState = false;
 bool volumeChanged = false;
 bool parking = true;
-bool homing = false;
 bool service = false;
 
 // =========== МАКРО ===========
@@ -157,11 +156,7 @@ bool service = false;
 #endif
 
 #ifdef STEPPER_ENDSTOP
-#if (STEPPER_ENDSTOP_INVERT == 1)
-#define ENDSTOP_STATUS !digitalRead(STEPPER_ENDSTOP)
-#else 
-#define ENDSTOP_STATUS digitalRead(STEPPER_ENDSTOP)
-#endif
+#define ENDSTOP_STATUS !digitalRead(STEPPER_ENDSTOP) ^ STEPPER_ENDSTOP_INVERT
 #endif
 
 #ifdef VALVE_PIN
@@ -170,4 +165,4 @@ bool service = false;
 #define drinkSelect(x)
 #endif
 
-#define HeadLED leds[NUM_SHOTS] //strip.setLED(NUM_SHOTS, x); strip.show()
+#define HeadLED leds[NUM_SHOTS]

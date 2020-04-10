@@ -41,42 +41,32 @@ void setup() {
 #else
   pinMode(STEPPER_ENDSTOP, INPUT_PULLUP);
 #endif
-  stepper.enable();
-  stepper.setRPM(5);
-  stepper.rotate(CCW);
-  HeadLED = ORANGE;
-  while (ENDSTOP_STATUS && stepper.update()); // двигаемся пока не сработал концевик
-  stepper.resetPos();
-  stepper.setRPM(STEPPER_SPEED);
-  if(PARKING_POS != 0){
-   stepper.setAngle(PARKING_POS);
-   while(stepper.update()); 
+  while (homing());   // двигаемся пока не сработал концевик
+  if (PARKING_POS != 0) {
+    stepper.setAngle(PARKING_POS);
+    while (stepper.update());
   }
-#else 
+#else
   stepper.setRPM(STEPPER_SPEED);
   stepper.resetPos(PARKING_POS);
 #endif
   stepper.disable();
 
   // animation
-  timerMinim durationTimer(5110); //5110
-  timerMinim timer20(20);
-  timerMinim timer60(60);
-  while (!durationTimer.isReady()) {
-    if (timer20.isReady()) {
-      static byte counter = 0;
-      strip.setBrightness(counter);
+  timerMinim LedColorTimer(20);
+  timerMinim DispFrameTimer(100);
+  uint8_t _brightness = 255;
+  while (_brightness) {
+    if (LedColorTimer.isReady()) {
       for (byte i = 0; i < NUM_SHOTS + 1; i++) {
-        leds[i] = mHSV(counter + i * (255 / NUM_SHOTS + 1), 255, 255);
+        leds[i] = mHSV(_brightness + i * (255 / NUM_SHOTS + 1), 255, _brightness);
       }
-      strip.setBrightness(255 - counter);
+      _brightness--;
       strip.show();
-      counter++;
+      if (DispFrameTimer.isReady()) showAnimation(2);
     }
-    if (timer60.isReady()) showAnimation(6);
   }
   strip.clear();
-  strip.setBrightness(255);
   HeadLED = WHITE;
 
   serviceMode();    // калибровка

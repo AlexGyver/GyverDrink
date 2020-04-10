@@ -59,7 +59,7 @@ void serviceMode() {
 #ifdef STEPPER_ENDSTOP
     stepper.setRPM(5);
     stepper.rotate(CCW);
-    while (ENDSTOP_STATUS && stepper.update()); // двигаемся пока не сработал концевик
+    while (!ENDSTOP_STATUS && stepper.update()); // двигаемся пока не сработал концевик
     stepper.resetPos();
     stepper.setRPM(STEPPER_SPEED);
     stepper.setAngle(PARKING_POS);
@@ -180,7 +180,6 @@ void flowRoutnie() {
           stepper.enable();
           stepper.setAngle(shotPos[curPumping]);          // задаём цель
           parking = false;
-          homing = false;
           HeadLED = ORANGE;
           LEDchanged = true;
           DEBUG("GO!");
@@ -220,7 +219,7 @@ void flowRoutnie() {
 
   } else if (systemState == PUMPING) {                    // если качаем
     dispNum(volumeCount += volumeTick);
-    int colorCount = MIN_COLOR + volumeCount * COLOR_DIFF / thisVolume;
+    int colorCount = MIN_COLOR + volumeCount * COLOR_SCALE / thisVolume;
     strip.setLED(curPumping, mWHEEL(colorCount));
     LEDchanged = true;
 
@@ -239,18 +238,6 @@ void flowRoutnie() {
       DEBUG("search");
     }
   }
-}
-
-
-void headBreathing() {
-  static uint8_t i = 255;
-  static int8_t dir = -1;
-
-  i += dir;
-  if(i == 0 || dir*i == 255) dir *= -1;
-
-  strip.setBrightness(i);
-  strip.show();
 }
 
 // отрисовка светодиодов по флагу (100мс)
@@ -312,6 +299,34 @@ void jerkServo() {
     delay(200);
     stepper.disable();
   }
+}
+
+bool homing(){
+  if(ENDSTOP_STATUS){
+    stepper.setRPM(STEPPER_SPEED);
+    stepper.resetPos();
+    return 0;
+  }
+  stepper.enable();
+  stepper.setRPM(5);
+  stepper.rotate(CCW);
+  stepper.update();
+  return 1;
+}
+
+void rainbowFlow(){
+  
+}
+
+void headBreathing() {
+  static uint8_t i = 255;
+  static int8_t dir = -1;
+
+  i += dir;
+  if(i == 0 || dir*i == 255) dir *= -1;
+
+  strip.setBrightness(i);
+  strip.show();
 }
 
 void showAnimation(byte mode) {
