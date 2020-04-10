@@ -18,19 +18,24 @@ void btnTick() {
     workMode = !workMode;
     dispMode();
   }
-  if (encBtn.holded()) {
+  if (encBtn.holding()) {
     int8_t pumpingShot = -1;
-    for (byte i = 0; i < NUM_SHOTS; i++) {    // поиск наличия рюмки
-      if (!digitalRead(SW_pins[i])) {         // нашли рюмку
-        servoON();
-        servo.attach(SERVO_PIN);
-        servo.setTargetDeg(shotPos[i]);
-        pumpingShot = i;
+    if (!workMode) {
+      for (byte i = 0; i < NUM_SHOTS; i++) {    // поиск наличия рюмки
+        if (!digitalRead(SW_pins[i])) {         // нашли рюмку
+          servoON();
+          servo.attach(SERVO_PIN);
+          servo.setTargetDeg(shotPos[i]);
+          pumpingShot = i;
+        }
       }
+      if (pumpingShot == -1) return; // нет рюмок -> нет прокачки, ищем заново ^
+      while (!servo.tick()); // едем к рюмке
+      delay(300); // небольшая задержка перед наливом
     }
-    if (pumpingShot == -1) return; // нет рюмок -> нет прокачки, ищем заново ^
-    while (!servo.tick()); // едем к рюмке
-    delay(300); // небольшая задержка перед наливом
+    else if(systemState != PUMPING) return;
+    else pumpingShot = curPumping;
+
     pumpON(); // включаем помпу
     timerMinim timer100(100);
     while (!digitalRead(SW_pins[pumpingShot]) && !digitalRead(ENC_SW)) // пока стоит рюмка и зажат энкодер, продолжаем наливать
