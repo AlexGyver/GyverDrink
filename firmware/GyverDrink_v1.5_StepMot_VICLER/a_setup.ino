@@ -13,7 +13,7 @@ void setup() {
   // тыкаем ленту
   strip.clear();
   strip.show();
-  strip.setBrightness(255);
+  strip.setBrightness(130);
   DEBUG("strip init");
 
   // настройка пинов
@@ -34,40 +34,34 @@ void setup() {
   stepper.autoPower(STEPPER_POWERSAFE);
   stepper.invertDir(INVERT_STEPPER);
   stepper.setBacklash(STEPER_BACKLASH);
-  stepper.setMode(ABSOLUTE);
-#ifdef STEPPER_ENDSTOP
-#if (STEPPER_ENDSTOP_INVERT == 1)
-  pinMode(STEPPER_ENDSTOP, INPUT);
-#else
-  pinMode(STEPPER_ENDSTOP, INPUT_PULLUP);
-#endif
-  while (homing());   // двигаемся пока не сработал концевик
-  if (PARKING_POS != 0) {
-    stepper.setAngle(PARKING_POS);
-    while (stepper.update());
-  }
-#else
   stepper.setRPM(STEPPER_SPEED);
-  stepper.resetPos(PARKING_POS);
+  stepper.setMode(ABSOLUTE);
+  
+#ifdef STEPPER_ENDSTOP
+  if(STEPPER_ENDSTOP_INVERT == 0) pinMode(STEPPER_ENDSTOP, INPUT_PULLUP);
 #endif
+
+  while (rainbowFadeFlow(100, 65)) {
+    stepper.update();
+#ifdef STEPPER_ENDSTOP
+    if (!parking) {
+      if(!homing()) {
+        stepper.setRPM(10);
+        stepper.setAngle(PARKING_POS);
+        parking = true;
+      }
+    }
+#else
+    stepper.resetPos(PARKING_POS);
+#endif
+    showAnimation(2, 50);
+  }
+  stepper.setRPM(STEPPER_SPEED);
   stepper.disable();
 
-  // animation
-  timerMinim LedColorTimer(20);
-  timerMinim DispFrameTimer(100);
-  uint8_t _brightness = 255;
-  while (_brightness) {
-    if (LedColorTimer.isReady()) {
-      for (byte i = 0; i < NUM_SHOTS + 1; i++) {
-        leds[i] = mHSV(_brightness + i * (255 / NUM_SHOTS + 1), 255, _brightness);
-      }
-      _brightness--;
-      strip.show();
-      if (DispFrameTimer.isReady()) showAnimation(2);
-    }
-  }
   strip.clear();
   HeadLED = WHITE;
+  strip.show();
 
   serviceMode();    // калибровка
   dispMode();       // выводим на дисплей стандартные значения

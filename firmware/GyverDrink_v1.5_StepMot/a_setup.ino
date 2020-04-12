@@ -30,6 +30,7 @@ void setup() {
   // настройка шагового двигателя
   stepper.autoPower(STEPPER_POWERSAFE);
   stepper.invertDir(INVERT_STEPPER);
+  stepper.setBacklash(STEPER_BACKLASH);
   stepper.setMode(ABSOLUTE);
 #ifdef STEPPER_ENDSTOP
 #if (STEPPER_ENDSTOP_INVERT == 1)
@@ -37,13 +38,14 @@ void setup() {
 #else
   pinMode(STEPPER_ENDSTOP, INPUT_PULLUP);
 #endif
-  stepper.enable();
-  stepper.setRPM(STEPPER_SPEED / 2);
-  stepper.rotate(CCW);
-  while (ENDSTOP_STATUS && stepper.update()) {} // двигаемся пока не сработал концевик
-  stepper.resetPos();
-  stepper.disable();
+  while (homing());   // двигаемся пока не сработал концевик
+  stepper.setAngle(PARKING_POS);
+  while (stepper.update());
+#else
+  stepper.setRPM(STEPPER_SPEED);
+  stepper.resetPos(PARKING_POS);
 #endif
+  stepper.disable();
   
 
 

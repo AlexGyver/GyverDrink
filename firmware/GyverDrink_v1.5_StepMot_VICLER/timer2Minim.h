@@ -5,7 +5,7 @@
 class timerMinim
 {
   public:
-    timerMinim(uint32_t interval);				// объявление таймера с указанием интервала
+    timerMinim(uint32_t interval = 0);				// объявление таймера с указанием интервала
     void setInterval(uint32_t interval);	// установка интервала работы таймера
     boolean isReady();                    // возвращает true, когда пришло время. Сбрасывается в false сам (AUTO) или вручную (MANUAL)
     void reset();							            // ручной сброс таймера на установленный интервал
@@ -15,12 +15,12 @@ class timerMinim
   private:
     uint32_t _timer = 0;
     uint32_t _interval = 0;
-    bool _status = true;
+    bool _stop = 0;
 };
 
-timerMinim::timerMinim(uint32_t interval) {
+timerMinim::timerMinim(uint32_t interval = 0) {
   _interval = interval;
-  _timer = millis();
+  //_timer = millis();
 }
 
 void timerMinim::setInterval(uint32_t interval) {
@@ -28,28 +28,25 @@ void timerMinim::setInterval(uint32_t interval) {
 }
 
 void timerMinim::start() {
-  if(!_status) {
-    _status = true;
+  if (_stop) {
+    _stop = 0;
     _timer = millis();
   }
 }
 
 void timerMinim::stop() {
-  _status = false;
+  _stop = 1;
 }
 
 // алгоритм таймера v2.0
 boolean timerMinim::isReady() {
-  uint32_t thisMls = millis();
-  if (_status && thisMls - _timer >= _interval) {
-    do {
-      _timer += _interval;
-      if (_timer < _interval) break;          // переполнение uint32_t
-    } while (_timer < thisMls - _interval);  // защита от пропуска шага
+  if (_stop) return 0;
+  if (millis() - _timer >= _interval) {
+    _timer = millis();
+    if (_timer < _interval) return false;          // переполнение uint32_t
     return true;
-  } else {
-    return false;
   }
+  return false;
 }
 
 void timerMinim::reset() {

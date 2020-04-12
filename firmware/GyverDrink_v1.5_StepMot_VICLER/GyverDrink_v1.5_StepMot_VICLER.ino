@@ -121,12 +121,11 @@ StepMot stepper(STEPS_PER_REVOLUTION * MICROSTEPS, STEPPER_STEP, STEPPER_DIR, ST
 buttonMinim btn(BTN_PIN);
 buttonMinim encBtn(ENC_SW);
 timerMinim LEDtimer(50);
-timerMinim FLOWdebounce(50);
+timerMinim FLOWdebounce(20);
 timerMinim FLOWtimer(2000);
 timerMinim WAITtimer(500);
 timerMinim TIMEOUTtimer(5000);   // таймаут дёргания приводом
 timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
-timerMinim HeadLEDtimer(10);
 
 bool LEDchanged = false;
 bool pumping = false;
@@ -137,13 +136,14 @@ enum {SEARCH, MOVING, WAIT, PUMPING} systemState;
 bool workMode = 0;  // 0 manual, 1 auto
 uint8_t thisVolume = 50;
 //uint8_t thisVolume_2 = 50;
-float volumeTick = 50.0f * 50.0f / time50ml;
+float volumeTick = 20.0f * 50.0f / time50ml;  // volume per one FLOWdebouce timer tick
 float volumeCount = 0.0f;
 bool systemON = false;
 bool timeoutState = false;
 bool volumeChanged = false;
-bool parking = true;
-bool service = false;
+bool parking = false;
+bool rainbow = false;
+bool towerLight = false;
 
 // =========== МАКРО ===========
 #define pumpON() digitalWrite(PUMP_POWER, 1)

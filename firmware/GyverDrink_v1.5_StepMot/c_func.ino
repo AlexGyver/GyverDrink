@@ -55,11 +55,7 @@ void serviceMode() {
     }
     disp.clear();
 #ifdef STEPPER_ENDSTOP
-    stepper.setRPM(STEPPER_SPEED / 2);
-    stepper.rotate(CCW);
-    while (ENDSTOP_STATUS && stepper.update()); // двигаемся пока не сработал концевик
-    stepper.resetPos();
-    stepper.setRPM(STEPPER_SPEED);
+    while (homing());
     stepper.setAngle(PARKING_POS);
     while (stepper.update());
 #else
@@ -233,4 +229,17 @@ void jerkServo() {
     stepper.disable();
     disp.brightness(1);
   }
+}
+
+bool homing() {
+  if (ENDSTOP_STATUS) {
+    stepper.setRPM(STEPPER_SPEED);
+    stepper.resetPos();
+    return 0;
+  }
+  stepper.enable();
+  stepper.setRPM(5);
+  stepper.rotate(CCW);
+  stepper.update();
+  return 1;
 }

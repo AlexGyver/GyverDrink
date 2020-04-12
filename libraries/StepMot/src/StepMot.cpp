@@ -84,6 +84,7 @@ void StepMot::setAngle(float newAngle) {
 
   if (newAngle > _lastAngle) StepMot::setDir(CW);
   if (newAngle < _lastAngle) StepMot::setDir(CCW);
+  if (newAngle == _lastAngle) return;
 
   if (_dir == CW)
   {
