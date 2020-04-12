@@ -250,6 +250,7 @@ void timeoutTick() {
       jerkServo();
     } else {
       disp.displayByte(0x00, 0x00, 0x00, 0x00);
+      disp.point(false);
     }
   }
 }
