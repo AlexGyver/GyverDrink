@@ -91,12 +91,14 @@ void dispNum(uint16_t num) {
 // наливайка, опрос кнопок
 void flowTick() {
   if (FLOWdebounce.isReady()) {
+    static uint8_t shotCount = 0;
     for (byte i = 0; i < NUM_SHOTS; i++) {
       if (!digitalRead(SW_pins[i]) && shotStates[i] == NO_GLASS) {  // поставили пустую рюмку
         timeoutReset();                                             // сброс таймаута
         shotStates[i] = EMPTY;                                      // флаг на заправку
         strip.setLED(i, mCOLOR(ORANGE));                               // подсветили
         LEDchanged = true;
+        shotCount++;
         DEBUG("set glass");
         DEBUG(i);
       }
@@ -113,9 +115,17 @@ void flowTick() {
         }
         volumeCount = 0;
         dispMode();
+        shotCount--;
         DEBUG("take glass");
         DEBUG(i);
       }
+    }
+    if (shotCount == 0) {                                          // если нет ни одной рюмки 
+      TIMEOUTtimer.start();
+      rainbow = false;
+    }
+    else {
+      TIMEOUTtimer.stop();
     }
 
     if (workMode) {         // авто
@@ -159,6 +169,7 @@ void flowRoutnie() {
         systemON = false;                                     // выключили систему
         parking = true;                                       // уже на месте!
         DEBUG("parked!");
+        rainbow = true;
       }
       else {                                              // если же в ручном режиме:
         servoON();                                          // включаем серво и паркуемся
@@ -169,6 +180,7 @@ void flowRoutnie() {
           systemON = false;                                 // выключили систему
           parking = true;                                   // на месте!
           DEBUG("no glass");
+          rainbow = true;
         }
       }
     }
@@ -221,6 +233,7 @@ void LEDtick() {
     LEDchanged = false;
     strip.show();
   }
+  if(rainbow) rainbowFlow(255);
 }
 
 // сброс таймаута
@@ -265,6 +278,19 @@ void jerkServo() {
     servo.detach();
     servoOFF();
     disp.brightness(1);
+  }
+}
+
+void rainbowFlow(uint8_t Brightness) {
+  static timerMinim timer(100);
+  static uint8_t count = 180;
+  if (timer.isReady()) {
+    for (byte i = 0; i < NUM_SHOTS; i++) {
+      if (shotStates[i] == READY)
+        leds[i] = mHSV(count + i * (255 / NUM_SHOTS), 255, Brightness);
+    }
+    count -= 2;
+    strip.show();
   }
 }
 

@@ -23,6 +23,7 @@
    - убраны буквы для отображения режима (если автоматический - горит двоеточие)
    - объём на дисплее отображается по центру
    - плавный цветовой переход во время налива (от ORANGE до AQUA)
+   - динамическая подсветка налитых рюмок
    - анимация приветствия
 */
 
@@ -116,6 +117,7 @@ float volumeCount = 0.0f;
 bool systemON = false;
 bool timeoutState = false;
 bool parking = true;
+bool rainbow = false;
 
 // =========== МАКРО ===========
 #define servoON() digitalWrite(SERVO_POWER, 1)
