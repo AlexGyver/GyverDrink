@@ -13,7 +13,7 @@ void setup() {
   // тыкаем ленту
   strip.clear();
   strip.show();
-  strip.setBrightness(130);
+  strip.setBrightness(255);
   DEBUG("strip init");
 
   // настройка пинов

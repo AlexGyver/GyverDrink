@@ -201,7 +201,7 @@ void flowRoutnie() {
         HeadLED = WHITE;
         strip.show();
         parking = 1;
-//        rainbow = true;                                   // радужная подсветка наполненных рюмок
+        rainbow = true;                                   // радужная подсветка наполненных рюмок
         DEBUG("parked!");
       }
     }
@@ -211,7 +211,7 @@ void flowRoutnie() {
   } else if (systemState == MOVING) {                    // движение к рюмке
     if (stepper.ready()) {                               // если приехали
       systemState = PUMPING;                             // режим - наливание
-//      delay(300);
+      delay(300);
       FLOWtimer.setInterval((long)thisVolume * time50ml / 50);  // перенастроили таймер
       FLOWtimer.reset();                                 // сброс таймера
       pumpON();                                          // НАЛИВАЙ!
@@ -353,14 +353,14 @@ bool rainbowFadeFlow(uint8_t startBrightness, uint32_t period) {
 }
 
 void rainbowFlow(uint8_t Brightness) {
-  static timerMinim timer(100);
+  static timerMinim timer(50);
   static uint8_t count = 0;
   if (timer.isReady()) {
     for (byte i = 0; i < NUM_SHOTS + 1; i++) {
       if (shotStates[i] == READY)
         leds[i] = mHSV(count + i * (255 / NUM_SHOTS + 1), 255, Brightness);
     }
-    count += 2;
+    count++;
     strip.show();
   }
 }
