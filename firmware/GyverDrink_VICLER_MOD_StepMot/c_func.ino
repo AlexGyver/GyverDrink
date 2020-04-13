@@ -1,4 +1,4 @@
- // различные функции
+// различные функции
 
 void serviceMode() {
   if (!digitalRead(BTN_PIN)) {
@@ -54,7 +54,7 @@ void serviceMode() {
       if (btn.holded()) break;
     }
     disp.clear();
-    HeadLED = ORANGE;
+    HeadLED = mCOLOR(ORANGE);
     strip.show();
 #ifdef STEPPER_ENDSTOP
     while (homing()); // двигаемся пока не сработал концевик
@@ -72,22 +72,8 @@ void serviceMode() {
 
 // выводим объём и режим
 void dispMode() {
-  if (thisVolume < 100) {
-    disp.displayByte(0, 0x00);
-    disp.display(1, thisVolume / 10);
-    disp.display(2, thisVolume % 10);
-    disp.displayByte(3, 0x00);
-  }
-  else {
-    disp.display(0, thisVolume / 100);
-    disp.display(1, (thisVolume % 100) / 10);
-    disp.display(2, thisVolume % 10);
-    disp.displayByte(3, 0x00);
-  }
-
-  if (workMode) {
-    disp.point(true);
-  }
+  dispNum(thisVolume);
+  if (workMode) disp.point(true);
   else {
     disp.point(false);
     pumpOFF();
@@ -96,7 +82,7 @@ void dispMode() {
 
 void dispNum(int num) {
   static int lastNum = 0;
-  if(num == lastNum) return;
+  if (num == lastNum) return;
   lastNum = num;
   if (num < 100) {
     disp.displayByte(0, 0x00);
@@ -121,7 +107,7 @@ void flowTick() {
       if (swState && shotStates[i] == NO_GLASS) {                   // поставили пустую рюмку
         timeoutReset();                                             // сброс таймаута
         shotStates[i] = EMPTY;                                      // флаг на заправку
-        strip.setLED(i, ORANGE);                                    // подсветили
+        strip.setLED(i, mCOLOR(ORANGE));                                    // подсветили
         LEDchanged = true;
         shotCount += 1;
         DEBUG("set glass");
@@ -137,7 +123,6 @@ void flowTick() {
           systemState = WAIT;                                       // режим работы - ждать
           WAITtimer.reset();
           pumpOFF();                                                // помпу выкл
-          //dispMode();
         }
         dispMode();
         shotCount -= 1;
@@ -145,11 +130,19 @@ void flowTick() {
         DEBUG(i);
         volumeCount = 0;
       }
+      if (shotStates[i] == READY) {
+        rainbowFlow(1, i);
+      }
+      else {
+        rainbowFlow(0, i);
+      }
     }
-    if (shotCount == 0) {                                          // если нет ни одной рюмки 
+    if (shotCount == 0) {                                          // если нет ни одной рюмки
       TIMEOUTtimer.start();
-      rainbow = false;
-      towerLight = false;
+      if(timeoutState) {
+        LEDbreathing = false;
+        HeadLED = mCOLOR(WHITE);
+      }
     }
     else {
       TIMEOUTtimer.stop();
@@ -182,7 +175,7 @@ void flowRoutnie() {
           stepper.enable();
           stepper.setAngle(shotPos[curPumping]);          // задаём цель
           parking = false;
-          HeadLED = ORANGE;
+          HeadLED = mCOLOR(ORANGE);
           strip.show();
           DEBUG("GO!");
         }
@@ -193,32 +186,30 @@ void flowRoutnie() {
     }
     if (noGlass && !parking) {                            // если не нашли ни одной пустой рюмки
       stepper.setAngle(PARKING_POS);                      // цель -> домашнее положение
-      HeadLED = ORANGE;
+      HeadLED = mCOLOR(ORANGE);
       LEDchanged = true;
       if (stepper.ready()) {                              // приехали
         stepper.disable();                                // выключили шаговик
         systemON = false;                                 // выключили систему
-        HeadLED = WHITE;
-        strip.show();
         parking = 1;
-        rainbow = true;                                   // радужная подсветка наполненных рюмок
+        LEDbreathing = true;
+        LEDchanged = true;
         DEBUG("parked!");
       }
     }
-    else if (!workMode && noGlass)                       // если в ручном режиме, припаркованны и нет рюмок - отключаемся нахрен
+    else if (!workMode && noGlass)                       // если в ручном режиме, припаркованны и нет пустых рюмок - отключаемся нахрен
       systemON = false;
 
   } else if (systemState == MOVING) {                    // движение к рюмке
     if (stepper.ready()) {                               // если приехали
-      systemState = PUMPING;                             // режим - наливание
-      delay(300);
-      FLOWtimer.setInterval((long)thisVolume * time50ml / 50);  // перенастроили таймер
-      FLOWtimer.reset();                                 // сброс таймера
-      pumpON();                                          // НАЛИВАЙ!
-      volumeCount = 0;
-      strip.setLED(curPumping, mCOLOR(YELLOW));
       HeadLED = WHITE;
       strip.show();
+      delay(300);
+      systemState = PUMPING;                             // режим - наливание
+      FLOWtimer.setInterval((long)thisVolume * time50ml / 50);  // перенастроили таймер
+      FLOWtimer.reset();                                 // сброс таймера
+      volumeCount = 0;
+      pumpON();                                          // НАЛИВАЙ!
       DEBUG("fill glass");
       DEBUG(curPumping);
     }
@@ -229,12 +220,10 @@ void flowRoutnie() {
     int colorCount = MIN_COLOR + volumeCount * COLOR_SCALE / thisVolume;
     strip.setLED(curPumping, mWHEEL(colorCount));
     LEDchanged = true;
-    
+
     if (FLOWtimer.isReady()) {                            // если налили (таймер)
       pumpOFF();                                          // помпа выкл
       shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
-      strip.setLED(curPumping, mCOLOR(AQUA));
-      strip.show();
       curPumping = -1;                                    // снимаем выбор рюмки
       systemState = WAIT;                                 // режим работы - ждать
       WAITtimer.reset();
@@ -253,10 +242,9 @@ void flowRoutnie() {
 void LEDtick() {
   if (LEDchanged && LEDtimer.isReady()) {
     LEDchanged = false;
+    breathing(LEDbreathing, NUM_SHOTS, timeoutState);
     strip.show();
   }
-  if (rainbow)  rainbowFlow(130);
-  if (towerLight) towerBreathing(10);
 }
 
 // сброс таймаута
@@ -265,10 +253,10 @@ void timeoutReset() {
     disp.brightness(7);
     dispMode();
   }
-  towerLight = false;
   HeadLED = WHITE;
+  LEDbreathing = false;
   LEDchanged = true;
-  
+
   timeoutState = true;
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
@@ -281,6 +269,7 @@ void timeoutTick() {
     DEBUG("timeout");
     timeoutState = false;
     disp.brightness(0);
+    LEDbreathing = true;
     LEDchanged = true;
     POWEROFFtimer.reset();
     jerkServo();
@@ -288,7 +277,6 @@ void timeoutTick() {
       volumeChanged = false;
       EEPROM.put(0, thisVolume);
     }
-    towerLight = true;
   }
 
   // дёргаем питание серво, это приводит к скачку тока и powerbank не отключает систему
@@ -318,25 +306,35 @@ bool homing() {
     return 0;
   }
   stepper.enable();
-  stepper.setRPM(5);
-  stepper.rotate(CCW);
-  stepper.update();
+  stepper.setRPM(-5);
+  stepper.rotate();
   return 1;
 }
 #endif
 
 
-void towerBreathing(uint8_t period) {
-  static timerMinim timer(period);
-  static uint8_t i = 127;
-  static int8_t dir = -1;
-
-  if (timer.isReady()) {
-    i += dir;
-    if (i == 0 || dir * i == 127) dir *= -1;
-    leds[NUM_SHOTS] = mHSV(255, 0, i);
-    strip.show();
+void breathing(bool _state, uint8_t _shotNum, bool mode) {
+  static short _brightness = 255;
+  static int8_t _dir = -1;
+  if (!_state) {
+    _brightness = 255;
+    _dir = -1;
+    return;
   }
+  _brightness += _dir*10;
+  if(_brightness < 0){
+    _brightness = 0;
+    _dir = 1;
+  }
+  else if(_brightness > 255){
+    _brightness = 255;
+    _dir = -1;
+  }
+  if(mode) leds[NUM_SHOTS] = mHSV(130, 255, _brightness);
+  else     leds[NUM_SHOTS] = mHSV(255, 0, _brightness);
+  
+  LEDchanged = true;
+  DEBUG(_brightness);
 }
 
 bool rainbowFadeFlow(uint8_t startBrightness, uint32_t period) {
@@ -352,17 +350,15 @@ bool rainbowFadeFlow(uint8_t startBrightness, uint32_t period) {
   return (count) ? 1 : 0;
 }
 
-void rainbowFlow(uint8_t Brightness) {
-  static timerMinim timer(50);
-  static uint8_t count = 0;
-  if (timer.isReady()) {
-    for (byte i = 0; i < NUM_SHOTS + 1; i++) {
-      if (shotStates[i] == READY)
-        leds[i] = mHSV(count + i * (255 / NUM_SHOTS + 1), 255, Brightness);
-    }
-    count++;
-    strip.show();
+void rainbowFlow(bool _state, uint8_t _shotNum) {
+  static byte count[NUM_SHOTS] = {130};
+  if (!_state) {
+    count[_shotNum] = 130;
+    return;
   }
+  leds[_shotNum] = mHSV(count[_shotNum], 255, 255);
+  count[_shotNum] += 1;
+  LEDchanged = true;
 }
 
 void showAnimation(byte mode, uint8_t period) {

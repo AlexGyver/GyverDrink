@@ -54,7 +54,7 @@ void setup() {
 #else
     stepper.resetPos(PARKING_POS);
 #endif
-    showAnimation(2, 50);
+    showAnimation(2, 60);
   }
   stepper.setRPM(STEPPER_SPEED);
   stepper.disable();

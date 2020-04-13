@@ -28,16 +28,17 @@ void setup() {
   // настройка серво
   servoON();
   servo.attach(SERVO_PIN, PARKING_POS);
-  delay(800);
+  delay(500);
   servo.setCurrentDeg(PARKING_POS);
   servo.setSpeed(50);
   servo.setAccel(0.6);
+  servo.detach();
   servoOFF();
-  if(INVERSE_SERVO) for(byte i = 0; i < NUM_SHOTS / 2; i++){
-    byte temp = shotPos[i];
-    shotPos[i] = shotPos[NUM_SHOTS - 1 -i];
-    shotPos[NUM_SHOTS -1 -i] = temp;
-  }
+//  if(INVERSE_SERVO) for(byte i = 0; i < NUM_SHOTS / 2; i++){
+//    byte temp = shotPos[i];
+//    shotPos[i] = shotPos[NUM_SHOTS - 1 -i];
+//    shotPos[NUM_SHOTS -1 -i] = temp;
+//  }
 
   // animation
   timerMinim rainbowSpeed(20);

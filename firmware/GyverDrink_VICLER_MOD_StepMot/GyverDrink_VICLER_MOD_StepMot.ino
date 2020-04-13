@@ -32,8 +32,22 @@
    Версия 1.5:
    - Добавлена инверсия сервопривода (ОБНОВИТЕ БИБЛИОТЕКУ ИЗ АРХИВА)
 
-   Версия 1.5 by VICLER
-   - для шагового двигателя с драйвером типа StepStick
+   VICLER_MOD_StepMot
+   - шаговый двигатель с драйвером типа StepStick вместо серво
+   - возможность работы как с концевым датчиком для нулевой позиции двигателя (для этого укажите пин STEPPER_ENDSTOP)
+      так и без него, установив нулевую позицию вручную (закоментируйте STEPPER_ENDSTOP)
+   - компенсация люфта шагового двигателя в градусах STEPER_BACKLASH
+   - возможность установить парковочную позицию PARKING_POS
+   - прокачка над любой рюмкой. Прокачка проводится только в ручном режиме и только при наличии рюмки
+   - шаг изменения объёма 1мл
+   - вывод налитого объёма в реальном времени. Так же и во время прокачки (сброс после снятия рюмки)
+   - убраны буквы для отображения режима (если автоматический - горит двоеточие)
+   - объём на дисплее отображается по центру
+   - плавный цветовой переход во время налива (от ORANGE до AQUA)
+   - динамическая подсветка налитых рюмок
+   - анимация приветствия
+   - дополнительный светодиод в башне. При движении мотора горит оранжевым, при остановке - белым. 
+      После налития всех рюмок "дышит" бирюзовым, во время простоя - белым
 */
 
 // ======== НАСТРОЙКИ ========
@@ -113,8 +127,7 @@ GyverTM1637 disp(DISP_CLK, DISP_DIO);
 encMinim enc(ENC_CLK, ENC_DT, ENC_SW, 1, 1);      // пин clk, пин dt, пин sw, направление (0/1), тип (0/1)
 StepMot stepper(STEPS_PER_REVOLUTION * MICROSTEPS, STEPPER_STEP, STEPPER_DIR, STEPPER_EN);
 
-#define ORANGE mHEX(0xFF4000)
-#define MIN_COLOR 64  // ORANGE mWHEEL
+#define MIN_COLOR 48  // ORANGE mWHEEL
 #define MAX_COLOR 765 // AQUA mWHEEL
 #define COLOR_SCALE (MAX_COLOR - MIN_COLOR)
 
@@ -142,8 +155,7 @@ bool systemON = false;
 bool timeoutState = false;
 bool volumeChanged = false;
 bool parking = false;
-bool rainbow = false;
-bool towerLight = false;
+bool LEDbreathing = false;
 
 // =========== МАКРО ===========
 #define pumpON() digitalWrite(PUMP_POWER, 1)

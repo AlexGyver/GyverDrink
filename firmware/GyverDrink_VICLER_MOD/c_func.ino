@@ -7,6 +7,7 @@ void serviceMode() {
     while (!digitalRead(BTN_PIN));  // ждём отпускания
     delay(200);
     servoON();
+    servo.attach();
     int servoPos = PARKING_POS;
     long pumpTime = 0;
     timerMinim timer100(100);
@@ -58,6 +59,7 @@ void serviceMode() {
     disp.clear();
     while (!servo.tick());
     servoOFF();
+    servo.detach();
   }
 }
 
@@ -119,10 +121,15 @@ void flowTick() {
         DEBUG("take glass");
         DEBUG(i);
       }
+      if (shotStates[i] == READY) {
+        rainbowFlow(1, i);
+      }
+      else {
+        rainbowFlow(0, i);
+      }
     }
-    if (shotCount == 0) {                                          // если нет ни одной рюмки 
+    if (shotCount == 0) {                                          // если нет ни одной рюмки
       TIMEOUTtimer.start();
-      rainbow = false;
     }
     else {
       TIMEOUTtimer.stop();
@@ -154,6 +161,7 @@ void flowRoutnie() {
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
         if (shotPos[i] != servo.getCurrentDeg()) {        // включаем серво только если целевая позиция не совпадает с текущей
           servoON();                                      // вкл питание серво
+          servo.attach();
           servo.setTargetDeg(shotPos[curPumping]);        // задаём цель
           parking = false;
         }
@@ -166,21 +174,22 @@ void flowRoutnie() {
     if (noGlass && !parking) {                            // если не нашли ни одной пустой рюмки и не припаркованны
       if (workMode) {                                       // если в авто режиме:
         servoOFF();                                           // выключили серво
+        servo.detach();
         systemON = false;                                     // выключили систему
         parking = true;                                       // уже на месте!
         DEBUG("parked!");
-        rainbow = true;
       }
       else {                                              // если же в ручном режиме:
         servoON();                                          // включаем серво и паркуемся
+        servo.attach();
         servo.setTargetDeg(PARKING_POS);
 
         if (servo.tick()) {                                 // едем до упора
           servoOFF();                                       // выключили серво
+          servo.detach();
           systemON = false;                                 // выключили систему
           parking = true;                                   // на месте!
           DEBUG("no glass");
-          rainbow = true;
         }
       }
     }
@@ -190,14 +199,13 @@ void flowRoutnie() {
   } else if (systemState == MOVING) {                     // движение к рюмке
     if (servo.tick()) {                                   // если приехали
       servoOFF();                                         // отключаем сервопривод
+      servo.detach();
       systemState = PUMPING;                              // режим - наливание
       delay(300);
       FLOWtimer.setInterval((long)thisVolume * time50ml / 50);  // перенастроили таймер
       FLOWtimer.reset();                                  // сброс таймера
       pumpON();                                           // НАЛИВАЙ!
       volumeCount = 0;
-      //strip.setLED(curPumping, mCOLOR(OLIVE));            // зажгли цвет
-      //strip.show();
       DEBUG("fill glass");
       DEBUG(curPumping);
     }
@@ -212,8 +220,6 @@ void flowRoutnie() {
       pumpOFF();                                          // помпа выкл
       dispMode();
       shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
-      //strip.setLED(curPumping, mCOLOR(AQUA));             // подсветили
-      //strip.show();
       curPumping = -1;                                    // снимаем выбор рюмки
       systemState = WAIT;                                 // режим работы - ждать
       WAITtimer.reset();
@@ -233,7 +239,6 @@ void LEDtick() {
     LEDchanged = false;
     strip.show();
   }
-  if(rainbow) rainbowFlow(255);
 }
 
 // сброс таймаута
@@ -252,6 +257,7 @@ void timeoutTick() {
     timeoutState = false;
     disp.brightness(1);
     servoOFF();
+    servo.detach();
     systemON = false;
     POWEROFFtimer.reset();
     jerkServo();
@@ -281,17 +287,15 @@ void jerkServo() {
   }
 }
 
-void rainbowFlow(uint8_t Brightness) {
-  static timerMinim timer(100);
-  static uint8_t count = 180;
-  if (timer.isReady()) {
-    for (byte i = 0; i < NUM_SHOTS; i++) {
-      if (shotStates[i] == READY)
-        leds[i] = mHSV(count + i * (255 / NUM_SHOTS), 255, Brightness);
-    }
-    count -= 2;
-    strip.show();
+void rainbowFlow(bool _state, uint8_t _shotNum) {
+  static byte count[NUM_SHOTS] = {130};
+  if (!_state) {
+    count[_shotNum] = 130;
+    return;
   }
+  leds[_shotNum] = mHSV(count[_shotNum], 255, 255);
+  count[_shotNum] += 1;
+  LEDchanged = true;
 }
 
 void showAnimation(byte mode) {
