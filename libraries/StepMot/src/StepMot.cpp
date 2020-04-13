@@ -112,7 +112,9 @@ void StepMot::rotate()
 }
 
 float StepMot::getAngle() {
-    return _currentAngle = _currentSteps * _anglePerStep;
+  if(_backlash && _dir == CW)
+    return _currentAngle = _currentSteps * _anglePerStep - _backlash;
+  else return _currentAngle = _currentSteps * _anglePerStep;
 }
 
 void StepMot::resetPos(float pos = 0.0) {
