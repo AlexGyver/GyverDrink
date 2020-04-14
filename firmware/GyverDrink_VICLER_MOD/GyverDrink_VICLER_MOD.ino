@@ -26,6 +26,7 @@
    - плавный цветовой переход во время налива (от ORANGE до AQUA)
    - динамическая подсветка налитых рюмок
    - анимация приветствия
+   - после выхода из сервис режима, калибровка объёма сохраняется в постоянной памяти
 */
 
 // ======== НАСТРОЙКИ ========
@@ -39,7 +40,7 @@ byte shotPos[] = {0, 45, 90, 135, 180};
 #define PARKING_POS 90       // угол для домашней позиции
 
 // время заполнения 50 мл
-const long time50ml = 5000;
+#define TIME_50ML 5100
 
 #define KEEP_POWER 0    // 1 - система поддержания питания ПБ, чтобы он не спал
 
@@ -96,12 +97,11 @@ buttonMinim encBtn(ENC_SW);
 timerMinim LEDtimer(50);
 timerMinim FLOWdebounce(20);
 timerMinim FLOWtimer(2000);
-timerMinim WAITtimer(300);
+timerMinim WAITtimer(500);
 timerMinim TIMEOUTtimer(10000);   // таймаут дёргания приводом
 timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
-timerMinim delayTimer(1000);
 
-#define MIN_COLOR 47                          // ORANGE mWHEEL
+#define MIN_COLOR 48                          // ORANGE mWHEEL
 #define MAX_COLOR 765                         // AQUA mWHEEL
 #define COLOR_SCALE (MAX_COLOR - MIN_COLOR)   // фактор для плавного изменения цвета во время налива
 
@@ -112,6 +112,7 @@ int8_t curPumping = -1;
 enum {NO_GLASS, EMPTY, IN_PROCESS, READY} shotStates[NUM_SHOTS];
 enum {SEARCH, MOVING, WAIT, PUMPING} systemState;
 bool workMode = 0;  // 0 manual, 1 auto
+uint16_t time50ml;
 uint8_t thisVolume = 50;
 float volumeTick = 20.0f * 50.0f / time50ml;
 float volumeCount = 0.0f;

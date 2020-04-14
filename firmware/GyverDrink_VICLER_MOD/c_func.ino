@@ -60,6 +60,12 @@ void serviceMode() {
     while (!servo.tick());
     servoOFF();
     servo.detach();
+    if (pumpTime > 0) {
+      time50ml = pumpTime;
+      volumeTick = 20.0f * 50.0f / time50ml;
+      EEPROM.write(500, 47);
+      EEPROM.put(10, pumpTime);
+    }
   }
 }
 

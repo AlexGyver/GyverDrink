@@ -10,6 +10,12 @@ void setup() {
   }
   EEPROM.get(0, thisVolume);
 
+  if (EEPROM.read(500) == 47) {
+    EEPROM.get(10, time50ml);
+    volumeTick = 20.0f * 50.0f / time50ml;
+  }
+  else time50ml = TIME_50ML;
+
   // тыкаем ленту
   strip.setBrightness(255);
   strip.clear();
@@ -41,17 +47,17 @@ void setup() {
   }
 
   // animation
-  timerMinim rainbowSpeed(20);
-  timerMinim timer50(50);
+  timerMinim nextColor(20);
+  timerMinim nextFrame(50);
   uint8_t startBrightness = 255;
   while (startBrightness) {
-    if (rainbowSpeed.isReady()) {
+    if (nextColor.isReady()) {
       for (byte i = 0; i < NUM_SHOTS; i++)
         leds[i] = mHSV(startBrightness + i * (255 / NUM_SHOTS), 255, startBrightness);
       startBrightness--;
       strip.show();
     }
-    if (timer50.isReady()) showAnimation(2);
+    if (nextFrame.isReady()) showAnimation(2);
   }
   strip.clear();
 
