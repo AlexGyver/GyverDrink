@@ -334,7 +334,6 @@ void breathing(bool _state, uint8_t _shotNum, bool mode) {
   else     leds[NUM_SHOTS] = mHSV(255, 0, _brightness);
   
   LEDchanged = true;
-  DEBUG(_brightness);
 }
 
 bool rainbowFadeFlow(uint8_t startBrightness, uint32_t period) {

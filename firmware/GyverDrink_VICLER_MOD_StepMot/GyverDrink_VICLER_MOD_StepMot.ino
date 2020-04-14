@@ -81,13 +81,13 @@ const long time50ml = 5000;
 #define VALVE_PIN       1
 #define DISP_DIO        2
 #define DISP_CLK        3
-#define BTN_PIN         10
+#define BTN_PIN         4
 #define LED_PIN         5
 #define STEPPER_STEP    6
 #define STEPPER_DIR     7
 #define STEPPER_EN      8
 #define STEPPER_ENDSTOP 9
-#define ENC_SW          4
+#define ENC_SW          10 
 #define ENC_DT          14
 #define ENC_CLK         16
 const byte SW_pins[] = {15, 18, 19, 20, 21};
