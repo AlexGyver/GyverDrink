@@ -149,7 +149,7 @@ enum {NO_GLASS, EMPTY, IN_PROCESS, READY} shotStates[NUM_SHOTS];
 enum {SEARCH, MOVING, WAIT, PUMPING} systemState;
 bool workMode = 0;  // 0 manual, 1 auto
 uint16_t time50ml;
-uint8_t thisVolume = 50;
+uint8_t thisVolume = 47;
 float volumeTick = 20.0f * 50.0f / time50ml;  // volume per one FLOWdebouce timer tick
 float volumeCount = 0.0f;
 bool systemON = false;
