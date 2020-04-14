@@ -9,6 +9,7 @@
   v 1.3 - ready() function for separating update() from main loop
   v 1.4 - invert direction fix, small bugfixes and stability improvements
   v 1.5 - add backlash compensation. Set direction with rpm (positive -> CW, negative -> CCW)
+  v 1.6 - bugfixes
   by VICLER
 */
 

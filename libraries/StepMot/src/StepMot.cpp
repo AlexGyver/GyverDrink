@@ -121,6 +121,7 @@ void StepMot::resetPos(float pos = 0.0) {
   _currentAngle = pos;
   _currentSteps = pos * _stepsPerAngle;
   _targetSteps = 0;
+  _lastAngle = 0;
   _ready = 1;
 }
 
