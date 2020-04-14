@@ -15,7 +15,7 @@ class timerMinim
   private:
     uint32_t _timer = 0;
     uint32_t _interval = 0;
-    bool _status = true;
+    bool _stop = false;
 };
 
 timerMinim::timerMinim(uint32_t interval) {
@@ -28,18 +28,22 @@ void timerMinim::setInterval(uint32_t interval) {
 }
 
 void timerMinim::start() {
-  _status = true;
-  _timer = millis();
+  if (_stop) {
+    _stop = false;
+    _timer = millis();
+  }
 }
 
 void timerMinim::stop() {
-  _status = false;
+  _stop = true;
 }
 
 // алгоритм таймера v2.0
 boolean timerMinim::isReady() {
+  if(_stop) return 0;
+  
   uint32_t thisMls = millis();
-  if (_status && thisMls - _timer >= _interval) {
+  if (thisMls - _timer >= _interval) {
     do {
       _timer += _interval;
       if (_timer < _interval) break;          // переполнение uint32_t

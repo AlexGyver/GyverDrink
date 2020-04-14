@@ -48,6 +48,7 @@
    - анимация приветствия
    - дополнительный светодиод в башне. При движении мотора горит оранжевым, при остановке - белым. 
       После налития всех рюмок "дышит" бирюзовым, во время простоя - белым. Подключается к светодиоду последней рюмки
+   - после выхода из сервис режима, калибровка объёма сохраняется в постоянной памяти
 */
 
 // ======== НАСТРОЙКИ ========
@@ -68,7 +69,7 @@ const byte shotPos[] = {0, 45, 90, 135, 180};
 #define PARKING_POS 90       // положение парковочной позиции в градусах
 
 // время заполнения 50 мл
-const long time50ml = 5000;
+#define TIME_50ML 5100
 
 #define KEEP_POWER OFF    // ON - система поддержания питания ПБ, чтобы он не спал
 
@@ -147,14 +148,15 @@ int8_t curPumping = -1;
 enum {NO_GLASS, EMPTY, IN_PROCESS, READY} shotStates[NUM_SHOTS];
 enum {SEARCH, MOVING, WAIT, PUMPING} systemState;
 bool workMode = 0;  // 0 manual, 1 auto
+uint16_t time50ml;
 uint8_t thisVolume = 50;
-//uint8_t thisVolume_2 = 50;
 float volumeTick = 20.0f * 50.0f / time50ml;  // volume per one FLOWdebouce timer tick
 float volumeCount = 0.0f;
 bool systemON = false;
 bool timeoutState = false;
 bool volumeChanged = false;
 bool parking = false;
+bool atHome = false;
 bool LEDbreathing = false;
 
 // =========== МАКРО ===========

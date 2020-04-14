@@ -30,10 +30,10 @@ void btnTick() {
     if (pumpingShot == -1) return;
     while (stepper.update());
     delay(300);
-    timerMinim timer100(100);
+    timerMinim timer(100);
     pumpON();
     while (!digitalRead(SW_pins[pumpingShot]) && !digitalRead(ENC_SW)) {
-      if (timer100.isReady()) {
+      if (timer.isReady()) {
         volumeCount += round(100 * 50.0 / time50ml);
         dispNum(volumeCount);
         strip.setLED(pumpingShot, mWHEEL( (int)(volumeCount*10 + MIN_COLOR) % 1530) );

@@ -9,7 +9,8 @@ void serviceMode() {
     stepper.autoPower(OFF);
     stepper.enable();
     int stepperPos = PARKING_POS;
-    long pumpTime = 0;
+    atHome = false;
+    uint16_t pumpTime = 0;
     timerMinim timer100(100);
     dispNum(PARKING_POS);
     bool flag;
@@ -34,9 +35,11 @@ void serviceMode() {
         for (byte i = 0; i < NUM_SHOTS; i++) {
           if (!digitalRead(SW_pins[i])) {
             strip.setLED(i, mCOLOR(GREEN));
+            dispNum(i);
           } else {
             strip.setLED(i, mCOLOR(BLACK));
           }
+
           strip.show();
         }
       }
@@ -53,11 +56,11 @@ void serviceMode() {
 
       if (btn.holded()) break;
     }
-    disp.clear();
+    disp.displayByte(0x00, 0x00, 0x00, 0x00);
     HeadLED = mCOLOR(ORANGE);
     strip.show();
 #ifdef STEPPER_ENDSTOP
-    while (homing()); // двигаемся пока не сработал концевик
+    while (homing());   // двигаемся пока не сработал концевик
     stepper.setAngle(PARKING_POS);
     while (stepper.update());
 #else
@@ -67,6 +70,13 @@ void serviceMode() {
     stepper.disable();
     stepper.autoPower(STEPPER_POWERSAFE);
     HeadLED = WHITE;
+
+    if (pumpTime > 0) {
+      time50ml = pumpTime;
+      volumeTick = 20.0f * 50.0f / time50ml;
+      EEPROM.write(500, 47);
+      EEPROM.put(10, pumpTime);
+    }
   }
 }
 
@@ -139,7 +149,7 @@ void flowTick() {
     }
     if (shotCount == 0) {                                          // если нет ни одной рюмки
       TIMEOUTtimer.start();
-      if(timeoutState) {
+      if (timeoutState) {
         LEDbreathing = false;
         HeadLED = mCOLOR(WHITE);
       }
@@ -208,8 +218,8 @@ void flowRoutnie() {
       systemState = PUMPING;                             // режим - наливание
       FLOWtimer.setInterval((long)thisVolume * time50ml / 50);  // перенастроили таймер
       FLOWtimer.reset();                                 // сброс таймера
-      volumeCount = 0;
       pumpON();                                          // НАЛИВАЙ!
+      volumeCount = 0;
       DEBUG("fill glass");
       DEBUG(curPumping);
     }
@@ -300,14 +310,19 @@ void jerkServo() {
 
 #ifdef STEPPER_ENDSTOP
 bool homing() {
+  if (atHome) return 0;
+
   if (ENDSTOP_STATUS) {
     stepper.setRPM(STEPPER_SPEED);
     stepper.resetPos();
+    atHome = true;
+    DEBUG("at Home");
     return 0;
   }
   stepper.enable();
   stepper.setRPM(-5);
   stepper.rotate();
+  stepper.update();
   return 1;
 }
 #endif
@@ -321,18 +336,18 @@ void breathing(bool _state, uint8_t _shotNum, bool mode) {
     _dir = -1;
     return;
   }
-  _brightness += _dir*10;
-  if(_brightness < 0){
+  _brightness += _dir * 10;
+  if (_brightness < 0) {
     _brightness = 0;
     _dir = 1;
   }
-  else if(_brightness > 255){
+  else if (_brightness > 255) {
     _brightness = 255;
     _dir = -1;
   }
-  if(mode) leds[NUM_SHOTS] = mHSV(130, 255, _brightness);
+  if (mode) leds[NUM_SHOTS] = mHSV(130, 255, _brightness);
   else     leds[NUM_SHOTS] = mHSV(255, 0, _brightness);
-  
+
   LEDchanged = true;
 }
 
