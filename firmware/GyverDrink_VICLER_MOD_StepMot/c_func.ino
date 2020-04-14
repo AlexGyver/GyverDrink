@@ -96,7 +96,8 @@ void dispNum(int num) {
   lastNum = num;
   if (num < 100) {
     disp.displayByte(0, 0x00);
-    disp.display(1, num / 10);
+    if(num < 10) disp.displayByte(1, 0x00);
+    else disp.display(1, num / 10);
     disp.display(2, num % 10);
     disp.displayByte(3, 0x00);
   }
