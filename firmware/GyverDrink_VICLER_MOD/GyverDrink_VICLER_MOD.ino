@@ -40,7 +40,7 @@ byte shotPos[] = {0, 45, 90, 135, 180};
 #define PARKING_POS 90       // угол для домашней позиции
 
 // время заполнения 50 мл
-#define TIME_50ML 5100
+#define TIME_50ML 5000
 
 #define KEEP_POWER 0    // 1 - система поддержания питания ПБ, чтобы он не спал
 
@@ -112,7 +112,7 @@ int8_t curPumping = -1;
 enum {NO_GLASS, EMPTY, IN_PROCESS, READY} shotStates[NUM_SHOTS];
 enum {SEARCH, MOVING, WAIT, PUMPING} systemState;
 bool workMode = 0;  // 0 manual, 1 auto
-uint16_t time50ml;
+uint16_t time50ml = 0;
 uint8_t thisVolume = 47;
 float volumeTick = 20.0f * 50.0f / time50ml;
 float volumeCount = 0.0f;

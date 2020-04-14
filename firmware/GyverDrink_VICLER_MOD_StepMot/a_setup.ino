@@ -10,11 +10,13 @@ void setup() {
   }
   EEPROM.get(0, thisVolume);
 
-  if (EEPROM.read(500) == 47) {
-    EEPROM.get(10, time50ml);
-    volumeTick = 20.0f * 50.0f / time50ml;
+  if (EEPROM.read(500) != 47) {
+    EEPROM.write(500, 47);
+    EEPROM.put(10, TIME_50ML);
   }
-  else time50ml = TIME_50ML;
+  EEPROM.get(10, time50ml);
+  volumeTick = 20.0f * 50.0f / time50ml;
+
 
   // тыкаем ленту
   strip.clear();
@@ -49,10 +51,10 @@ void setup() {
 
   while (rainbowFadeFlow(100, 65)) {
 #ifdef STEPPER_ENDSTOP
-    if (!homing() && !parking){
+    if (!homing() && !parking) {
       stepper.setRPM(10);
       stepper.setAngle(PARKING_POS);
-      if(!stepper.update()) {
+      if (!stepper.update()) {
         parking = true;
         DEBUG("parked!");
       }
