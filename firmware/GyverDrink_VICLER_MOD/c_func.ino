@@ -302,8 +302,8 @@ void timeoutTick() {
     if (!POWEROFFtimer.isReady()) {   // пока не сработал таймер полного отключения
       jerkServo();
     } else {
-      disp.displayByte(0x00, 0x00, 0x00, 0x00);
-      disp.point(false);
+      //disp.displayByte(0x00, 0x00, 0x00, 0x00);
+      //disp.point(false);
     }
   }
 }
