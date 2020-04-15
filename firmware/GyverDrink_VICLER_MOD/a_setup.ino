@@ -4,8 +4,8 @@ void setup() {
   DEBUG("start");
 #endif
   // епром
-  if (EEPROM.read(1000) != 10) {
-    EEPROM.write(1000, 10);
+  if (EEPROM.read(1000) != 47) {
+    EEPROM.write(1000, 47);
     EEPROM.put(0, thisVolume);
   }
   EEPROM.get(0, thisVolume);

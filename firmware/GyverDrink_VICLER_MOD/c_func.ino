@@ -31,7 +31,6 @@ void serviceMode() {
         }
 
         // зажигаем светодиоды от кнопок
-
         for (byte i = 0; i < NUM_SHOTS; i++) {
           if (!digitalRead(SW_pins[i]) && shotStates[i] != EMPTY) {
             strip.setLED(i, mCOLOR(WHITE));
@@ -48,8 +47,7 @@ void serviceMode() {
         }
       }
 
-      if (enc.isTurn()) {
-        // крутим серво от энкодера
+      if (enc.isTurn()) {   // крутим серво от энкодера
         pumpTime = 0;
         if (enc.isLeft()) servoPos += 1;
         if (enc.isRight())  servoPos -= 1;
@@ -72,13 +70,15 @@ void serviceMode() {
     while (!servo.tick());
     servoOFF();
     servo.detach();
+    
+    // сохраняем настройки таймера налива
     if (pumpTime > 0) {
       time50ml = pumpTime;
       volumeTick = 20.0f * 50.0f / time50ml;
       EEPROM.write(1001, 47);
       EEPROM.put(10, pumpTime);
     }
-
+    // сохраняем значения углов в память
     EEPROM.write(1002, 47);
     for (byte i = 0; i < NUM_SHOTS; i++)  EEPROM.write(100 + i, shotPos[i]);
   }
