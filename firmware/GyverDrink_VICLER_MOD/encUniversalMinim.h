@@ -31,8 +31,8 @@ encMinim::encMinim(uint8_t clk, uint8_t dt, uint8_t sw, boolean dir, boolean typ
   }
   _sw = sw;
   _type = type;
-  pinMode (_clk, INPUT);
-  pinMode (_dt, INPUT);
+  pinMode (_clk, INPUT_PULLUP);
+  pinMode (_dt, INPUT_PULLUP);
   pinMode (_sw, INPUT_PULLUP);
   _lastState = digitalRead(_clk);
 }
