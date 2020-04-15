@@ -21,6 +21,7 @@ void btnTick() {
   if (encBtn.holding()) {
     if (workMode) return;
     int8_t pumpingShot = -1;
+    if (!timeoutState) disp.brightness(7);
 
     for (byte i = 0; i < NUM_SHOTS; i++) {    // поиск наличия рюмки
       if (!digitalRead(SW_pins[i])) {         // нашли рюмку
@@ -51,7 +52,6 @@ void btnTick() {
     servo.setTargetDeg(PARKING_POS);
     while (!servo.tick()); // едем назад в нулевое положение
     servoOFF();
-    systemState = WAIT;
     timeoutReset();
   }
 }

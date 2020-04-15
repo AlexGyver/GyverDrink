@@ -280,7 +280,6 @@ void timeoutReset() {
   timeoutState = true;
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
-  dispMode();
   DEBUG("timeout reset");
 }
 

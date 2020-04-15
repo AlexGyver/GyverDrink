@@ -282,7 +282,6 @@ void LEDtick() {
 void timeoutReset() {
   if (!timeoutState) {
     disp.brightness(7);
-    dispMode();
   }
   HeadLED = WHITE;
   LEDbreathing = false;
