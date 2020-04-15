@@ -74,7 +74,7 @@ void serviceMode() {
     // сохраняем настройки таймера налива
     if (pumpTime > 0) {
       time50ml = pumpTime;
-      volumeTick = 20.0f * 50.0f / time50ml;
+      volumeTick = 15.0f * 50.0f / time50ml;
       EEPROM.write(1001, 47);
       EEPROM.put(10, pumpTime);
     }

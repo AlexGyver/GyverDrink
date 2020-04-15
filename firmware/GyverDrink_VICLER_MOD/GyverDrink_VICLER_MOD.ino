@@ -27,7 +27,7 @@
    - динамическая подсветка налитых рюмок
    - анимация приветствия
    - после выхода из сервис режима, калибровка объёма сохраняется в постоянной памяти
-   - в сервис режиме при наличии рюмки на дисплее отображается номер рюмки (начиная с 1) и градус серво для этой рюмки.
+   - в сервис режиме при наличии рюмки на дисплее отображается номер рюмки (начиная с 1) и положение крана для этой рюмки в градусах.
       Чтобы изменить положение крана над определённой рюмкой нужно поставить рюмку, подстроить угол энкодером и убрать рюмку.
       После выхода из сервисного режима зажатием кнопки энкодера, все углы сохранятся в постоянной памяти.
 */
@@ -98,7 +98,7 @@ encMinim enc(ENC_CLK, ENC_DT, ENC_SW, 1, 1);  // пин clk, пин dt, пин s
 buttonMinim btn(BTN_PIN);
 buttonMinim encBtn(ENC_SW);
 timerMinim LEDtimer(50);
-timerMinim FLOWdebounce(20);
+timerMinim FLOWdebounce(15);
 timerMinim FLOWtimer(2000);
 timerMinim WAITtimer(500);
 timerMinim TIMEOUTtimer(10000);   // таймаут дёргания приводом
@@ -117,7 +117,7 @@ enum {SEARCH, MOVING, WAIT, PUMPING} systemState;
 bool workMode = 0;  // 0 manual, 1 auto
 uint16_t time50ml = 0;
 uint8_t thisVolume = 47;
-float volumeTick = 20.0f * 50.0f / time50ml;
+float volumeTick = 15.0f * 50.0f / time50ml;
 float volumeCount = 0.0f;
 bool systemON = false;
 bool timeoutState = false;
