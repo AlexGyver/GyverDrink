@@ -10,14 +10,21 @@ void setup() {
   }
   EEPROM.get(0, thisVolume);
 
-  if (EEPROM.read(500) != 47) {
-    EEPROM.write(500, 47);
+  if (EEPROM.read(1001) != 47) {
+    EEPROM.write(1001, 47);
     EEPROM.put(10, TIME_50ML);
   }
   EEPROM.get(10, time50ml);
   volumeTick = 20.0f * 50.0f / time50ml;
 
-  
+  if (EEPROM.read(1002) != 47) {
+    EEPROM.write(1002, 47);
+    for (byte i = 0; i < NUM_SHOTS; i++)
+      EEPROM.write(100 + i, shotPos[i]);
+  }
+  for (byte i = 0; i < NUM_SHOTS; i++)
+    EEPROM.get(100 + i, shotPos[i]);
+
 
   // тыкаем ленту
   strip.setBrightness(255);
@@ -33,7 +40,7 @@ void setup() {
   pinMode(PUMP_POWER, 1);
   pinMode(SERVO_POWER, 1);
   for (byte i = 0; i < NUM_SHOTS; i++)  pinMode(SW_pins[i], INPUT_PULLUP);
-  
+
   // настройка серво
   servoON();
   servo.attach(SERVO_PIN, PARKING_POS);
@@ -43,11 +50,11 @@ void setup() {
   servo.setAccel(0.6);
   servo.detach();
   servoOFF();
-  if(INVERSE_SERVO) for(byte i = 0; i < NUM_SHOTS / 2; i++){
-    byte temp = shotPos[i];
-    shotPos[i] = shotPos[NUM_SHOTS - 1 -i];
-    shotPos[NUM_SHOTS -1 -i] = temp;
-  }
+  if (INVERSE_SERVO) for (byte i = 0; i < NUM_SHOTS / 2; i++) {
+      byte temp = shotPos[i];
+      shotPos[i] = shotPos[NUM_SHOTS - 1 - i];
+      shotPos[NUM_SHOTS - 1 - i] = temp;
+    }
 
   // animation
   timerMinim nextColor(20);

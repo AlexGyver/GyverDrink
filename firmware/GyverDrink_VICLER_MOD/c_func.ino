@@ -15,6 +15,7 @@ void serviceMode() {
     bool flag;
     while (1) {
       enc.tick();
+      static int currShot = -1;
 
       if (timer100.isReady()) {   // период 100 мс
         // работа помпы со счётчиком
@@ -30,12 +31,18 @@ void serviceMode() {
         }
 
         // зажигаем светодиоды от кнопок
+
         for (byte i = 0; i < NUM_SHOTS; i++) {
-          if (!digitalRead(SW_pins[i])) {
-            strip.setLED(i, mCOLOR(GREEN));
-            dispNum(i);
-          } else {
+          if (!digitalRead(SW_pins[i]) && shotStates[i] != EMPTY) {
+            strip.setLED(i, mCOLOR(WHITE));
+            shotStates[i] = EMPTY;
+            dispNum((i + 1) * 1000 + shotPos[i]);
+            currShot = i;
+          } else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
             strip.setLED(i, mCOLOR(BLACK));
+            shotStates[i] = NO_GLASS;
+            currShot = -1;
+            dispNum(servoPos);
           }
           strip.show();
         }
@@ -48,7 +55,12 @@ void serviceMode() {
         if (enc.isRight())  servoPos -= 1;
         servoPos = constrain(servoPos, 0, 180);
         servo.write(servoPos);
-        dispNum(servoPos);
+        servo.setCurrentDeg(servoPos);
+        if (!flag && shotStates[currShot] == EMPTY) {
+          shotPos[currShot] = servoPos;
+          dispNum((currShot + 1) * 1000 + shotPos[currShot]);
+        }
+        else if (!flag) dispNum(servoPos);
       }
 
       if (btn.holded()) {
@@ -63,9 +75,12 @@ void serviceMode() {
     if (pumpTime > 0) {
       time50ml = pumpTime;
       volumeTick = 20.0f * 50.0f / time50ml;
-      EEPROM.write(500, 47);
+      EEPROM.write(1001, 47);
       EEPROM.put(10, pumpTime);
     }
+
+    EEPROM.write(1002, 47);
+    for (byte i = 0; i < NUM_SHOTS; i++)  EEPROM.write(100 + i, shotPos[i]);
   }
 }
 
@@ -82,21 +97,29 @@ void dispMode() {
 }
 
 void dispNum(uint16_t num) {
-static int lastNum = 0;
+  static int lastNum = 0;
   if (num == lastNum) return;
   lastNum = num;
   if (num < 100) {
     disp.displayByte(0, 0x00);
-    if(num < 10) disp.displayByte(1, 0x00);
+    if (num < 10) disp.displayByte(1, 0x00);
     else disp.display(1, num / 10);
     disp.display(2, num % 10);
     disp.displayByte(3, 0x00);
   }
-  else {
+  else if (num < 1000) {
     disp.display(0, num / 100);
     disp.display(1, (num % 100) / 10);
     disp.display(2, num % 10);
     disp.displayByte(3, 0x00);
+  }
+  else {
+    disp.display(0, num / 1000);                                            // тысячные
+    if ( (num % 1000) / 100 > 0 )  disp.display(1, (num % 1000) / 100);     // сотые
+    else disp.displayByte(1, 0x00);                                   
+    if ( ((num % 100) / 10 > 0) || ((num % 1000) / 100 > 0) )  disp.display(2, (num % 100) / 10);         // десятые
+    else disp.displayByte(2, 0x00);
+    disp.display(3, num % 10);
   }
 }
 
