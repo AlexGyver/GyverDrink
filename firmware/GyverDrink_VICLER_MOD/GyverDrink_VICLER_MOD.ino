@@ -101,7 +101,7 @@ timerMinim LEDtimer(50);
 timerMinim FLOWdebounce(15);
 timerMinim FLOWtimer(2000);
 timerMinim WAITtimer(500);
-timerMinim TIMEOUTtimer(10000);   // таймаут дёргания приводом
+timerMinim TIMEOUTtimer(5000);   // таймаут дёргания приводом
 timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
 
 #define MIN_COLOR 48                          // ORANGE mWHEEL
