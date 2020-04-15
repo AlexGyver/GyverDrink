@@ -289,7 +289,7 @@ void timeoutTick() {
   if (timeoutState && TIMEOUTtimer.isReady() && systemState == SEARCH) {
     DEBUG("timeout");
     timeoutState = false;
-    disp.brightness(1);
+    disp.brightness(0);
     servoOFF();
     servo.detach();
     systemON = false;
