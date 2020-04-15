@@ -17,6 +17,7 @@ void serviceMode() {
     while (1) {
       enc.tick();
       stepper.update();
+      static int currShot = -1;
 
       if (timer100.isReady()) {   // период 100 мс
         // работа помпы со счётчиком
@@ -33,25 +34,32 @@ void serviceMode() {
 
         // зажигаем светодиоды от кнопок
         for (byte i = 0; i < NUM_SHOTS; i++) {
-          if (!digitalRead(SW_pins[i])) {
-            strip.setLED(i, mCOLOR(GREEN));
-            dispNum(i);
-          } else {
+          if (!digitalRead(SW_pins[i]) && shotStates[i] != EMPTY) {
+            strip.setLED(i, mCOLOR(WHITE));
+            shotStates[i] = EMPTY;
+            dispNum((i + 1) * 1000 + shotPos[i]);
+            currShot = i;
+          } else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
             strip.setLED(i, mCOLOR(BLACK));
+            shotStates[i] = NO_GLASS;
+            currShot = -1;
+            dispNum(stepperPos);
           }
-
           strip.show();
         }
       }
 
-      if (enc.isTurn()) {
-        // крутим серво от энкодера
+      if (enc.isTurn()) {   // крутим серво от энкодера
         pumpTime = 0;
         if (enc.isLeft()) stepperPos += 1;
         if (enc.isRight())  stepperPos -= 1;
-        stepperPos = constrain(stepperPos, 0, 360);
-        dispNum(stepperPos);
+        stepperPos = constrain(stepperPos, 0, 180);
         stepper.setAngle(stepperPos);
+        if (!flag && shotStates[currShot] == EMPTY) {
+          shotPos[currShot] = stepperPos;
+          dispNum((currShot + 1) * 1000 + shotPos[currShot]);
+        }
+        else if (!flag) dispNum(stepperPos);
       }
 
       if (btn.holded()) break;
@@ -70,13 +78,17 @@ void serviceMode() {
     stepper.disable();
     stepper.autoPower(STEPPER_POWERSAFE);
     HeadLED = WHITE;
-
+    
+    // сохраняем настройки таймера налива
     if (pumpTime > 0) {
       time50ml = pumpTime;
       volumeTick = 15.0f * 50.0f / time50ml; // volume per one FLOWdebouce timer tick
       EEPROM.write(500, 47);
       EEPROM.put(10, pumpTime);
     }
+    // сохраняем значения углов в память
+    EEPROM.write(1002, 47);
+    for (byte i = 0; i < NUM_SHOTS; i++)  EEPROM.write(100 + i, shotPos[i]);
   }
 }
 
@@ -90,22 +102,30 @@ void dispMode() {
   }
 }
 
-void dispNum(int num) {
+void dispNum(uint16_t num) {
   static int lastNum = 0;
   if (num == lastNum) return;
   lastNum = num;
   if (num < 100) {
     disp.displayByte(0, 0x00);
-    if(num < 10) disp.displayByte(1, 0x00);
+    if (num < 10) disp.displayByte(1, 0x00);
     else disp.display(1, num / 10);
     disp.display(2, num % 10);
     disp.displayByte(3, 0x00);
   }
-  else { 
+  else if (num < 1000) {
     disp.display(0, num / 100);
     disp.display(1, (num % 100) / 10);
     disp.display(2, num % 10);
     disp.displayByte(3, 0x00);
+  }
+  else {
+    disp.display(0, num / 1000);                                            // тысячные
+    if ( (num % 1000) / 100 > 0 )  disp.display(1, (num % 1000) / 100);     // сотые
+    else disp.displayByte(1, 0x00);                                   
+    if ( ((num % 100) / 10 > 0) || ((num % 1000) / 100 > 0) )  disp.display(2, (num % 100) / 10);         // десятые
+    else disp.displayByte(2, 0x00);
+    disp.display(3, num % 10);
   }
 }
 

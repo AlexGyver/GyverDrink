@@ -4,19 +4,26 @@ void setup() {
   DEBUG("start");
 #endif
   // епром
-  if (EEPROM.read(1000) != 10) {
-    EEPROM.write(1000, 10);
+  if (EEPROM.read(1000) != 47) {
+    EEPROM.write(1000, 47);
     EEPROM.put(0, thisVolume);
   }
   EEPROM.get(0, thisVolume);
 
-  if (EEPROM.read(500) != 47) {
-    EEPROM.write(500, 47);
+  if (EEPROM.read(1001) != 47) {
+    EEPROM.write(1001, 47);
     EEPROM.put(10, TIME_50ML);
   }
   EEPROM.get(10, time50ml);
   volumeTick = 15.0f * 50.0f / time50ml;
 
+  if (EEPROM.read(1002) != 47) {
+    EEPROM.write(1002, 47);
+    for (byte i = 0; i < NUM_SHOTS; i++)
+      EEPROM.write(100 + i, shotPos[i]);
+  }
+  for (byte i = 0; i < NUM_SHOTS; i++)
+    EEPROM.get(100 + i, shotPos[i]);
 
   // тыкаем ленту
   strip.clear();
