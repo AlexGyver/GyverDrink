@@ -37,8 +37,8 @@ void serviceMode() {
           if (!digitalRead(SW_pins[i]) && shotStates[i] != EMPTY) {
             strip.setLED(i, mCOLOR(WHITE));
             shotStates[i] = EMPTY;
-            dispNum((i + 1) * 1000 + shotPos[i]);
             currShot = i;
+            dispNum((i + 1) * 1000 + shotPos[i]);
           } else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
             strip.setLED(i, mCOLOR(BLACK));
             shotStates[i] = NO_GLASS;
@@ -103,7 +103,7 @@ void dispMode() {
 }
 
 void dispNum(uint16_t num) {
-  static int lastNum = 0;
+  static int lastNum = -1;
   if (num == lastNum) return;
   lastNum = num;
   if (num < 100) {

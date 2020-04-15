@@ -46,8 +46,8 @@ void setup() {
   servo.attach(SERVO_PIN, PARKING_POS);
   delay(500);
   servo.setCurrentDeg(PARKING_POS);
-  servo.setSpeed(50);
-  servo.setAccel(0.6);
+  servo.setSpeed(30);
+  servo.setAccel(0.5);
   servo.detach();
   servoOFF();
   if (INVERSE_SERVO) for (byte i = 0; i < NUM_SHOTS / 2; i++) {
