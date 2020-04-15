@@ -73,7 +73,7 @@ void serviceMode() {
 
     if (pumpTime > 0) {
       time50ml = pumpTime;
-      volumeTick = 20.0f * 50.0f / time50ml;
+      volumeTick = 15.0f * 50.0f / time50ml; // volume per one FLOWdebouce timer tick
       EEPROM.write(500, 47);
       EEPROM.put(10, pumpTime);
     }
@@ -101,7 +101,7 @@ void dispNum(int num) {
     disp.display(2, num % 10);
     disp.displayByte(3, 0x00);
   }
-  else {
+  else { 
     disp.display(0, num / 100);
     disp.display(1, (num % 100) / 10);
     disp.display(2, num % 10);

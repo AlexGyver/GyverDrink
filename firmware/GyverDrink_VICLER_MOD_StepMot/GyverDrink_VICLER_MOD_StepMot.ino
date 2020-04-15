@@ -59,7 +59,7 @@
 #define STEPPER_ENDSTOP_INVERT  0         // 1 - высокий сигнал при замыкании, 0 - низкий
 #define STEPPER_POWERSAFE 1               // энергосберегающий режим шагового двигателя
 #define INVERT_STEPPER 0                  // инвертировать направление вращения шагового двигателя
-#define STEPPER_SPEED 20                  // скорость двигателя в оборотах в минуту
+#define STEPPER_SPEED 15                   // скорость двигателя в оборотах в минуту
 #define MICROSTEPS  2                     // значение микрошага, выставленного на драйвере двигателя
 #define STEPER_BACKLASH 3.5
 
@@ -135,7 +135,7 @@ StepMot stepper(STEPS_PER_REVOLUTION * MICROSTEPS, STEPPER_STEP, STEPPER_DIR, ST
 buttonMinim btn(BTN_PIN);
 buttonMinim encBtn(ENC_SW);
 timerMinim LEDtimer(50);
-timerMinim FLOWdebounce(20);
+timerMinim FLOWdebounce(15);
 timerMinim FLOWtimer(2000);
 timerMinim WAITtimer(500);
 timerMinim TIMEOUTtimer(5000);   // таймаут дёргания приводом
@@ -150,7 +150,7 @@ enum {SEARCH, MOVING, WAIT, PUMPING} systemState;
 bool workMode = 0;  // 0 manual, 1 auto
 uint16_t time50ml = 0;
 uint8_t thisVolume = 47;
-float volumeTick = 20.0f * 50.0f / time50ml;  // volume per one FLOWdebouce timer tick
+float volumeTick = 15.0f * 50.0f / time50ml;  // volume per one FLOWdebouce timer tick
 float volumeCount = 0.0f;
 bool systemON = false;
 bool timeoutState = false;

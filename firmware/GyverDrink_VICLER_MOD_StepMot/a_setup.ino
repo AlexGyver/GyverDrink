@@ -15,7 +15,7 @@ void setup() {
     EEPROM.put(10, TIME_50ML);
   }
   EEPROM.get(10, time50ml);
-  volumeTick = 20.0f * 50.0f / time50ml;
+  volumeTick = 15.0f * 50.0f / time50ml;
 
 
   // тыкаем ленту
