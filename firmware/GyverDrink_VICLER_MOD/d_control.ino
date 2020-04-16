@@ -26,6 +26,7 @@ void btnTick() {
     for (byte i = 0; i < NUM_SHOTS; i++) {    // поиск наличия рюмки
       if (!digitalRead(SW_pins[i])) {         // нашли рюмку
         servoON();
+        servo.attach();
         servo.setTargetDeg(shotPos[i]);
         pumpingShot = i;
       }
@@ -52,6 +53,7 @@ void btnTick() {
     servo.setTargetDeg(PARKING_POS);
     while (!servo.tick()); // едем назад в нулевое положение
     servoOFF();
+    servo.detach();
     timeoutReset();
   }
 }

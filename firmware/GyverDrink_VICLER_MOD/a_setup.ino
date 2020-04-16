@@ -46,7 +46,7 @@ void setup() {
   servo.attach(SERVO_PIN, PARKING_POS);
   delay(500);
   servo.setCurrentDeg(PARKING_POS);
-  servo.setSpeed(30);
+  servo.setSpeed(50);
   servo.setAccel(0.5);
   servo.detach();
   servoOFF();
