@@ -314,8 +314,8 @@ void timeoutTick() {
     if (!POWEROFFtimer.isReady()) {   // пока не сработал таймер полного отключения
       jerkServo();
     } else {
-      disp.displayByte(0x00, 0x00, 0x00, 0x00);
-      disp.point(false);
+//      disp.displayByte(0x00, 0x00, 0x00, 0x00);
+//      disp.point(false);
     }
   }
 }
@@ -374,6 +374,7 @@ void breathing(bool _state, uint8_t _shotNum, bool mode) {
 bool rainbowFadeFlow(uint8_t startBrightness, uint32_t period) {
   static timerMinim timer(period);
   static uint8_t count = startBrightness;
+  if(!count) return 0;
   if (timer.isReady()) {
     for (byte i = 0; i < NUM_SHOTS + 1; i++) {
       leds[i] = mHSV(count + i * (255 / NUM_SHOTS + 1), 255, count);
@@ -427,5 +428,9 @@ void showAnimation(byte mode, uint8_t period) {
   else if (mode == 6) {
     if (i >= 8) i = 0;
     disp.displayByte(AnimationData_6[i++]);
+  }
+  else if (mode == 7){
+    if (i >= 12) i = 0;
+    disp.displayByte(AnimationData_7[i++]);
   }
 }

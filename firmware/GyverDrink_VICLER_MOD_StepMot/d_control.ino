@@ -19,16 +19,16 @@ void btnTick() {
     dispMode();
   }
   if (encBtn.holded()) {
-    if (!timeoutState) disp.brightness(7);
     int8_t pumpingShot = -1;
     for (byte i = 0; i < NUM_SHOTS; i++) {
       if (!digitalRead(SW_pins[i])) {
         stepper.enable();
-        stepper.setAngle(shotPos[i]);
         pumpingShot = i;
       }
     }
     if (pumpingShot == -1) return;
+    if (!timeoutState) disp.brightness(7);
+    stepper.setAngle(shotPos[pumpingShot]);
     while (stepper.update());
     delay(300);
     timerMinim timer(100);

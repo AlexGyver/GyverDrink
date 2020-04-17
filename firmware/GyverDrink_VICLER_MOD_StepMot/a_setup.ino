@@ -56,7 +56,20 @@ void setup() {
   if (STEPPER_ENDSTOP_INVERT == 0) pinMode(STEPPER_ENDSTOP, INPUT_PULLUP);
 #endif
 
-  while (rainbowFadeFlow(100, 65)) {
+/* - Стартовая анимация. Значение ANIMATION_FPS задаёт количество кадров в секунду (чем больше - тем быстрее анимация)
+ *    Всего доступно 8 видов анимации. Выбирается в ANIMATION_NUM от 0 до 7.
+ * - Радуга. Начальная яркость задаётся в RAINBOW_START_BRIGHTNESS ... (максимум 255). С этого значения яркость плавно убавляется до 0.
+ *    Частота изменения цвета зависит от RAINBOW_FPS ... (чем больше значение - тем быстрее смена цвета)
+ * - Время, за которое пройдёт приветствие (пока светодиоды не погаснут) зависит от RAINBOW_FPS и RAINBOW_START_BRIGHTNESS.
+ *    Время до полного угасания в мс = 1000 * RAINBOW_START_BRIGHTNESS / RAINBOW_FPS
+ */
+
+ #define ANIMATION_NUM 7
+ #define ANIMATION_FPS 16
+ #define RAINBOW_FPS 50
+ #define RAINBOW_START_BRIGHTNESS 250
+ 
+  while (rainbowFadeFlow(RAINBOW_START_BRIGHTNESS, 1000 / RAINBOW_FPS) || !parking) {
 #ifdef STEPPER_ENDSTOP
     if (!homing() && !parking) {
       stepper.setRPM(10);
@@ -69,7 +82,7 @@ void setup() {
 #else
     stepper.resetPos(PARKING_POS);
 #endif
-    showAnimation(2, 60);
+    showAnimation(ANIMATION_NUM, 1000 / ANIMATION_FPS);
   }
   stepper.setRPM(STEPPER_SPEED);
   stepper.disable();

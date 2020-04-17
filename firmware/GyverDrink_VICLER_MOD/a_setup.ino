@@ -56,10 +56,22 @@ void setup() {
       shotPos[NUM_SHOTS - 1 - i] = temp;
     }
 
-  // animation
-  timerMinim nextColor(20);
-  timerMinim nextFrame(50);
-  uint8_t startBrightness = 255;
+/* - Стартовая анимация. Значение ANIMATION_FPS задаёт количество кадров в секунду (чем больше - тем быстрее анимация)
+ *    Всего доступно 7 видов анимации. Выбирается в ANIMATION_NUM от 0 до 6.
+ * - Радуга. Начальная яркость задаётся в RAINBOW_START_BRIGHTNESS ... (максимум 255). С этого значения яркость плавно убавляется до 0.
+ *    Частота изменения цвета зависит от RAINBOW_FPS ... (чем больше значение - тем быстрее смена цвета)
+ * - Время, за которое пройдёт приветствие (пока светодиоды не погаснут) зависит от RAINBOW_FPS и RAINBOW_START_BRIGHTNESS.
+ *    Время до полного угасания в мс = 1000 * RAINBOW_START_BRIGHTNESS / RAINBOW_FPS
+ */
+
+ #define ANIMATION_NUM 2
+ #define ANIMATION_FPS 20
+ #define RAINBOW_FPS 50
+ #define RAINBOW_START_BRIGHTNESS 250
+ 
+  timerMinim nextFrame(1000 / ANIMATION_FPS);
+  timerMinim nextColor(1000 / RAINBOW_FPS);
+  uint8_t startBrightness = RAINBOW_START_BRIGHTNESS;
   while (startBrightness) {
     if (nextColor.isReady()) {
       for (byte i = 0; i < NUM_SHOTS; i++)
@@ -67,7 +79,7 @@ void setup() {
       startBrightness--;
       strip.show();
     }
-    if (nextFrame.isReady()) showAnimation(2);
+    if (nextFrame.isReady()) showAnimation(ANIMATION_NUM);
   }
   strip.clear();
 
