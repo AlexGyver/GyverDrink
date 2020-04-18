@@ -66,7 +66,7 @@ void setup() {
  */
 
  #define ANIMATION_NUM 7
- #define ANIMATION_FPS 16
+ #define ANIMATION_FPS 20
  #define RAINBOW_FPS 50
  #define RAINBOW_START_BRIGHTNESS 250
  
