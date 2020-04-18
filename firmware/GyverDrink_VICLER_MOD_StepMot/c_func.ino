@@ -132,7 +132,6 @@ void dispNum(uint16_t num) {
 // наливайка, опрос кнопок
 void flowTick() {
   if (FLOWdebounce.isReady()) {
-    static uint8_t shotCount = 0;
     for (byte i = 0; i < NUM_SHOTS; i++) {
       bool swState = !digitalRead(SW_pins[i]) ^ SWITCH_LEVEL;
       if (swState && shotStates[i] == NO_GLASS) {                   // поставили пустую рюмку
@@ -141,6 +140,7 @@ void flowTick() {
         strip.setLED(i, mCOLOR(ORANGE));                                    // подсветили
         LEDchanged = true;
         shotCount += 1;
+        dispNum(shotVolume[i]);
         DEBUG("set glass");
         DEBUG(i);
       }
@@ -237,7 +237,8 @@ void flowRoutnie() {
       strip.show();
       delay(300);
       systemState = PUMPING;                             // режим - наливание
-      FLOWtimer.setInterval((long)thisVolume * time50ml / 50);  // перенастроили таймер
+//      FLOWtimer.setInterval((long)thisVolume * time50ml / 50);  // перенастроили таймер
+      FLOWtimer.setInterval((long)shotVolume[curPumping] * time50ml / 50);  // перенастроили таймер
       FLOWtimer.reset();                                 // сброс таймера
       pumpON();                                          // НАЛИВАЙ!
       volumeCount = 0;
@@ -248,7 +249,8 @@ void flowRoutnie() {
   } else if (systemState == PUMPING) {                    // если качаем
     volumeCount += volumeTick;
     dispNum(round(volumeCount));
-    int colorCount = MIN_COLOR + volumeCount * COLOR_SCALE / thisVolume;
+//    int colorCount = MIN_COLOR + volumeCount * COLOR_SCALE / thisVolume;
+    int colorCount = MIN_COLOR + COLOR_SCALE * volumeCount / shotVolume[curPumping];  // расчёт цвета для текущего обьёма
     strip.setLED(curPumping, mWHEEL(colorCount));
     LEDchanged = true;
 
@@ -299,6 +301,9 @@ void timeoutTick() {
     DEBUG("timeout");
     timeoutState = false;
     disp.brightness(0);
+    dispMode();
+    for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mCOLOR(BLACK);
+    selectShot = -1;
     LEDbreathing = true;
     LEDchanged = true;
     POWEROFFtimer.reset();
