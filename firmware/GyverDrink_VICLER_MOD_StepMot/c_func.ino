@@ -304,6 +304,7 @@ void timeoutTick() {
     dispMode();
     for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mCOLOR(BLACK);
     selectShot = -1;
+    curSelected = -1;
     LEDbreathing = true;
     LEDchanged = true;
     POWEROFFtimer.reset();

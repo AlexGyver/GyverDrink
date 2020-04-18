@@ -300,6 +300,7 @@ void timeoutTick() {
     for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mCOLOR(BLACK);
     LEDchanged = true;
     selectShot = -1;
+    curSelected = -1;
     systemON = false;
     POWEROFFtimer.reset();
     jerkServo();
