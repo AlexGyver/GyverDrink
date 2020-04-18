@@ -95,9 +95,13 @@ void serviceMode() {
 // выводим объём и режим
 void dispMode() {
   dispNum(thisVolume);
-  if (workMode) disp.point(true);
+if (workMode) {
+    if(thisVolume < 100) disp.displayByte(0, 64);
+    disp.displayByte(3, 64);
+  }
   else {
-    disp.point(false);
+    if(thisVolume < 100) disp.displayByte(0, 0x00);
+    disp.displayByte(3, 0x00); 
     pumpOFF();
   }
 }
