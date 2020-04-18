@@ -36,7 +36,7 @@
 */
 
 // ======== НАСТРОЙКИ ========
-#define NUM_SHOTS 3       // количество рюмок (оно же кол-во светодиодов и кнопок!)
+#define NUM_SHOTS 5       // количество рюмок (оно же кол-во светодиодов и кнопок!)
 #define TIMEOUT_OFF 5     // таймаут на выключение (перестаёт дёргать привод), минут
 #define INVERSE_SERVO 0   // инвертировать направление вращения серво
 
@@ -51,7 +51,7 @@ byte shotPos[] = {0, 45, 90, 135, 180};
 #define KEEP_POWER 0    // 1 - система поддержания питания ПБ, чтобы он не спал
 
 // отладка
-#define DEBUG_UART 1
+#define DEBUG_UART 0
 
 #if defined(ARDUINO_AVR_MICRO)  // =========== ПИНЫ Arduino Micro ===========
 #define PUMP_POWER 4

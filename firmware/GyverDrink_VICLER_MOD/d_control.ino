@@ -19,7 +19,6 @@ void encTick() {
       dispMode();
       for(byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
     }
-    
     EEPROM.put(0, thisVolume);
   }
 }

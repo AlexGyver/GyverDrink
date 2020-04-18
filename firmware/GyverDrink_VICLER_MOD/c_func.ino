@@ -370,4 +370,8 @@ void showAnimation(byte mode) {
     if (i >= 8) i = 0;
     disp.displayByte(AnimationData_6[i++]);
   }
+  else if (mode == 7){
+    if (i >= 12) i = 0;
+    disp.displayByte(AnimationData_7[i++]);
+  }
 }

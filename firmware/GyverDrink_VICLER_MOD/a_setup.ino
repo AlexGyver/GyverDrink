@@ -65,7 +65,7 @@ void setup() {
  *    Время до полного угасания в мс = 1000 * RAINBOW_START_BRIGHTNESS / RAINBOW_FPS
  */
 
- #define ANIMATION_NUM 2
+ #define ANIMATION_NUM 7
  #define ANIMATION_FPS 20
  #define RAINBOW_FPS 50
  #define RAINBOW_START_BRIGHTNESS 250
