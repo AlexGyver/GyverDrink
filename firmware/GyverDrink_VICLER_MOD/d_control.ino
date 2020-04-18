@@ -4,10 +4,22 @@ void encTick() {
   enc.tick();
   if (enc.isTurn()) {
     timeoutReset();
-    if (enc.isLeft()) thisVolume += 1;
-    if (enc.isRight()) thisVolume -= 1;
+    if (enc.isLeft()) {
+      if (curSelected >= 0)  shotVolume[curSelected] += 1;
+      else  thisVolume += 1;
+    }
+    if (enc.isRight()) {
+      if (curSelected >= 0) shotVolume[curSelected] -= 1;
+      else thisVolume -= 1;
+    }
+    shotVolume[curSelected] = constrain(shotVolume[curSelected], 1, 200);
     thisVolume = constrain(thisVolume, 1, 200);
-    dispMode();
+    if(curSelected >= 0) dispNum(shotVolume[curSelected]);
+    else {
+      dispMode();
+      for(byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
+    }
+    
     EEPROM.put(0, thisVolume);
   }
 }
@@ -17,6 +29,21 @@ void btnTick() {
     timeoutReset();
     workMode = !workMode;
     dispMode();
+  }
+  if (encBtn.clicked()) {
+    timeoutReset();
+    selectShot++;
+    if (selectShot == NUM_SHOTS)  selectShot = -1;
+    curSelected = selectShot;
+
+    for (byte i = 0; i < NUM_SHOTS; i++) {
+      if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
+      else if (shotStates[i] == EMPTY) strip.setLED(i, mCOLOR(ORANGE));
+      else strip.setLED(i, mCOLOR(BLACK));
+    }
+    if(curSelected >= 0) dispNum(shotVolume[curSelected]);
+    else dispMode();
+    LEDchanged = true;
   }
   if (encBtn.holding()) {
     if (workMode) return;
@@ -43,7 +70,7 @@ void btnTick() {
       if (timer50.isReady()) {
         volumeCount += 50 * 50.0 / time50ml;
         dispNum(round(volumeCount));
-        strip.setLED(pumpingShot, mWHEEL( (int)(volumeCount*10 + MIN_COLOR) % 1530) );
+        strip.setLED(pumpingShot, mWHEEL( (int)(volumeCount * 10 + MIN_COLOR) % 1530) );
         strip.show();
       }
     }

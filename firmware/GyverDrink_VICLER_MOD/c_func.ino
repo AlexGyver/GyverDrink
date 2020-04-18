@@ -126,16 +126,18 @@ void dispNum(uint16_t num) {
 // наливайка, опрос кнопок
 void flowTick() {
   if (FLOWdebounce.isReady()) {
-    static uint8_t shotCount = 0;
     for (byte i = 0; i < NUM_SHOTS; i++) {
       if (!digitalRead(SW_pins[i]) && shotStates[i] == NO_GLASS) {  // поставили пустую рюмку
         timeoutReset();                                             // сброс таймаута
         shotStates[i] = EMPTY;                                      // флаг на заправку
-        strip.setLED(i, mCOLOR(ORANGE));                               // подсветили
+        strip.setLED(i, mCOLOR(ORANGE));                            // подсветили
         LEDchanged = true;
-        shotCount++;
+        shotCount++;                                                // инкрементировали счётчик пустых рюмок
+        dispNum(shotVolume[i]);
         DEBUG("set glass");
         DEBUG(i);
+        DEBUG("volume:");
+        DEBUG(shotVolume[i]);
       }
       if (digitalRead(SW_pins[i]) && shotStates[i] != NO_GLASS) {   // убрали пустую/полную рюмку
         shotStates[i] = NO_GLASS;                                   // статус - нет рюмки
@@ -149,8 +151,8 @@ void flowTick() {
           pumpOFF();                                                  // помпу выкл
         }
         volumeCount = 0;
-        dispMode();
         shotCount--;
+        dispMode();
         DEBUG("take glass");
         DEBUG(i);
       }
@@ -235,23 +237,26 @@ void flowRoutnie() {
       servo.detach();
       systemState = PUMPING;                              // режим - наливание
       delay(300);
-      FLOWtimer.setInterval((long)thisVolume * time50ml / 50);  // перенастроили таймер
+      //FLOWtimer.setInterval((long)thisVolume * time50ml / 50);  // перенастроили таймер
+      FLOWtimer.setInterval((long)shotVolume[curPumping] * time50ml / 50);  // перенастроили таймер
       FLOWtimer.reset();                                  // сброс таймера
       pumpON();                                           // НАЛИВАЙ!
       volumeCount = 0;
       DEBUG("fill glass");
       DEBUG(curPumping);
+      DEBUG((long)shotVolume[curPumping] * time50ml / 50);
     }
 
   } else if (systemState == PUMPING) {                      // если качаем
     dispNum(volumeCount += volumeTick);                     // выводим текущий объём на дисплей
-    int colorCount = MIN_COLOR + COLOR_SCALE * volumeCount / thisVolume;  // thisVolume;  // расчёт цвета для текущего обьёма
+    //int colorCount = MIN_COLOR + COLOR_SCALE * volumeCount / thisVolume;  // расчёт цвета для текущего обьёма
+    int colorCount = MIN_COLOR + COLOR_SCALE * volumeCount / shotVolume[curPumping];  // расчёт цвета для текущего обьёма
     strip.setLED(curPumping, mWHEEL(colorCount));
     LEDchanged = true;
 
     if (FLOWtimer.isReady()) {                            // если налили (таймер)
       pumpOFF();                                          // помпа выкл
-      dispMode();
+      //dispMode();
       shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
       curPumping = -1;                                    // снимаем выбор рюмки
       systemState = WAIT;                                 // режим работы - ждать
@@ -289,8 +294,12 @@ void timeoutTick() {
     DEBUG("timeout");
     timeoutState = false;
     disp.brightness(0);
+    dispMode();
     servoOFF();
     servo.detach();
+    for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mCOLOR(BLACK);
+    LEDchanged = true;
+    selectShot = -1;
     systemON = false;
     POWEROFFtimer.reset();
     jerkServo();
