@@ -5,6 +5,7 @@ void serviceMode() {
     byte serviceText[] = {_S, _E, _r, _U, _i, _C, _E};
     disp.runningString(serviceText, sizeof(serviceText), 150);
     while (!digitalRead(BTN_PIN));  // ждём отпускания
+    DEBUGln("service Mode");
     delay(200);
     servoON();
     servo.attach();
@@ -70,7 +71,7 @@ void serviceMode() {
     while (!servo.tick());
     servoOFF();
     servo.detach();
-    
+
     // сохраняем настройки таймера налива
     if (pumpTime > 0) {
       time50ml = pumpTime;
@@ -81,20 +82,31 @@ void serviceMode() {
     // сохраняем значения углов в память
     EEPROM.write(1002, 47);
     for (byte i = 0; i < NUM_SHOTS; i++)  EEPROM.write(100 + i, shotPos[i]);
+
+    DEBUG("time for 1ml: ");
+    DEBUGln(time50ml / 50);
+    DEBUG("volume per tick: ");
+    DEBUGln(volumeTick);
+    DEBUGln("shot positions:");
+    for (byte i = 0; i < NUM_SHOTS; i++) {
+      DEBUG(i);
+      DEBUG(" -> ");
+      DEBUG(shotPos[i]);
+      DEBUGln("°");
+    }
+    DEBUGln("exit service Mode");
   }
 }
 
-// выводим объём и режим
+// выводим режим
 void dispMode() {
-  dispNum(thisVolume);
   if (workMode) {
-    if(thisVolume < 100) disp.displayByte(0, 64);
+    if (thisVolume < 100) disp.displayByte(0, 64);
     disp.displayByte(3, 64);
   }
   else {
-    if(thisVolume < 100) disp.displayByte(0, 0x00);
-    disp.displayByte(3, 0x00); 
-    pumpOFF();
+    if (thisVolume < 100) disp.displayByte(0, 0x00);
+    disp.displayByte(3, 0x00);
   }
 }
 
@@ -102,23 +114,27 @@ void dispNum(uint16_t num) {
   static int lastNum = -1;
   if (num == lastNum) return;
   lastNum = num;
+
   if (num < 100) {
-    disp.displayByte(0, 0x00);
+    if (!workMode) disp.displayByte(0, 0x00);
+    else disp.displayByte(0, 0x40);
     if (num < 10) disp.displayByte(1, 0x00);
     else disp.display(1, num / 10);
     disp.display(2, num % 10);
-    disp.displayByte(3, 0x00);
+    if (!workMode) disp.displayByte(3, 0x00);
+    else disp.displayByte(3, 0x40);
   }
   else if (num < 1000) {
     disp.display(0, num / 100);
     disp.display(1, (num % 100) / 10);
     disp.display(2, num % 10);
-    disp.displayByte(3, 0x00);
+    if (!workMode) disp.displayByte(3, 0x00);
+    else disp.displayByte(3, 0x40);
   }
   else {
     disp.display(0, num / 1000);                                            // тысячные
     if ( (num % 1000) / 100 > 0 )  disp.display(1, (num % 1000) / 100);     // сотые
-    else disp.displayByte(1, 0x00);                                   
+    else disp.displayByte(1, 0x00);
     if ( ((num % 100) / 10 > 0) || ((num % 1000) / 100 > 0) )  disp.display(2, (num % 100) / 10);         // десятые
     else disp.displayByte(2, 0x00);
     disp.display(3, num % 10);
@@ -136,10 +152,10 @@ void flowTick() {
         LEDchanged = true;
         shotCount++;                                                // инкрементировали счётчик пустых рюмок
         dispNum(shotVolume[i]);
-        DEBUG("set glass");
+        DEBUG("set glass: ");
         DEBUG(i);
-        DEBUG("volume:");
-        DEBUG(shotVolume[i]);
+        DEBUG(", volume: ");
+        DEBUGln(shotVolume[i]);
       }
       if (digitalRead(SW_pins[i]) && shotStates[i] != NO_GLASS) {   // убрали пустую/полную рюмку
         shotStates[i] = NO_GLASS;                                   // статус - нет рюмки
@@ -151,12 +167,14 @@ void flowTick() {
           systemState = WAIT;                                         // режим работы - ждать
           WAITtimer.reset();
           pumpOFF();                                                  // помпу выкл
+          DEBUG("abort fill for shot: ");
+          DEBUGln(i);
         }
         volumeCount = 0;
         shotCount--;
-        dispMode();
-        DEBUG("take glass");
-        DEBUG(i);
+        dispNum(thisVolume);
+        DEBUG("take glass: ");
+        DEBUGln(i);
       }
       if (shotStates[i] == READY) {
         rainbowFlow(1, i);
@@ -190,21 +208,26 @@ void flowRoutnie() {
   if (systemState == SEARCH) {                            // если поиск рюмки
     bool noGlass = true;
     for (byte i = 0; i < NUM_SHOTS; i++) {
-      if ( *(shotStates + i) == EMPTY && i != curPumping) {    // поиск
+      if (shotStates[i] == EMPTY && i != curPumping) {    // поиск
         TIMEOUTtimer.stop();
         noGlass = false;                                  // флаг что нашли хоть одну рюмку
         curPumping = i;                                   // запоминаем выбор
         systemState = MOVING;                             // режим - движение
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
+        DEBUG("found glass: ");
+        DEBUGln(curPumping);
+        //        DEBUG("currentPos -> targetPos: ");
+        //        DEBUG(shotPos[i]);
+        //        DEBUG(" -> ");
+        //DEBUGln(servo.getCurrentDeg());
         if (shotPos[i] != servo.getCurrentDeg()) {        // включаем серво только если целевая позиция не совпадает с текущей
           servoON();                                      // вкл питание серво
           servo.attach();
           servo.setTargetDeg(shotPos[curPumping]);        // задаём цель
           parking = false;
+          DEBUG("moving to shot: ");
+          DEBUGln(i);
         }
-
-        DEBUG("found glass");
-        DEBUG(curPumping);
         break;
       }
     }
@@ -214,7 +237,7 @@ void flowRoutnie() {
         servo.detach();
         systemON = false;                                     // выключили систему
         parking = true;                                       // уже на месте!
-        DEBUG("parked!");
+        DEBUGln("parked!");
       }
       else {                                              // если же в ручном режиме:
         servoON();                                          // включаем серво и паркуемся
@@ -226,9 +249,10 @@ void flowRoutnie() {
           servo.detach();
           systemON = false;                                 // выключили систему
           parking = true;                                   // на месте!
-          DEBUG("no glass");
+          DEBUGln("parked!");
         }
       }
+      dispNum(thisVolume);
     }
     else if (!workMode && noGlass)                        // если в ручном режиме, припаркованны и нет рюмок - отключаемся нахрен
       systemON = false;
@@ -244,9 +268,11 @@ void flowRoutnie() {
       FLOWtimer.reset();                                  // сброс таймера
       pumpON();                                           // НАЛИВАЙ!
       volumeCount = 0;
-      DEBUG("fill glass");
+      DEBUG("fill glass: ");
       DEBUG(curPumping);
-      DEBUG((long)shotVolume[curPumping] * time50ml / 50);
+      DEBUG(" for ");
+      DEBUG(FLOWtimer.getInterval());
+      DEBUGln("ms");
     }
 
   } else if (systemState == PUMPING) {                      // если качаем
@@ -258,17 +284,16 @@ void flowRoutnie() {
 
     if (FLOWtimer.isReady()) {                            // если налили (таймер)
       pumpOFF();                                          // помпа выкл
-      //dispMode();
       shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
       curPumping = -1;                                    // снимаем выбор рюмки
       systemState = WAIT;                                 // режим работы - ждать
       WAITtimer.reset();
-      DEBUG("wait");
+      DEBUGln("WAIT");
     }
   } else if (systemState == WAIT) {
     if (WAITtimer.isReady()) {
       systemState = SEARCH;
-      DEBUG("search");
+      DEBUGln("SEARCH");
     }
   }
 }
@@ -287,16 +312,16 @@ void timeoutReset() {
   timeoutState = true;
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
-  DEBUG("timeout reset");
+  //DEBUGln("timeout reset");
 }
 
 // сам таймаут
 void timeoutTick() {
   if (timeoutState && TIMEOUTtimer.isReady() && systemState == SEARCH) {
-    DEBUG("timeout");
+    //DEBUGln("timeout");
     timeoutState = false;
     disp.brightness(0);
-    dispMode();
+    dispNum(thisVolume);
     servoOFF();
     servo.detach();
     for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mCOLOR(BLACK);
@@ -373,7 +398,7 @@ void showAnimation(byte mode) {
     if (i >= 8) i = 0;
     disp.displayByte(AnimationData_6[i++]);
   }
-  else if (mode == 7){
+  else if (mode == 7) {
     if (i >= 12) i = 0;
     disp.displayByte(AnimationData_7[i++]);
   }

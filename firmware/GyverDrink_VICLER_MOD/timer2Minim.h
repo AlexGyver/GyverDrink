@@ -11,12 +11,17 @@ class timerMinim
     void reset();                         // ручной сброс таймера на установленный интервал
     void stop();
     void start();
+    uint32_t getInterval();
 
   private:
     uint32_t _timer = 0;
     uint32_t _interval = 0;
     bool _stop = false;
 };
+
+uint32_t timerMinim::getInterval() {
+  return _interval;
+}
 
 timerMinim::timerMinim(uint32_t interval) {
   _interval = interval;
@@ -29,19 +34,19 @@ void timerMinim::setInterval(uint32_t interval) {
 
 void timerMinim::start() {
   if (_stop) {
-    _stop = true;
+    _stop = false;
     _timer = millis();
   }
 }
 
 void timerMinim::stop() {
-  _stop = false;
+  _stop = true;
 }
 
 // алгоритм таймера v2.0
 boolean timerMinim::isReady() {
-  if(_stop) return false;
-  
+  if (_stop) return false;
+
   uint32_t thisMls = millis();
   if (thisMls - _timer >= _interval) {
     do {

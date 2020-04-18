@@ -46,7 +46,7 @@ byte shotPos[] = {0, 45, 90, 135, 180};
 #define PARKING_POS 0       // угол для домашней позиции
 
 // время заполнения 50 мл
-#define TIME_50ML 5000
+#define TIME_50ML 5100
 
 #define KEEP_POWER 0    // 1 - система поддержания питания ПБ, чтобы он не спал
 
@@ -137,7 +137,9 @@ bool parking = true;
 #define pumpOFF() digitalWrite(PUMP_POWER, 0)
 
 #if (DEBUG_UART == 1)
-#define DEBUG(x) Serial.println(x)
+#define DEBUG(x) Serial.print(x)
+#define DEBUGln(x) Serial.println(x)
 #else
 #define DEBUG(x)
+#define DEBUGln(x)
 #endif

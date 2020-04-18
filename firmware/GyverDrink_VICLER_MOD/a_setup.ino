@@ -1,22 +1,23 @@
 void setup() {
 #if (DEBUG_UART == 1)
   Serial.begin(9600);
-  DEBUG("start");
+  DEBUGln("start");
 #endif
+
   // епром
   if (EEPROM.read(1000) != 47) {
     EEPROM.write(1000, 47);
     EEPROM.put(0, thisVolume);
   }
   EEPROM.get(0, thisVolume);
-  for(byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
+  for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
 
   if (EEPROM.read(1001) != 47) {
     EEPROM.write(1001, 47);
     EEPROM.put(10, TIME_50ML);
   }
   EEPROM.get(10, time50ml);
-  volumeTick = 15.0 * 50.0 / time50ml;
+  volumeTick = 15.0f * 50.0f / time50ml;
 
   if (EEPROM.read(1002) != 47) {
     EEPROM.write(1002, 47);
@@ -30,12 +31,12 @@ void setup() {
   // тыкаем ленту
   strip.setBrightness(255);
   strip.clear();
-  DEBUG("strip init");
+  DEBUGln("strip init");
 
   // старт дисплея
   disp.clear();
   disp.brightness(7);
-  DEBUG("disp init");
+  DEBUGln("disp init");
 
   // настройка пинов
   pinMode(PUMP_POWER, 1);
@@ -47,7 +48,7 @@ void setup() {
   servo.attach(SERVO_PIN, PARKING_POS);
   delay(500);
   servo.setCurrentDeg(PARKING_POS);
-  servo.setSpeed(50);
+  servo.setSpeed(30);
   servo.setAccel(0.5);
   servo.detach();
   servoOFF();
@@ -56,20 +57,21 @@ void setup() {
       shotPos[i] = shotPos[NUM_SHOTS - 1 - i];
       shotPos[NUM_SHOTS - 1 - i] = temp;
     }
+  DEBUGln("servo init");
 
-/* - Стартовая анимация. Значение ANIMATION_FPS задаёт количество кадров в секунду (чем больше - тем быстрее анимация)
- *    Всего доступно 7 видов анимации. Выбирается в ANIMATION_NUM от 0 до 6.
- * - Радуга. Начальная яркость задаётся в RAINBOW_START_BRIGHTNESS ... (максимум 255). С этого значения яркость плавно убавляется до 0.
- *    Частота изменения цвета зависит от RAINBOW_FPS ... (чем больше значение - тем быстрее смена цвета)
- * - Время, за которое пройдёт приветствие (пока светодиоды не погаснут) зависит от RAINBOW_FPS и RAINBOW_START_BRIGHTNESS.
- *    Время до полного угасания в мс = 1000 * RAINBOW_START_BRIGHTNESS / RAINBOW_FPS
- */
 
- #define ANIMATION_NUM 7
- #define ANIMATION_FPS 20
- #define RAINBOW_FPS 50
- #define RAINBOW_START_BRIGHTNESS 250
- 
+  /* - Стартовая анимация. Значение ANIMATION_FPS задаёт количество кадров в секунду (чем больше - тем быстрее анимация)
+        Всего доступно 7 видов анимации. Выбирается в ANIMATION_NUM от 0 до 6.
+     - Радуга. Начальная яркость задаётся в RAINBOW_START_BRIGHTNESS ... (максимум 255). С этого значения яркость плавно убавляется до 0.
+        Частота изменения цвета зависит от RAINBOW_FPS ... (чем больше значение - тем быстрее смена цвета)
+     - Время, за которое пройдёт приветствие (пока светодиоды не погаснут) зависит от RAINBOW_FPS и RAINBOW_START_BRIGHTNESS.
+        Время до полного угасания в мс = 1000 * RAINBOW_START_BRIGHTNESS / RAINBOW_FPS
+  */
+#define ANIMATION_NUM 7
+#define ANIMATION_FPS 20
+#define RAINBOW_FPS 50
+#define RAINBOW_START_BRIGHTNESS 250
+
   timerMinim nextFrame(1000 / ANIMATION_FPS);
   timerMinim nextColor(1000 / RAINBOW_FPS);
   uint8_t startBrightness = RAINBOW_START_BRIGHTNESS;
@@ -84,9 +86,26 @@ void setup() {
   }
   strip.clear();
 
-
   serviceMode();
   timeoutReset();   // сброс таймаута
   TIMEOUTtimer.start();
-  dispMode();       // выводим на дисплей стандартные значения
+  dispNum(thisVolume);
+
+  DEBUG("- main volume: ");
+  DEBUGln(thisVolume);
+  DEBUG("- time for 1ml: ");
+  DEBUGln(time50ml / 50);
+  DEBUG("- volume per tick: ");
+  DEBUGln(volumeTick);
+  DEBUG("- shots quantity: ");
+  DEBUGln(NUM_SHOTS);
+  DEBUG("- parking position: ");
+  DEBUGln(PARKING_POS);
+  DEBUGln("- shot positions:");
+  for (byte i = 0; i < NUM_SHOTS; i++) {
+    DEBUG(i);
+    DEBUG(" -> ");
+    DEBUG(shotPos[i]);
+    DEBUGln("°");
+  }
 }
