@@ -43,6 +43,7 @@ void btnTick() {
       systemState = WAIT;                                         // режим работы - ждать
       WAITtimer.reset();
       pumpOFF();                                                  // помпу выкл
+      systemON = true;
     }
     if (workMode) DEBUGln("automatic mode");
     else DEBUGln("manual mode");
@@ -96,7 +97,7 @@ void btnTick() {
     {
       if (timer20.isReady()) {
         volumeCount += 20 * 50.0 / time50ml;
-        dispNum(volumeCount);
+        dispNum(round(volumeCount));
         strip.setLED(pumpingShot, mWHEEL( (int)(volumeCount * 10 + MIN_COLOR) % 1530) );
         strip.show();
       }

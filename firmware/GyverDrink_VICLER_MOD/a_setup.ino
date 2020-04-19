@@ -94,7 +94,8 @@ void setup() {
   DEBUG("- main volume: ");
   DEBUGln(thisVolume);
   DEBUG("- time for 1ml: ");
-  DEBUGln(time50ml / 50);
+  DEBUG(time50ml / 50);
+  DEBUGln("ms");
   DEBUG("- volume per tick: ");
   DEBUGln(volumeTick);
   DEBUG("- shots quantity: ");

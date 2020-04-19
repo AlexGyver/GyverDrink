@@ -150,7 +150,7 @@ void flowTick() {
         shotStates[i] = EMPTY;                                      // флаг на заправку
         strip.setLED(i, mCOLOR(ORANGE));                            // подсветили
         LEDchanged = true;
-        shotCount++;                                                // инкрементировали счётчик пустых рюмок
+        shotCount++;                                                // инкрементировали счётчик поставленных рюмок
         dispNum(shotVolume[i]);
         DEBUG("set glass: ");
         DEBUG(i);
@@ -161,7 +161,7 @@ void flowTick() {
         shotStates[i] = NO_GLASS;                                   // статус - нет рюмки
         strip.setLED(i, mCOLOR(BLACK));                             // нигра
         LEDchanged = true;
-        timeoutReset();                                             // сброс таймаута
+        //timeoutReset();                                             // сброс таймаута
         if (i == curPumping) {
           curPumping = -1; // снимаем выбор рюмки
           systemState = WAIT;                                         // режим работы - ждать
@@ -263,11 +263,10 @@ void flowRoutnie() {
       servo.detach();
       systemState = PUMPING;                              // режим - наливание
       delay(300);
-      //FLOWtimer.setInterval((long)thisVolume * time50ml / 50);  // перенастроили таймер
       FLOWtimer.setInterval((long)shotVolume[curPumping] * time50ml / 50);  // перенастроили таймер
       FLOWtimer.reset();                                  // сброс таймера
-      pumpON();                                           // НАЛИВАЙ!
       volumeCount = 0;
+      pumpON();                                           // НАЛИВАЙ!
       DEBUG("fill glass: ");
       DEBUG(curPumping);
       DEBUG(" for ");
@@ -277,7 +276,6 @@ void flowRoutnie() {
 
   } else if (systemState == PUMPING) {                      // если качаем
     dispNum(volumeCount += volumeTick);                     // выводим текущий объём на дисплей
-    //int colorCount = MIN_COLOR + COLOR_SCALE * volumeCount / thisVolume;  // расчёт цвета для текущего обьёма
     int colorCount = MIN_COLOR + COLOR_SCALE * volumeCount / shotVolume[curPumping];  // расчёт цвета для текущего обьёма
     strip.setLED(curPumping, mWHEEL(colorCount));
     LEDchanged = true;
