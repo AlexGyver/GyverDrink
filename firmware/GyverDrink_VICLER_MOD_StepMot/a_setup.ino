@@ -1,7 +1,7 @@
 void setup() {
-#if (DEBUG_UART == ON)
+#if (DEBUG_UART == 1)
   Serial.begin(9600);
-  DEBUG("start");
+  DEBUGln("start");
 #endif
   // епром
   if (EEPROM.read(1000) != 47) {
@@ -9,7 +9,7 @@ void setup() {
     EEPROM.put(0, thisVolume);
   }
   EEPROM.get(0, thisVolume);
-  for(byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
+  for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
 
   if (EEPROM.read(1001) != 47) {
     EEPROM.write(1001, 47);
@@ -30,7 +30,7 @@ void setup() {
   strip.clear();
   strip.show();
   strip.setBrightness(255);
-  DEBUG("strip init");
+  DEBUGln("strip init");
 
   // настройка пинов
   pinMode(PUMP_POWER, OUTPUT);
@@ -44,7 +44,7 @@ void setup() {
   // старт дисплея
   disp.clear();
   disp.brightness(7);
-  DEBUG("disp init");
+  DEBUGln("disp init");
 
   // настройка шагового двигателя
   stepper.autoPower(STEPPER_POWERSAFE);
@@ -57,19 +57,19 @@ void setup() {
   if (STEPPER_ENDSTOP_INVERT == 0) pinMode(STEPPER_ENDSTOP, INPUT_PULLUP);
 #endif
 
-/* - Стартовая анимация. Значение ANIMATION_FPS задаёт количество кадров в секунду (чем больше - тем быстрее анимация)
- *    Всего доступно 8 видов анимации. Выбирается в ANIMATION_NUM от 0 до 7.
- * - Радуга. Начальная яркость задаётся в RAINBOW_START_BRIGHTNESS ... (максимум 255). С этого значения яркость плавно убавляется до 0.
- *    Частота изменения цвета зависит от RAINBOW_FPS ... (чем больше значение - тем быстрее смена цвета)
- * - Время, за которое пройдёт приветствие (пока светодиоды не погаснут) зависит от RAINBOW_FPS и RAINBOW_START_BRIGHTNESS.
- *    Время до полного угасания в мс = 1000 * RAINBOW_START_BRIGHTNESS / RAINBOW_FPS
- */
+  /* - Стартовая анимация. Значение ANIMATION_FPS задаёт количество кадров в секунду (чем больше - тем быстрее анимация)
+        Всего доступно 8 видов анимации. Выбирается в ANIMATION_NUM от 0 до 7.
+     - Радуга. Начальная яркость задаётся в RAINBOW_START_BRIGHTNESS ... (максимум 255). С этого значения яркость плавно убавляется до 0.
+        Частота изменения цвета зависит от RAINBOW_FPS ... (чем больше значение - тем быстрее смена цвета)
+     - Время, за которое пройдёт приветствие (пока светодиоды не погаснут) зависит от RAINBOW_FPS и RAINBOW_START_BRIGHTNESS.
+        Время до полного угасания в мс = 1000 * RAINBOW_START_BRIGHTNESS / RAINBOW_FPS
+  */
 
- #define ANIMATION_NUM 7
- #define ANIMATION_FPS 20
- #define RAINBOW_FPS 50
- #define RAINBOW_START_BRIGHTNESS 250
- 
+#define ANIMATION_NUM 7
+#define ANIMATION_FPS 20
+#define RAINBOW_FPS 50
+#define RAINBOW_START_BRIGHTNESS 250
+
   while (rainbowFadeFlow(RAINBOW_START_BRIGHTNESS, 1000 / RAINBOW_FPS) || !parking) {
 #ifdef STEPPER_ENDSTOP
     if (!homing() && !parking) {
@@ -77,7 +77,7 @@ void setup() {
       stepper.setAngle(PARKING_POS);
       if (!stepper.update()) {
         parking = true;
-        DEBUG("parked!");
+        DEBUGln("parked!");
       }
     }
 #else
@@ -93,8 +93,26 @@ void setup() {
   strip.show();
 
   serviceMode();    // калибровка
-  dispMode();       // выводим на дисплей стандартные значения
+  dispNum(thisVolume);
   timeoutReset();   // сброс таймаута
   TIMEOUTtimer.start();
-  DEBUG("ready");
+
+  DEBUG("- main volume: ");
+  DEBUGln(thisVolume);
+  DEBUG("- time for 1ml: ");
+  DEBUG(time50ml / 50);
+  DEBUGln("ms");
+  DEBUG("- volume per tick: ");
+  DEBUGln(volumeTick);
+  DEBUG("- shots quantity: ");
+  DEBUGln(NUM_SHOTS);
+  DEBUG("- parking position: ");
+  DEBUGln(PARKING_POS);
+  DEBUGln("- shot positions:");
+  for (byte i = 0; i < NUM_SHOTS; i++) {
+    DEBUG(i);
+    DEBUG(" -> ");
+    DEBUG(shotPos[i]);
+    DEBUGln("°");
+  }
 }

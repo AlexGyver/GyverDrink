@@ -77,10 +77,10 @@ byte shotPos[] = {0, 45, 90, 135, 180};
 // время заполнения 50 мл
 #define TIME_50ML 5100
 
-#define KEEP_POWER OFF    // ON - система поддержания питания ПБ, чтобы он не спал
+#define KEEP_POWER 0    // 1 - система поддержания питания ПБ, чтобы он не спал
 
 // отладка
-#define DEBUG_UART OFF
+#define DEBUG_UART 0
 
 // =========== ПИНЫ Arduino Micro===========
 #if defined(ARDUINO_AVR_MICRO)
@@ -173,10 +173,12 @@ bool LEDbreathing = false;
 #define pumpON() digitalWrite(PUMP_POWER, 1)
 #define pumpOFF() digitalWrite(PUMP_POWER, 0)
 
-#if (DEBUG_UART == ON)
-#define DEBUG(x) Serial.println(x)
+#if (DEBUG_UART == 1)
+#define DEBUG(x) Serial.print(x)
+#define DEBUGln(x) Serial.println(x)
 #else
 #define DEBUG(x)
+#define DEBUGln(x)
 #endif
 
 #ifdef STEPPER_ENDSTOP
