@@ -145,7 +145,8 @@ void flowTick() {
       if (swState && shotStates[i] == NO_GLASS) {                   // поставили пустую рюмку
         timeoutReset();                                             // сброс таймаута
         shotStates[i] = EMPTY;                                      // флаг на заправку
-        strip.setLED(i, mCOLOR(ORANGE));                            // подсветили
+        if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
+        else  strip.setLED(i, mCOLOR(ORANGE));                            // подсветили
         LEDchanged = true;
         shotCount++;                                                // обновили счётчик поставленных рюмок
         dispNum(shotVolume[i]);                                     // отобразили объём поставленной рюмки
@@ -156,7 +157,8 @@ void flowTick() {
       }
       else if (!swState && shotStates[i] != NO_GLASS) {             // убрали пустую/полную рюмку
         shotStates[i] = NO_GLASS;                                   // статус - нет рюмки
-        strip.setLED(i, mCOLOR(BLACK));                             // нигра
+        if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
+        else  strip.setLED(i, mCOLOR(BLACK));                             // нигра
         LEDchanged = true;
         //timeoutReset();                                           // сброс таймаута
         if (i == curPumping) {

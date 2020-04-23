@@ -85,7 +85,7 @@ void btnTick() {
     stepper.setAngle(shotPos[pumpingShot]);
     while (stepper.update());
     delay(300);
-//    pumpON();
+    pumpON();
     timerMinim timer(20);
     while (!digitalRead(SW_pins[pumpingShot]) && !digitalRead(ENC_SW)) {
       if (timer.isReady()) {

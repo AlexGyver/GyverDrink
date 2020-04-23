@@ -65,7 +65,7 @@
 #define STEPPER_ENDSTOP_INVERT  0         // 1 - высокий сигнал при замыкании, 0 - низкий
 #define STEPPER_POWERSAFE 1               // энергосберегающий режим шагового двигателя
 #define INVERT_STEPPER 0                  // инвертировать направление вращения шагового двигателя
-#define STEPPER_SPEED 20                   // скорость двигателя в оборотах в минуту
+#define STEPPER_SPEED 15                   // скорость двигателя в оборотах в минуту
 #define MICROSTEPS  2                     // значение микрошага, выставленного на драйвере двигателя
 #define STEPER_BACKLASH 3.5
 

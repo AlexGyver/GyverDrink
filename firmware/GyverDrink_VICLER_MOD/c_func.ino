@@ -148,7 +148,8 @@ void flowTick() {
       if (!digitalRead(SW_pins[i]) && shotStates[i] == NO_GLASS) {  // поставили пустую рюмку
         timeoutReset();                                             // сброс таймаута
         shotStates[i] = EMPTY;                                      // флаг на заправку
-        strip.setLED(i, mCOLOR(ORANGE));                            // подсветили
+        if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
+        else  strip.setLED(i, mCOLOR(ORANGE));                      // подсветили оранжевым
         LEDchanged = true;
         shotCount++;                                                // инкрементировали счётчик поставленных рюмок
         dispNum(shotVolume[i]);
@@ -159,14 +160,15 @@ void flowTick() {
       }
       if (digitalRead(SW_pins[i]) && shotStates[i] != NO_GLASS) {   // убрали пустую/полную рюмку
         shotStates[i] = NO_GLASS;                                   // статус - нет рюмки
-        strip.setLED(i, mCOLOR(BLACK));                             // нигра
+        if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
+        else  strip.setLED(i, mCOLOR(BLACK));                       // нигра
         LEDchanged = true;
-        //timeoutReset();                                             // сброс таймаута
+        //timeoutReset();                                           // сброс таймаута
         if (i == curPumping) {
           curPumping = -1; // снимаем выбор рюмки
-          systemState = WAIT;                                         // режим работы - ждать
+          systemState = WAIT;                                       // режим работы - ждать
           WAITtimer.reset();
-          pumpOFF();                                                  // помпу выкл
+          pumpOFF();                                                // помпу выкл
           DEBUG("abort fill for shot: ");
           DEBUGln(i);
         }
@@ -259,6 +261,9 @@ void flowRoutnie() {
 
   } else if (systemState == MOVING) {                     // движение к рюмке
     if (servo.tick()) {                                   // если приехали
+      DEBUG("actual position: ");
+      DEBUG(servo.getCurrentDeg());
+      DEBUGln("°");
       servoOFF();                                         // отключаем сервопривод
       servo.detach();
       systemState = PUMPING;                              // режим - наливание
