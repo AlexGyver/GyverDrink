@@ -4,6 +4,8 @@ void setup() {
   DEBUGln("start");
 #endif
 
+//EEPROM.write(1002, 0);
+
   // епром
   if (EEPROM.read(1000) != 47) {
     EEPROM.write(1000, 47);

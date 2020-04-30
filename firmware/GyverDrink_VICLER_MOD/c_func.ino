@@ -234,23 +234,23 @@ void flowRoutnie() {
       }
     }
     if (noGlass && !parking) {                            // если не нашли ни одной пустой рюмки и не припаркованны
-      if (workMode) {                                       // если в авто режиме:
-        servoOFF();                                           // выключили серво
+      if (workMode && AUTO_PARKING == 0) {                // если в авто режиме:
+        servoOFF();                                       // выключили серво
         servo.detach();
-        systemON = false;                                     // выключили систему
-        parking = true;                                       // уже на месте!
+        systemON = false;                                 // выключили систему
+        parking = true;                                   // уже на месте!
         DEBUGln("parked!");
       }
       else {                                              // если же в ручном режиме:
-        servoON();                                          // включаем серво и паркуемся
+        servoON();                                        // включаем серво и паркуемся
         servo.attach();
         servo.setTargetDeg(PARKING_POS);
 
-        if (servo.tick()) {                                 // едем до упора
-          servoOFF();                                       // выключили серво
+        if (servo.tick()) {                               // едем до упора
+          servoOFF();                                     // выключили серво
           servo.detach();
-          systemON = false;                                 // выключили систему
-          parking = true;                                   // на месте!
+          systemON = false;                               // выключили систему
+          parking = true;                                 // на месте!
           DEBUGln("parked!");
         }
       }
