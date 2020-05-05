@@ -218,9 +218,9 @@ void flowRoutnie() {
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
         DEBUG("found glass: ");
         DEBUGln(curPumping);
-        //        DEBUG("currentPos -> targetPos: ");
-        //        DEBUG(shotPos[i]);
-        //        DEBUG(" -> ");
+        //DEBUG("currentPos -> targetPos: ");
+        //DEBUG(shotPos[i]);
+        //DEBUG(" -> ");
         //DEBUGln(servo.getCurrentDeg());
         if (shotPos[i] != servo.getCurrentDeg()) {        // включаем серво только если целевая позиция не совпадает с текущей
           servoON();                                      // вкл питание серво
