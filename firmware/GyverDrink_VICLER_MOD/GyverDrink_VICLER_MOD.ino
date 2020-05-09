@@ -1,20 +1,10 @@
 /*
-  Скетч к проекту "Наливатор by AlexGyver"
-  - Страница проекта (схемы, описания): https://alexgyver.ru/GyverDrink/
-  - Исходники на GitHub: https://github.com/AlexGyver/GyverDrink/
-  Проблемы с загрузкой? Читай гайд для новичков: https://alexgyver.ru/arduino-first/
-  Нравится, как написан код? Поддержи автора! https://alexgyver.ru/support_alex/
-  Автор: AlexGyver, AlexGyver Technologies, 2019
-  https://www.youtube.com/c/alexgyvershow
-  https://github.com/AlexGyver
-  https://AlexGyver.ru/
-  alex@alexgyver.ru
-*/
+  VICLER_MOD_1.7
+  
+  Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" на основе версии 1.3 by AlexGyver с устранением багов и дополнительным функционалом
+  Исходники на GitHub: https://github.com/VICLER/GyverDrink
 
-/*
-   VICLER_MOD_1.7:
    - !!Важно! для корректной работы серводвигателя рекомендуется обновить библиотеку ServoSmooth из репозитория с этой прошивкой !!
-   - основанно на версии 1.3 by AlexGyver
    - возможность установить парковочную позицию PARKING_POS
    - в автоматическом режиме краник остаётся над последней налитой рюмкой (в ручном возвращается в домашнее положение)
    - инверсия серво
@@ -34,6 +24,19 @@
    - возможность настроить объём для каждой рюмки отдельно:
       При однократном нажатии на энкодер подсвечивается место рюмки, объём которой изменяется вращением энкодера. При повторном нажатии подсвечивается следующая рюмка.
       Если же ни одна рюмка не подсвечивается белым, вращение энкодера изменяет объём для всех рюмок одновременно (как в обычном ручном режиме)
+*/
+
+/*
+  Скетч к проекту "Наливатор by AlexGyver"
+  - Страница проекта (схемы, описания): https://alexgyver.ru/GyverDrink/
+  - Исходники на GitHub: https://github.com/AlexGyver/GyverDrink/
+  Проблемы с загрузкой? Читай гайд для новичков: https://alexgyver.ru/arduino-first/
+  Нравится, как написан код? Поддержи автора! https://alexgyver.ru/support_alex/
+  Автор: AlexGyver, AlexGyver Technologies, 2019
+  https://www.youtube.com/c/alexgyvershow
+  https://github.com/AlexGyver
+  https://AlexGyver.ru/
+  alex@alexgyver.ru
 */
 
 // ======== НАСТРОЙКИ ========
