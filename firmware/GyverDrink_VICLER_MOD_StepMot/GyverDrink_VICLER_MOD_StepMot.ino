@@ -1,41 +1,12 @@
 /*
-  Скетч к проекту "Наливатор by AlexGyver"
-  - Страница проекта (схемы, описания): https://alexgyver.ru/GyverDrink/
-  - Исходники на GitHub: https://github.com/AlexGyver/GyverDrink/
-  Проблемы с загрузкой? Читай гайд для новичков: https://alexgyver.ru/arduino-first/
-  Нравится, как написан код? Поддержи автора! https://alexgyver.ru/support_alex/
-  Автор: AlexGyver, AlexGyver Technologies, 2019
-  https://www.youtube.com/c/alexgyvershow
-  https://github.com/AlexGyver
-  https://AlexGyver.ru/
-  alex@alexgyver.ru
-*/
+  GyverDrink VICLER_MOD_StepMot_v1.7
 
-/*
-   Версия 1.1:
-   - Поправлена работа системы при выборе некорректного объёма
-   - Исправлены ошибки при наливании больших объёмов
-   - Исправлен баг с остановкой наливания при убирании другой рюмки
-
-   Версия 1.2:
-   - Исправлено ограничение выбора объёма
-   - Исправлены ошибки (обновите библиотеки из архива! servoSmooth v1.8, microLED v2.3)
-   - Добавлено хранение в памяти выбранного объёма
-
-   Версия 1.3:
-   - Исправлен баг со снятием рюмки в авто режиме (жука поймал Юрий Соколов)
-
-   Версия 1.4:
-   - Добавлена настройка уровня концевиков (для ИК датчиков)
-   - Исправлена ошибка с наливанием больших объёмов
-
-   Версия 1.5:
-   - Добавлена инверсия сервопривода (ОБНОВИТЕ БИБЛИОТЕКУ ИЗ АРХИВА)
-
-   VICLER_MOD_StepMot_v1.7
+  Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" на основе версии 1.5 by AlexGyver с заменой серводвигателя на шаговый мотор, устранением багов и дополнительным функционалом
+  Исходники на GitHub: https://github.com/VICLER/GyverDrink
+  
    - шаговый двигатель с драйвером типа StepStick вместо серво
    - возможность работы как с концевым датчиком для нулевой позиции двигателя (для этого укажите пин STEPPER_ENDSTOP)
-      так и без него, установив нулевую позицию вручную (закоментируйте STEPPER_ENDSTOP)
+      так и без него, установив нулевую позицию вручную перед или после включения устройства (закоментируйте #define STEPPER_ENDSTOP -> //#define STEPPER_ENDSTOP). Эта позиция должна соответствовать PARKING_POS
    - компенсация люфта шагового двигателя в градусах STEPER_BACKLASH
    - возможность установить парковочную позицию PARKING_POS
    - прокачка над любой рюмкой. Прокачка проводится только в ручном режиме и только при наличии рюмки
@@ -55,32 +26,40 @@
    - возможность настроить объём для каждой рюмки отдельно:
       При однократном нажатии на энкодер подсвечивается место рюмки, объём которой изменяется вращением энкодера. При повторном нажатии подсвечивается следующая рюмка.
       Если же ни одна рюмка не подсвечивается белым, вращение энкодера изменяет объём для всех рюмок одновременно (как в обычном ручном режиме)
+*/ 
+
+/*
+  - Страница проекта (схемы, описания): https://alexgyver.ru/GyverDrink/
+  - Исходники на GitHub: https://github.com/AlexGyver/GyverDrink/
+  Проблемы с загрузкой? Читай гайд для новичков: https://alexgyver.ru/arduino-first/
+  Нравится, как написан код? Поддержи автора! https://alexgyver.ru/support_alex/
+  Автор: AlexGyver, AlexGyver Technologies, 2019
+  https://www.youtube.com/c/alexgyvershow
+  https://github.com/AlexGyver
+  https://AlexGyver.ru/
+  alex@alexgyver.ru
 */
 
 // ======== НАСТРОЙКИ ========
 #define NUM_SHOTS 5                       // количество рюмок (оно же кол-во светодиодов и кнопок!)
 #define TIMEOUT_OFF 5                     // таймаут на выключение (перестаёт дёргать привод), минут
 #define SWITCH_LEVEL 0                    // кнопки 1 - высокий сигнал при замыкании, 0 - низкий
+#define PARKING_POS 90                    // положение парковочной позиции в градусах
+#define TIME_50ML 5100                    // время заполнения 50 мл
+#define KEEP_POWER 0                      // 1 - система поддержания питания ПБ, чтобы он не спал
+
 #define STEPS_PER_REVOLUTION 2037.88642   // количество шагов на оборот двигателя
 #define STEPPER_ENDSTOP_INVERT  0         // 1 - высокий сигнал при замыкании, 0 - низкий
 #define STEPPER_POWERSAFE 1               // энергосберегающий режим шагового двигателя
 #define INVERT_STEPPER 0                  // инвертировать направление вращения шагового двигателя
-#define STEPPER_SPEED 15                   // скорость двигателя в оборотах в минуту
+#define STEPPER_SPEED 15                  // скорость двигателя в оборотах в минуту
 #define MICROSTEPS  2                     // значение микрошага, выставленного на драйвере двигателя
 #define STEPER_BACKLASH 3.5
 
-// положение крана над центрами рюмок в градусах от нулевой точки
+#define DEBUG_UART 0                      // отладка
+
+// положение крана над центрами рюмок
 byte shotPos[] = {0, 45, 90, 135, 180};
-
-#define PARKING_POS 90       // положение парковочной позиции в градусах
-
-// время заполнения 50 мл
-#define TIME_50ML 5100
-
-#define KEEP_POWER 0    // 1 - система поддержания питания ПБ, чтобы он не спал
-
-// отладка
-#define DEBUG_UART 0
 
 // =========== ПИНЫ Arduino Micro===========
 #if defined(ARDUINO_AVR_MICRO)
@@ -93,7 +72,7 @@ byte shotPos[] = {0, 45, 90, 135, 180};
 #define STEPPER_STEP    6
 #define STEPPER_DIR     7
 #define STEPPER_EN      8
-#define STEPPER_ENDSTOP 9
+#define STEPPER_ENDSTOP 9   // закоментировать, если нет концевика
 #define ENC_SW          10 
 #define ENC_DT          14
 #define ENC_CLK         16
@@ -105,7 +84,7 @@ const byte SW_pins[] = {15, 18, 19, 20, 21};
 #define STEPPER_STEP  5
 #define STEPPER_DIR 4
 #define STEPPER_EN  2
-#define STEPPER_ENDSTOP 13
+#define STEPPER_ENDSTOP 13  // закоментировать, если нет концевика
 #define LED_PIN 6
 #define BTN_PIN 7
 #define ENC_SW 8

@@ -82,6 +82,7 @@ void setup() {
     }
 #else
     stepper.resetPos(PARKING_POS);
+    parking = true;
 #endif
     showAnimation(ANIMATION_NUM, 1000 / ANIMATION_FPS);
   }
