@@ -80,6 +80,7 @@ void setup() {
         DEBUGln("parked!");
       }
     }
+    stepper.update();
 #else
     stepper.resetPos(PARKING_POS);
     parking = true;

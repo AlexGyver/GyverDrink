@@ -53,7 +53,7 @@ void serviceMode() {
         pumpTime = 0;
         if (enc.isLeft()) stepperPos += 1;
         if (enc.isRight())  stepperPos -= 1;
-        stepperPos = constrain(stepperPos, 0, 180);
+        stepperPos = constrain(stepperPos, 0, 240);
         stepper.setAngle(stepperPos);
         if (!flag && shotStates[currShot] == EMPTY) {
           shotPos[currShot] = stepperPos;
@@ -68,7 +68,7 @@ void serviceMode() {
     HeadLED = mCOLOR(ORANGE);
     strip.show();
 #ifdef STEPPER_ENDSTOP
-    while (homing());   // двигаемся пока не сработал концевик
+    while (homing()) stepper.update();   // двигаемся пока не сработал концевик
     stepper.setAngle(PARKING_POS);
     while (stepper.update());
 #else
@@ -220,8 +220,10 @@ void flowRoutnie() {
 
         if (shotPos[curPumping] != (int)stepper.getAngle()) {  // если цель отличается от актуальной позиции
           stepper.enable();
+          stepper.setRPM(STEPPER_SPEED);
           stepper.setAngle(shotPos[curPumping]);          // задаём цель
           parking = false;
+          atHome = false;
           HeadLED = mCOLOR(ORANGE);
           strip.show();
           DEBUG("moving to shot: ");
@@ -231,9 +233,14 @@ void flowRoutnie() {
       }
     }
     if (noGlass && !parking) {                            // если не нашли ни одной пустой рюмки
-      stepper.setAngle(PARKING_POS);                      // цель -> домашнее положение
       HeadLED = mCOLOR(ORANGE);
       LEDchanged = true;
+
+#ifdef STEPPER_ENDSTOP
+      if (PARKING_POS == 0) homing();                     // если есть концевик и он в парковочном положении -> едем до концевика
+      else stepper.setAngle(PARKING_POS);                 // иначе едем до парковочной позиции
+#else stepper.setAngle(PARKING_POS);                      
+#endif
       if (stepper.ready()) {                              // приехали
         stepper.disable();                                // выключили шаговик
         systemON = false;                                 // выключили систему
@@ -249,6 +256,8 @@ void flowRoutnie() {
 
   } else if (systemState == MOVING) {                    // движение к рюмке
     if (stepper.ready()) {                               // если приехали
+      DEBUG("reached position: ");
+      DEBUGln(stepper.getAngle());
       HeadLED = WHITE;
       strip.show();
       delay(300);
@@ -307,13 +316,13 @@ void timeoutReset() {
   timeoutState = true;
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
-//  DEBUGln("timeout reset");
+  //  DEBUGln("timeout reset");
 }
 
 // сам таймаут
 void timeoutTick() {
   if (systemState == SEARCH && timeoutState && TIMEOUTtimer.isReady()) {
-//    DEBUGln("timeout");
+    //    DEBUGln("timeout");
     timeoutState = false;
     disp.brightness(0);
     dispNum(thisVolume);
@@ -354,16 +363,17 @@ bool homing() {
   if (atHome) return 0;
 
   if (ENDSTOP_STATUS) {
-    stepper.setRPM(STEPPER_SPEED);
+    //stepper.setRPM(STEPPER_SPEED);
     stepper.resetPos();
     atHome = true;
-    DEBUGln("at Home");
+    DEBUG("at Home: ");
+    DEBUGln((int)stepper.getAngle());
     return 0;
   }
   stepper.enable();
-  stepper.setRPM(-5);
+  stepper.setRPM(-STEPPER_HOMING_SPEED);
   stepper.rotate();
-  stepper.update();
+  //stepper.update();
   return 1;
 }
 #endif
