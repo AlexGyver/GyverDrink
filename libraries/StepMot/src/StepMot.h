@@ -10,6 +10,7 @@
   v 1.4 - invert direction fix, small bugfixes and stability improvements
   v 1.5 - add backlash compensation. Set direction with rpm (positive -> CW, negative -> CCW)
   v 1.6 - bugfixes
+  v 1.7 - fix wrong moving direction after rotate() with backlash
   by VICLER
 */
 

@@ -91,8 +91,7 @@ void StepMot::setAngle(float newAngle) {
     _lastAngle = newAngle;
     newAngle += _backlash;
   }
-  else
-    _lastAngle = newAngle;
+  else _lastAngle = newAngle;
 
   _targetAngle = abs(newAngle - _currentAngle);
   _targetSteps = round(_targetAngle * _stepsPerAngle);
@@ -112,16 +111,17 @@ void StepMot::rotate()
 }
 
 float StepMot::getAngle() {
-  if(_backlash && _dir == CW)
-    return _currentAngle = _currentSteps * _anglePerStep - _backlash;
-  else return _currentAngle = _currentSteps * _anglePerStep;
+  if(_backlash && _dir == CW) _currentAngle = _currentSteps * _anglePerStep - _backlash;
+  else  _currentAngle = _currentSteps * _anglePerStep;
+  _lastAngle = _currentAngle;
+  return _currentAngle;
 }
 
 void StepMot::resetPos(float pos = 0.0) {
   _currentAngle = pos;
   _currentSteps = pos * _stepsPerAngle;
   _targetSteps = 0;
-  _lastAngle = 0;
+  _lastAngle = _currentAngle;
   _ready = 1;
 }
 
