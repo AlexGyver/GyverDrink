@@ -239,8 +239,8 @@ void flowRoutnie() {
 #ifdef STEPPER_ENDSTOP
       if (PARKING_POS == 0) homing();                     // если есть концевик и он в парковочном положении -> едем до концевика
       else stepper.setAngle(PARKING_POS);                 // иначе едем до парковочной позиции
-#else stepper.setAngle(PARKING_POS);                      
 #endif
+      stepper.setAngle(PARKING_POS);
       if (stepper.ready()) {                              // приехали
         stepper.disable();                                // выключили шаговик
         systemON = false;                                 // выключили систему
