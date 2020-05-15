@@ -73,9 +73,9 @@ void setup() {
   while (rainbowFadeFlow(RAINBOW_START_BRIGHTNESS, 1000 / RAINBOW_FPS) || !parking) {
 #ifdef STEPPER_ENDSTOP
     if (!homing() && !parking) {
-      stepper.setRPM(10);
+      stepper.setRPM(STEPPER_SPEED * 0.75);
       stepper.setAngle(PARKING_POS);
-      if (!stepper.update()) {
+      if (stepper.ready()) {
         parking = true;
         DEBUGln("parked!");
       }
