@@ -1,6 +1,6 @@
 /*
   GyverDrink VICLER_MOD_StepMot_v1.7
-  15.05.2020
+  16.05.2020
 
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" на основе версии 1.5 by AlexGyver с заменой серводвигателя на шаговый мотор, устранением багов и дополнительным функционалом
   Исходники на GitHub: https://github.com/VICLER/GyverDrink
@@ -51,13 +51,13 @@
 #define KEEP_POWER   0     // 1 - система поддержания питания ПБ, чтобы он не спал
 
 #define STEPS_PER_REVOLUTION     2037.88642  // количество шагов на оборот двигателя
-#define STEPPER_ENDSTOP_INVERT   0           // 1 - высокий сигнал при замыкании, 0 - низкий
-#define STEPPER_POWERSAFE        1           // энергосберегающий режим шагового двигателя
-#define INVERT_STEPPER           0           // инвертировать направление вращения шагового двигателя
-#define STEPPER_SPEED            15          // скорость двигателя в об/мин
 #define MICROSTEPS               2           // значение микрошага, выставленного на драйвере двигателя
-#define STEPPER_HOMING_SPEED     5           // скорость вращения двигателя при движении к концевику (если он есть) в об/мин
+#define INVERT_STEPPER           0           // инвертировать направление вращения шагового двигателя
+#define STEPPER_ENDSTOP_INVERT   0           // 1 - высокий сигнал при замыкании, 0 - низкий
+#define STEPPER_POWERSAFE        1           // энергосберегающий режим шагового двигателя. 1 -> вкл ,0 -> выкл
 #define STEPER_BACKLASH          3           // компенсация люфта двигателя в градусах. 0 выключает эту функцию
+#define STEPPER_SPEED            15          // скорость двигателя в об/мин
+#define STEPPER_HOMING_SPEED     5           // скорость вращения двигателя при движении к концевику (если он есть) в об/мин
 
 #define DEBUG_UART 0                         // отладка
 
@@ -74,7 +74,7 @@ byte shotPos[] = {0, 45, 90, 135, 180};      // положение крана н
 #define STEPPER_STEP    6
 #define STEPPER_DIR     7
 #define STEPPER_EN      8
-#define STEPPER_ENDSTOP 9   // закоментировать, если нет концевика
+#define STEPPER_ENDSTOP 9    // закоментировать, если нет концевика
 #define ENC_SW          10
 #define ENC_DT          14
 #define ENC_CLK         16
@@ -82,18 +82,18 @@ const byte SW_pins[] = {15, 18, 19, 20, 21};
 
 // =========== ПИНЫ Arduino Nano===========
 #elif defined(ARDUINO_AVR_NANO)
-#define PUMP_POWER 3
-#define STEPPER_STEP  5
-#define STEPPER_DIR 4
-#define STEPPER_EN  2
-#define STEPPER_ENDSTOP 13  // закоментировать, если нет концевика
-#define LED_PIN 6
-#define BTN_PIN 7
-#define ENC_SW 8
-#define ENC_DT 9
-#define ENC_CLK 10
-#define DISP_DIO 11
-#define DISP_CLK 12
+#define PUMP_POWER      3
+#define STEPPER_STEP    5
+#define STEPPER_DIR     4
+#define STEPPER_EN      2
+#define STEPPER_ENDSTOP А7  // закоментировать, если нет концевика
+#define LED_PIN         6
+#define BTN_PIN         7
+#define ENC_SW          8
+#define ENC_DT          9
+#define ENC_CLK         10
+#define DISP_DIO        11
+#define DISP_CLK        12
 const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};
 #endif
 
