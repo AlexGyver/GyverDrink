@@ -86,7 +86,7 @@ const byte SW_pins[] = {15, 18, 19, 20, 21};
 #define STEPPER_STEP    5
 #define STEPPER_DIR     4
 #define STEPPER_EN      2
-#define STEPPER_ENDSTOP А7  // закоментировать, если нет концевика
+#define STEPPER_ENDSTOP A7  // закоментировать, если нет концевика
 #define LED_PIN         6
 #define BTN_PIN         7
 #define ENC_SW          8
