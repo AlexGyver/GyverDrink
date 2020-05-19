@@ -61,4 +61,5 @@ boolean timerMinim::isReady() {
 
 void timerMinim::reset() {
   _timer = millis();
+  _stop = false;
 }

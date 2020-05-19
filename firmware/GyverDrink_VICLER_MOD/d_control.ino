@@ -27,7 +27,6 @@ void encTick() {
       DEBUG("main volume: ");
       DEBUGln(thisVolume);
     }
-    EEPROM.put(0, thisVolume);
   }
 }
 

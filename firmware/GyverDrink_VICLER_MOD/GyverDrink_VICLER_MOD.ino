@@ -53,29 +53,29 @@
 byte shotPos[] = {0, 45, 90, 135, 180};
 
 #if defined(ARDUINO_AVR_MICRO)  // =========== ПИНЫ Arduino Micro ===========
-#define PUMP_POWER 4
+#define PUMP_POWER  4
 #define SERVO_POWER 16
-#define SERVO_PIN 6
-#define LED_PIN 5
-#define BTN_PIN 10
-#define ENC_SW 9
-#define ENC_DT 7
-#define ENC_CLK 8
-#define DISP_DIO 2
-#define DISP_CLK 3
+#define SERVO_PIN   6
+#define LED_PIN     5
+#define BTN_PIN     10
+#define ENC_SW      9
+#define ENC_DT      7
+#define ENC_CLK     8
+#define DISP_DIO    2
+#define DISP_CLK    3
 const byte SW_pins[] = {14, 15, 18, 19, 20};
 
 #elif defined(ARDUINO_AVR_NANO) // =========== ПИНЫ Arduino Nano ===========
-#define PUMP_POWER 3
+#define PUMP_POWER  3
 #define SERVO_POWER 4
-#define SERVO_PIN 5
-#define LED_PIN 6
-#define BTN_PIN 7
-#define ENC_SW 8
-#define ENC_DT 9
-#define ENC_CLK 10
-#define DISP_DIO 11
-#define DISP_CLK 12
+#define SERVO_PIN   5
+#define LED_PIN     6
+#define BTN_PIN     7
+#define ENC_SW      8
+#define ENC_DT      9
+#define ENC_CLK     10
+#define DISP_DIO    11
+#define DISP_CLK    12
 const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};
 #endif
 
