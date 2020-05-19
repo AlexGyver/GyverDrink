@@ -74,7 +74,7 @@ byte shotPos[] = {0, 45, 90, 135, 180};      // положение крана н
 #define STEPPER_STEP    6
 #define STEPPER_DIR     7
 #define STEPPER_EN      8
-#define STEPPER_ENDSTOP 9    // закоментировать, если нет концевика
+#define STEPPER_ENDSTOP 9     // закоментировать, если нет концевика
 #define ENC_SW          10
 #define ENC_DT          14
 #define ENC_CLK         16
@@ -86,7 +86,7 @@ const byte SW_pins[] = {15, 18, 19, 20, 21};
 #define STEPPER_STEP    5
 #define STEPPER_DIR     4
 #define STEPPER_EN      2
-#define STEPPER_ENDSTOP A7  // закоментировать, если нет концевика
+#define STEPPER_ENDSTOP A7    // закоментировать, если нет концевика
 #define LED_PIN         6
 #define BTN_PIN         7
 #define ENC_SW          8
