@@ -1,5 +1,6 @@
 /*
   GyverDrink VICLER_MOD_1.7
+  19.05.2020
   
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" на основе версии 1.3 by AlexGyver с устранением багов и дополнительным функционалом
   Исходники на GitHub: https://github.com/VICLER/GyverDrink
