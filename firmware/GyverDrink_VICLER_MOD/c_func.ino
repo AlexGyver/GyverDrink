@@ -218,10 +218,10 @@ void flowRoutnie() {
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
         DEBUG("found glass: ");
         DEBUGln(curPumping);
-        DEBUG("currentPos -> targetPos: ");
-        DEBUG(shotPos[i]);
-        DEBUG(" -> ");
-        DEBUGln(servo.getCurrentDeg());
+//        DEBUG("currentPos -> targetPos: ");
+//        DEBUG(shotPos[i]);
+//        DEBUG(" -> ");
+//        DEBUGln(servo.getCurrentDeg());
         if (shotPos[i] != servo.getCurrentDeg()) {        // включаем серво только если целевая позиция не совпадает с текущей
           servoON();                                      // вкл питание серво
           servo.attach();
@@ -315,13 +315,13 @@ void timeoutReset() {
   timeoutState = true;
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
-  DEBUGln("timeout reset");
+  //DEBUGln("timeout reset");
 }
 
 // сам таймаут
 void timeoutTick() {
   if (timeoutState && TIMEOUTtimer.isReady() && systemState == SEARCH) {
-    DEBUGln("timeout");
+    //DEBUGln("timeout");
     timeoutState = false;
     disp.brightness(0);
     dispNum(thisVolume);
