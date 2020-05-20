@@ -90,7 +90,8 @@ void setup() {
   stepper.setRPM(STEPPER_SPEED);
   stepper.disable();
 
-  strip.clear();
+  //strip.clear();
+  if(STANDBY_LIGHT == 1)  for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, 10);
   HeadLED = WHITE;
   strip.show();
 

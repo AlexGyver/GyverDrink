@@ -157,8 +157,12 @@ void flowTick() {
       }
       else if (!swState && shotStates[i] != NO_GLASS) {             // убрали пустую/полную рюмку
         shotStates[i] = NO_GLASS;                                   // статус - нет рюмки
-        if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
-        else  strip.setLED(i, mCOLOR(BLACK));                             // нигра
+        if (i == curSelected) 
+          strip.setLED(curSelected, mCOLOR(WHITE));
+        else if(STANDBY_LIGHT == 1) 
+          strip.setLED(i, mHSV(20, 255, 10));
+        else  
+          strip.setLED(i, mCOLOR(BLACK));                             // нигра
         LEDchanged = true;
         //timeoutReset();                                           // сброс таймаута
         if (i == curPumping) {
@@ -314,8 +318,13 @@ void timeoutReset() {
   LEDbreathing = false;
   LEDchanged = true;
   timeoutState = true;
+  if(STANDBY_LIGHT == 1){
+    for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, 10);
+    strip.show();
+  }
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
+  
   //  DEBUGln("timeout reset");
 }
 
@@ -326,7 +335,7 @@ void timeoutTick() {
     timeoutState = false;
     disp.brightness(0);
     dispNum(thisVolume);
-    for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mCOLOR(BLACK);
+    //for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mCOLOR(BLACK);
     selectShot = -1;
     curSelected = -1;
     LEDbreathing = true;
@@ -346,6 +355,7 @@ void timeoutTick() {
     } else {
       //      disp.displayByte(0x00, 0x00, 0x00, 0x00);
       //      disp.point(false);
+      for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mCOLOR(BLACK);
     }
   }
 }
@@ -397,7 +407,13 @@ void breathing(bool _state, uint8_t _shotNum, bool mode) {
     _dir = -1;
   }
   if (mode) leds[NUM_SHOTS] = mHSV(130, 255, _brightness);
-  else     leds[NUM_SHOTS] = mHSV(255, 0, _brightness);
+  else {
+    leds[NUM_SHOTS] = mHSV(255, 0, _brightness);
+    if(STANDBY_LIGHT == 1){
+      for (byte i = 0; i < NUM_SHOTS; i++)  
+      leds[i] = mHSV(20, 255, 5);
+    }
+  }
 
   LEDchanged = true;
 }

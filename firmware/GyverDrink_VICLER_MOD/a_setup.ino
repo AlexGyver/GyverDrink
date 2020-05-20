@@ -86,7 +86,11 @@ void setup() {
     }
     if (nextFrame.isReady()) showAnimation(ANIMATION_NUM);
   }
-  strip.clear();
+  if(STANDBY_LIGHT == 1){
+    for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, 10);
+    strip.show();
+  }
+  
 
   serviceMode();
   timeoutReset();   // сброс таймаута

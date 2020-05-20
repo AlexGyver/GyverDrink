@@ -160,8 +160,11 @@ void flowTick() {
       }
       if (digitalRead(SW_pins[i]) && shotStates[i] != NO_GLASS) {   // убрали пустую/полную рюмку
         shotStates[i] = NO_GLASS;                                   // статус - нет рюмки
-        if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
-        else  strip.setLED(i, mCOLOR(BLACK));                       // нигра
+        if (i == curSelected)
+          strip.setLED(curSelected, mCOLOR(WHITE));
+        else if(STANDBY_LIGHT == 1) 
+          strip.setLED(i, mHSV(20, 255, 10));
+        else strip.setLED(i, mCOLOR(BLACK)); 
         LEDchanged = true;
         //timeoutReset();                                           // сброс таймаута
         if (i == curPumping) {
@@ -218,10 +221,6 @@ void flowRoutnie() {
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
         DEBUG("found glass: ");
         DEBUGln(curPumping);
-//        DEBUG("currentPos -> targetPos: ");
-//        DEBUG(shotPos[i]);
-//        DEBUG(" -> ");
-//        DEBUGln(servo.getCurrentDeg());
         if (shotPos[i] != servo.getCurrentDeg()) {        // включаем серво только если целевая позиция не совпадает с текущей
           servoON();                                      // вкл питание серво
           servo.attach();
@@ -301,7 +300,7 @@ void flowRoutnie() {
   }
 }
 
-// отрисовка светодиодов по флагу (100мс)
+// отрисовка светодиодов по флагу (50мс)
 void LEDtick() {
   if (LEDchanged && LEDtimer.isReady()) {
     LEDchanged = false;
@@ -315,6 +314,10 @@ void timeoutReset() {
   timeoutState = true;
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
+  if(STANDBY_LIGHT == 1){
+    for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, 10);
+    strip.show();
+  }
   //DEBUGln("timeout reset");
 }
 
@@ -327,7 +330,8 @@ void timeoutTick() {
     dispNum(thisVolume);
     servoOFF();
     servo.detach();
-    for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mCOLOR(BLACK);
+    if(STANDBY_LIGHT == 1)
+      for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, 5);
     LEDchanged = true;
     selectShot = -1;
     curSelected = -1;
@@ -344,6 +348,7 @@ void timeoutTick() {
     } else {
       //disp.displayByte(0x00, 0x00, 0x00, 0x00);
       //disp.point(false);
+      for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mCOLOR(BLACK);
     }
   }
 }
