@@ -350,14 +350,16 @@ void timeoutTick() {
 
 void jerkServo() {
   if (KEEP_POWER) {
-    disp.brightness(7);
+    //disp.brightness(7);
     servoON();
     servo.attach();
-    servo.write(random(0, 4));
-    delay(200);
+    servo.write(servo.getCurrentDeg() + 2);
+    delay(100);
+    servo.write(servo.getCurrentDeg());
+    delay(100);
     servo.detach();
     servoOFF();
-    disp.brightness(1);
+    //disp.brightness(1);
   }
 }
 
