@@ -50,7 +50,7 @@
 #define PARKING_POS   0     // положение парковочной позиции в градусах
 #define TIME_50ML     5100  // время заполнения 50 мл
 #define KEEP_POWER    0     // 1 - система поддержания питания ПБ, чтобы он не спал
-#define STANDBY_LIGHT 1     // тусклая подсветка в режиме ожидания
+#define STANDBY_LIGHT 1     // тусклая подсветка в режиме ожидания. 1-> вкл, 0-> выкл
 
 #define STEPS_PER_REVOLUTION     2037.88642  // количество шагов на оборот двигателя
 #define MICROSTEPS               2           // значение микрошага, выставленного на драйвере двигателя
@@ -165,7 +165,8 @@ bool LEDbreathing = false;
 #endif
 
 #ifdef STEPPER_ENDSTOP
-#define ENDSTOP_STATUS (!digitalRead(STEPPER_ENDSTOP) ^ STEPPER_ENDSTOP_INVERT)
+//#define ENDSTOP_STATUS (!digitalRead(STEPPER_ENDSTOP) ^ STEPPER_ENDSTOP_INVERT)
+#define ENDSTOP_STATUS (!(analogRead(STEPPER_ENDSTOP)>512) ^ STEPPER_ENDSTOP_INVERT)
 #endif
 
 #define HeadLED leds[NUM_SHOTS]
