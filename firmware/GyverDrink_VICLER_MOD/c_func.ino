@@ -315,7 +315,10 @@ void timeoutReset() {
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
   if(STANDBY_LIGHT == 1){
-    for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, 10);
+    for (byte i = 0; i < NUM_SHOTS; i++) {
+      if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
+      else if(shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, 10);
+    }
     strip.show();
   }
   //DEBUGln("timeout reset");
