@@ -319,8 +319,8 @@ void timeoutReset() {
       if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
       else if(shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, 10);
     }
-    strip.show();
   }
+  LEDchanged = true;
   //DEBUGln("timeout reset");
 }
 
