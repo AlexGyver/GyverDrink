@@ -314,17 +314,16 @@ void timeoutReset() {
   if (!timeoutState) {
     disp.brightness(7);
   }
-  HeadLED = WHITE;
-  LEDbreathing = false;
-  LEDchanged = true;
-  timeoutState = true;
   if(STANDBY_LIGHT == 1){
     for (byte i = 0; i < NUM_SHOTS; i++){
       if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
       else if(shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, 10);
     }
-    strip.show();
   }
+  HeadLED = WHITE;
+  LEDbreathing = false;
+  LEDchanged = true;
+  timeoutState = true;
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
   
