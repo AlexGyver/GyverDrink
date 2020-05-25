@@ -190,6 +190,7 @@ void flowTick() {
     }
     if (shotCount == 0) {                                          // если нет ни одной рюмки
       TIMEOUTtimer.start();
+      if(!parking) systemON = true;
     }
     else {
       TIMEOUTtimer.stop();
