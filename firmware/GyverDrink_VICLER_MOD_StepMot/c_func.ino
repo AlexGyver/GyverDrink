@@ -40,10 +40,11 @@ void serviceMode() {
             currShot = i;
             dispNum((i + 1) * 1000 + shotPos[i]);
           } else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
-            strip.setLED(i, mCOLOR(BLACK));
-            shotStates[i] = NO_GLASS;
-            currShot = -1;
-            dispNum(stepperPos);
+              if(STANDBY_LIGHT == 1) strip.setLED(i, mHSV(20, 255, 10));
+              else  strip.setLED(i, mCOLOR(BLACK));
+              shotStates[i] = NO_GLASS;
+              currShot = -1;
+              dispNum(stepperPos);
           }
           strip.show();
         }

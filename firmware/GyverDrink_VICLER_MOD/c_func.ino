@@ -39,10 +39,11 @@ void serviceMode() {
             currShot = i;
             dispNum((i + 1) * 1000 + shotPos[i]);
           } else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
-            strip.setLED(i, mCOLOR(BLACK));
-            shotStates[i] = NO_GLASS;
-            currShot = -1;
-            dispNum(servoPos);
+              if(STANDBY_LIGHT == 1) strip.setLED(i, mHSV(20, 255, 10));
+              else  strip.setLED(i, mCOLOR(BLACK));
+              shotStates[i] = NO_GLASS;
+              currShot = -1;
+              dispNum(servoPos);
           }
           strip.show();
         }
@@ -222,7 +223,7 @@ void flowRoutnie() {
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
         DEBUG("found glass: ");
         DEBUGln(curPumping);
-        if (shotPos[i] != servo.getCurrentDeg()) {        // включаем серво только если целевая позиция не совпадает с текущей
+        if ( abs(shotPos[i] - servo.getCurrentDeg()) > 3 ) {        // включаем серво только если целевая позиция не совпадает с текущей
           servoON();                                      // вкл питание серво
           servo.attach();
           servo.setTargetDeg(shotPos[curPumping]);        // задаём цель
