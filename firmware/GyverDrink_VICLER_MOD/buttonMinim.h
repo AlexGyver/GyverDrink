@@ -43,7 +43,7 @@ void buttonMinim::tick() {
     flags.clickF = true;
     flags.holdF = false;
   }
-  if (flags.btnFlag && ((uint32_t)millis() - _btnTimer > 900)) {
+  if (flags.btnFlag && ((uint32_t)millis() - _btnTimer > 500)) {
     if (!btnState) {
       flags.holdF = true;
     } else {
