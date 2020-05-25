@@ -76,15 +76,18 @@ void btnTick() {
     for (byte i = 0; i < NUM_SHOTS; i++) {
       if (!digitalRead(SW_pins[i])) {
         stepper.enable();
-        pumpingShot = i;
+        pumpingShot = i; 
       }
     }
     if (pumpingShot == -1) return;
     if (!timeoutState) disp.brightness(7);
     DEBUG("pumping into shot ");
     DEBUGln(pumpingShot);
+    stepper.setRPM(STEPPER_SPEED);
     stepper.setAngle(shotPos[pumpingShot]);
     while (stepper.update());
+    parking = false;
+    atHome = false;
     delay(300);
     pumpON();
     timerMinim timer(20);
@@ -101,9 +104,6 @@ void btnTick() {
     DEBUG(round(volumeCount));
     DEBUGln("ml");
     delay(300);
-    stepper.setAngle(PARKING_POS);
-    DEBUGln("parking");
     timeoutReset();
-    if (workMode) systemState = WAIT;
   }
 }

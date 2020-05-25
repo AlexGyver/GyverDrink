@@ -192,6 +192,7 @@ void flowTick() {
         LEDbreathing = false;
         HeadLED = mCOLOR(WHITE);
       }
+      if(!parking) systemON = true;
     }
     else {
       TIMEOUTtimer.stop();                                         // если стоит хоть одна рюмка - останавливаем таймер режима ожидания
