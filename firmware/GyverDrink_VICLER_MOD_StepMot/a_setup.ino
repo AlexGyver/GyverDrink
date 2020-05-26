@@ -91,7 +91,7 @@ void setup() {
   stepper.disable();
 
   //strip.clear();
-  if(STANDBY_LIGHT == 1)  for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, 10);
+  if(STBY_LIGHT > 0)  for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, STBY_LIGHT);
   HeadLED = WHITE;
   strip.show();
 

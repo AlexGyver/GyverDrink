@@ -40,7 +40,7 @@ void serviceMode() {
             currShot = i;
             dispNum((i + 1) * 1000 + shotPos[i]);
           } else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
-              if(STANDBY_LIGHT == 1) strip.setLED(i, mHSV(20, 255, 10));
+              if(STBY_LIGHT > 0) strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
               else  strip.setLED(i, mCOLOR(BLACK));
               shotStates[i] = NO_GLASS;
               currShot = -1;
@@ -160,8 +160,8 @@ void flowTick() {
         shotStates[i] = NO_GLASS;                                   // статус - нет рюмки
         if (i == curSelected) 
           strip.setLED(curSelected, mCOLOR(WHITE));
-        else if(STANDBY_LIGHT == 1) 
-          strip.setLED(i, mHSV(20, 255, 10));
+        else if(STBY_LIGHT > 0) 
+          strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
         else  
           strip.setLED(i, mCOLOR(BLACK));                             // нигра
         LEDchanged = true;
@@ -316,10 +316,10 @@ void timeoutReset() {
   if (!timeoutState) {
     disp.brightness(7);
   }
-  if(STANDBY_LIGHT == 1){
+  if(STBY_LIGHT > 0){
     for (byte i = 0; i < NUM_SHOTS; i++){
       if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
-      else if(shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, 10);
+      else if(shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, STBY_LIGHT);
     }
   }
   HeadLED = WHITE;
@@ -413,9 +413,9 @@ void breathing(bool _state, uint8_t _shotNum, bool mode) {
   if (mode) leds[NUM_SHOTS] = mHSV(130, 255, _brightness);
   else {
     leds[NUM_SHOTS] = mHSV(255, 0, _brightness);
-    if(STANDBY_LIGHT == 1){
+    if(STBY_LIGHT > 0){
       for (byte i = 0; i < NUM_SHOTS; i++)  
-      leds[i] = mHSV(20, 255, 5);
+      leds[i] = mHSV(20, 255, STBY_LIGHT / 2);
     }
   }
 

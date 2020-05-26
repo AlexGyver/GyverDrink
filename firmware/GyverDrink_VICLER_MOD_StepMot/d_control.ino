@@ -64,7 +64,7 @@ void btnTick() {
     for (byte i = 0; i < NUM_SHOTS; i++) {
       if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
       else if (shotStates[i] == EMPTY) strip.setLED(i, mCOLOR(ORANGE));
-      else if (STANDBY_LIGHT == 1)  strip.setLED(i, mHSV(20, 255, 10));
+      else if (STBY_LIGHT > 0)  strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
       else strip.setLED(i, mCOLOR(BLACK));
     }
     if (curSelected >= 0) dispNum(shotVolume[curSelected]);
