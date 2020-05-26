@@ -82,8 +82,8 @@ void setup() {
     }
     if (nextFrame.isReady()) showAnimation(ANIMATION_NUM);
   }
-  if(STANDBY_LIGHT == 1){
-    for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, 10);
+  if(STBY_LIGHT > 0){
+    for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, STBY_LIGHT);
     strip.show();
   }
   

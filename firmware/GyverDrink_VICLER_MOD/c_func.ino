@@ -39,7 +39,7 @@ void serviceMode() {
             currShot = i;
             dispNum((i + 1) * 1000 + shotPos[i]);
           } else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
-              if(STANDBY_LIGHT == 1) strip.setLED(i, mHSV(20, 255, 10));
+              if(STBY_LIGHT > 0) strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
               else  strip.setLED(i, mCOLOR(BLACK));
               shotStates[i] = NO_GLASS;
               currShot = -1;
@@ -163,8 +163,8 @@ void flowTick() {
         shotStates[i] = NO_GLASS;                                   // статус - нет рюмки
         if (i == curSelected)
           strip.setLED(curSelected, mCOLOR(WHITE));
-        else if(STANDBY_LIGHT == 1) 
-          strip.setLED(i, mHSV(20, 255, 10));
+        else if(STBY_LIGHT > 0) 
+          strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
         else strip.setLED(i, mCOLOR(BLACK)); 
         LEDchanged = true;
         //timeoutReset();                                           // сброс таймаута
@@ -316,10 +316,10 @@ void timeoutReset() {
   timeoutState = true;
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
-  if(STANDBY_LIGHT == 1){
+  if(STBY_LIGHT > 0){
     for (byte i = 0; i < NUM_SHOTS; i++) {
       if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
-      else if(shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, 10);
+      else if(shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, STBY_LIGHT);
     }
   }
   LEDchanged = true;
@@ -335,8 +335,8 @@ void timeoutTick() {
     dispNum(thisVolume);
     servoOFF();
     servo.detach();
-    if(STANDBY_LIGHT == 1)
-      for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, 5);
+    if(STBY_LIGHT > 0)
+      for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, STBY_LIGHT / 2);
     LEDchanged = true;
     selectShot = -1;
     curSelected = -1;
