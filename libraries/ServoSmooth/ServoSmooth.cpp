@@ -116,8 +116,8 @@ boolean ServoSmooth::tickManual() {
 		if (_servoState) {
 			_newSpeed = constrain(_newSpeed, -_servoMaxSpeed, _servoMaxSpeed);	// ограничиваем по макс.
 			_servoCurrentPos += _newSpeed;										// получаем новую позицию			
-			//_newPos += (float)(_servoCurrentPos - _newPos) * _k;				// и фильтруем её
-			_newPos = _servoCurrentPos;											// и не фильтруем
+			_newPos += (float)(_servoCurrentPos - _newPos) * _k;				// и фильтруем её
+			//_newPos = _servoCurrentPos;											// и не фильтруем
 			_newPos = constrain(_newPos, _min, _max);							// ограничиваем
 			writeUs((int)_newPos);								// отправляем на серво
 		}
