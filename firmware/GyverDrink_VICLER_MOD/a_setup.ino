@@ -47,18 +47,14 @@ void setup() {
 
   // настройка серво
   servoON();
+  servo.setDirection(INVERSE_SERVO);
   servo.attach(SERVO_PIN, PARKING_POS);
   delay(500);
   servo.setCurrentDeg(PARKING_POS);
   servo.setSpeed(15);
-  //servo.setAccel(0.50);
+  servo.setAccel(0.2);
   servo.detach();
   servoOFF();
-  if (INVERSE_SERVO) for (byte i = 0; i < NUM_SHOTS / 2; i++) {
-      byte temp = shotPos[i];
-      shotPos[i] = shotPos[NUM_SHOTS - 1 - i];
-      shotPos[NUM_SHOTS - 1 - i] = temp;
-    }
   DEBUGln("servo init");
 
 
