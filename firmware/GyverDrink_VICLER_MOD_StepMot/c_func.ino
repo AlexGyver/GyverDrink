@@ -340,6 +340,8 @@ void timeoutTick() {
     disp.brightness(0);
     dispNum(thisVolume);
     //for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mCOLOR(BLACK);
+    if(STBY_LIGHT > 0)
+      for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, STBY_LIGHT / 2);
     selectShot = -1;
     curSelected = -1;
     LEDbreathing = true;
@@ -410,13 +412,9 @@ void breathing(bool _state, uint8_t _shotNum, bool mode) {
     _brightness = 255;
     _dir = -1;
   }
-  if (mode) leds[NUM_SHOTS] = mHSV(130, 255, _brightness);
+  if (mode) HeadLED = mHSV(130, 255, _brightness);
   else {
-    leds[NUM_SHOTS] = mHSV(255, 0, _brightness);
-    if(STBY_LIGHT > 0){
-      for (byte i = 0; i < NUM_SHOTS; i++)  
-      leds[i] = mHSV(20, 255, STBY_LIGHT / 2);
-    }
+    HeadLED = mHSV(255, 0, _brightness);
   }
 
   LEDchanged = true;

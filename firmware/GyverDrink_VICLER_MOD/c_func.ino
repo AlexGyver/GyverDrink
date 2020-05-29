@@ -146,7 +146,8 @@ void dispNum(uint16_t num) {
 void flowTick() {
   if (FLOWdebounce.isReady()) {
     for (byte i = 0; i < NUM_SHOTS; i++) {
-      if (!digitalRead(SW_pins[i]) && shotStates[i] == NO_GLASS) {  // поставили пустую рюмку
+      bool swState = !digitalRead(SW_pins[i]) ^ SWITCH_LEVEL;
+      if (swState && shotStates[i] == NO_GLASS) {  // поставили пустую рюмку
         timeoutReset();                                             // сброс таймаута
         shotStates[i] = EMPTY;                                      // флаг на заправку
         if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
@@ -159,7 +160,7 @@ void flowTick() {
         DEBUG(", volume: ");
         DEBUGln(shotVolume[i]);
       }
-      if (digitalRead(SW_pins[i]) && shotStates[i] != NO_GLASS) {   // убрали пустую/полную рюмку
+      if (!swState && shotStates[i] != NO_GLASS) {   // убрали пустую/полную рюмку
         shotStates[i] = NO_GLASS;                                   // статус - нет рюмки
         if (i == curSelected)
           strip.setLED(curSelected, mCOLOR(WHITE));

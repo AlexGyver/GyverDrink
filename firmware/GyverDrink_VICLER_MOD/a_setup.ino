@@ -43,7 +43,8 @@ void setup() {
   // настройка пинов
   pinMode(PUMP_POWER, 1);
   pinMode(SERVO_POWER, 1);
-  for (byte i = 0; i < NUM_SHOTS; i++)  pinMode(SW_pins[i], INPUT_PULLUP);
+  for (byte i = 0; i < NUM_SHOTS; i++)
+    if (SWITCH_LEVEL == 0) pinMode(SW_pins[i], INPUT_PULLUP);
 
   // настройка серво
   servoON();
