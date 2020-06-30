@@ -4,7 +4,8 @@ void setup() {
   DEBUGln("start");
 #endif
 
-//EEPROM.write(1002, 0);
+//EEPROM.write(1001, 0);  //сброс значения TIME_50ML из памяти
+//EEPROM.write(1002, 0);  //сброс позиций углов для серво
 
   // епром
   if (EEPROM.read(1000) != 47) {

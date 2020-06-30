@@ -32,7 +32,7 @@
       Если же ни одна рюмка не подсвечивается белым, вращение энкодера изменяет объём для всех рюмок одновременно (как в обычном ручном режиме)
 */
 
-/*
+/* 
   - Страница проекта (схемы, описания): https://alexgyver.ru/GyverDrink/
   - Исходники на GitHub: https://github.com/AlexGyver/GyverDrink/
   Проблемы с загрузкой? Читай гайд для новичков: https://alexgyver.ru/arduino-first/
@@ -67,37 +67,37 @@
 byte shotPos[] = {0, 45, 90, 135, 180};      // положение крана над центрами рюмок
 
 // =========== ПИНЫ Arduino Micro===========
-#if defined(ARDUINO_AVR_MICRO)
-#define PUMP_POWER      0
-#define VALVE_PIN       1
-#define DISP_DIO        2
-#define DISP_CLK        3
-#define BTN_PIN         4
-#define LED_PIN         5
-#define STEPPER_STEP    6
-#define STEPPER_DIR     7
-#define STEPPER_EN      8
-#define STEPPER_ENDSTOP 9     // закоментировать, если нет концевика
-#define ENC_SW          10
-#define ENC_DT          14
-#define ENC_CLK         16
-const byte SW_pins[] = {15, 18, 19, 20, 21};
+#if defined(ARDUINO_AVR_MICRO)  
+#define PUMP_POWER      0                     // управляющий сигнал драйвера помпы (обычно обозначен как IN на драйверах моторов, либо GATE/BASE, если используется транзистор)
+#define VALVE_PIN       1                     // не используется
+#define DISP_DIO        2                     // сигнал DIO на дисплее TM1637
+#define DISP_CLK        3                     // сигнал CLK на дисплее TM1637
+#define BTN_PIN         4                     // сигнал с основной кнопки для разлива и смены режимов
+#define LED_PIN         5                     // сигнал DIO/DI первого светодиода (для первой рюмки)
+#define STEPPER_STEP    6                     // сигнал STEP драйвера
+#define STEPPER_DIR     7                     // сигнал DIR драйвера
+#define STEPPER_EN      8                     // сигнал EN драйвера
+#define STEPPER_ENDSTOP 9                     // сигнал с концевика для двигателя. Закоментировать, если концевик не используется
+#define ENC_SW          10                    // сигнал центральной кнопки на энкодере для прокачки и настройки различных обьёмов. Обозначен как SW или BTN
+#define ENC_DT          14                    // сигнал DT или А с энкодера
+#define ENC_CLK         16                    // сигнал CLK или B с энкодера
+const byte SW_pins[] = {15, 18, 19, 20, 21};  // сигналы с датчиков наличия рюмок: от первой к последней рюмке
 
 // =========== ПИНЫ Arduino Nano===========
 #elif defined(ARDUINO_AVR_NANO)
-#define PUMP_POWER      3
-#define STEPPER_STEP    5
-#define STEPPER_DIR     4
-#define STEPPER_EN      2
-#define STEPPER_ENDSTOP A7    // закоментировать, если нет концевика
-#define LED_PIN         6
-#define BTN_PIN         7
-#define ENC_SW          8
-#define ENC_DT          9
-#define ENC_CLK         10
-#define DISP_DIO        11
-#define DISP_CLK        12
-const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};
+#define PUMP_POWER      3                         // управляющий сигнал драйвера помпы (обычно обозначен как IN на драйверах моторов, либо GATE/BASE, если используется транзистор)
+#define STEPPER_STEP    5                         // сигнал STEP драйвера
+#define STEPPER_DIR     4                         // сигнал DIR драйвера
+#define STEPPER_EN      2                         // сигнал EN драйвера
+#define STEPPER_ENDSTOP A7                        // сигнал с концевика для двигателя. Закоментировать, если концевик не используется
+#define LED_PIN         6                         // сигнал DIO/DI первого светодиода (для первой рюмки)
+#define BTN_PIN         7                         // сигнал с основной кнопки для разлива и смены режимов
+#define ENC_SW          8                         // сигнал центральной кнопки на энкодере для прокачки и настройки различных обьёмов. Обозначен как SW или BTN
+#define ENC_DT          9                         // сигнал DT или А с энкодера
+#define ENC_CLK         10                        // сигнал CLK или B с энкодера
+#define DISP_DIO        11                        // сигнал DIO на дисплее TM1637
+#define DISP_CLK        12                        // сигнал CLK на дисплее TM1637
+const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};  // сигналы с датчиков наличия рюмок: от первой к последней рюмке
 #endif
 
 // =========== ЛИБЫ ===========
@@ -166,7 +166,6 @@ bool LEDbreathing = false;
 #endif
 
 #ifdef STEPPER_ENDSTOP
-//#define ENDSTOP_STATUS (!digitalRead(STEPPER_ENDSTOP) ^ STEPPER_ENDSTOP_INVERT)
 #define ENDSTOP_STATUS (!(analogRead(STEPPER_ENDSTOP)>512) ^ STEPPER_ENDSTOP_INVERT)
 #endif
 
