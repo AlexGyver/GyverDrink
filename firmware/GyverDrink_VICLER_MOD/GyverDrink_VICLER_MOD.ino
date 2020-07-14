@@ -1,6 +1,6 @@
 /*
-  GyverDrink VICLER_MOD_1.8
-  29.05.2020
+  GyverDrink VICLER_MOD_1.9
+  14.07.2020
   
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" на основе версии 1.3 by AlexGyver с устранением багов и дополнительным функционалом
   Исходники на GitHub: https://github.com/VICLER/GyverDrink
@@ -52,7 +52,8 @@
 #define KEEP_POWER    0     // 1 - система поддержания питания ПБ, чтобы он не спал
 #define AUTO_PARKING  1     // парковка в авто режиме: 1 -> вкл, 0 -> выкл
 #define STBY_LIGHT    15    // яркость подсветки в режиме ожидания. 255 -> максимум, 0 -> выкл
-#define DEBUG_UART    0     // отладка
+#define DEBUG_UART    1     // отладка
+#define MAX_VOLUME    200   // ограничение максимального объёма
 
 // положение серво над центрами рюмок
 byte shotPos[] = {0, 45, 90, 135, 180};

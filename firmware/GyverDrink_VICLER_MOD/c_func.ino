@@ -224,11 +224,18 @@ void flowRoutnie() {
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
         DEBUG("found glass: ");
         DEBUGln(curPumping);
-        if ( abs(shotPos[i] - servo.getCurrentDeg()) > 3 ) {        // включаем серво только если целевая позиция не совпадает с текущей
+        if ( abs(shotPos[i] - servo.getCurrentDeg()) > 3) {        // включаем серво только если целевая позиция не совпадает с текущей
           servoON();                                      // вкл питание серво
           servo.attach();
           servo.setTargetDeg(shotPos[curPumping]);        // задаём цель
           parking = false;
+          DEBUG("moving to shot: ");
+          DEBUGln(i);
+        }
+        else if(shotPos[i] == PARKING_POS){               // если положение рюмки совпадает с парковочным
+          servoON();                                      // вкл питание серво
+          servo.attach(SERVO_PIN, PARKING_POS);
+          delay(500);
           DEBUG("moving to shot: ");
           DEBUGln(i);
         }
