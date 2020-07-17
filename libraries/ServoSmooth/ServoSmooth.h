@@ -29,7 +29,7 @@
 	2019 by AlexGyver
 */
 
-#define SS_SERVO_PERIOD 10		// период работы tick(), мс
+#define SS_SERVO_PERIOD 20		// период работы tick(), мс
 #define SS_DEADZONE 10			// мёртвая зона
 #define NORMAL 0
 #define REVERSE 1
