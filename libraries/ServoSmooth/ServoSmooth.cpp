@@ -8,7 +8,7 @@ ServoSmooth::ServoSmooth(int maxAngle) {
 
 // ====== WRITE ======
 void ServoSmooth::writeUs(int val) {
-	_servo.writeMicroseconds(_dir ? (_max - val) : val);
+	_servo.writeMicroseconds(_dir ? (_max - val + _min) : val);
 }
 void ServoSmooth::write(uint16_t angle) {
 	writeUs(map(angle, 0, _maxAngle, _min, _max));
@@ -117,6 +117,7 @@ boolean ServoSmooth::tickManual() {
 			_newSpeed = constrain(_newSpeed, -_servoMaxSpeed, _servoMaxSpeed);	// ограничиваем по макс.
 			_servoCurrentPos += _newSpeed;										// получаем новую позицию			
 			_newPos += (float)(_servoCurrentPos - _newPos) * _k;				// и фильтруем её
+			//_newPos = _servoCurrentPos;											// и не фильтруем
 			_newPos = constrain(_newPos, _min, _max);							// ограничиваем
 			writeUs((int)_newPos);								// отправляем на серво
 		}

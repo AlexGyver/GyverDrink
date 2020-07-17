@@ -1,4 +1,4 @@
-![PROJECT_PHOTO](https://github.com/AlexGyver/GyverDrink/blob/master/proj_img.jpg)
+![PROJECT_PHOTO](https://github.com/VICLER/GyverDrink/blob/master/proj_img.jpg)
 # Автоматический наливатор напитков на Arduino
 * [Описание проекта](#chapter-0)
 * [Папки проекта](#chapter-1)
@@ -7,24 +7,19 @@
 * [Как скачать и прошить](#chapter-4)
 * [FAQ](#chapter-5)
 * [Полезная информация](#chapter-6)
-[![AlexGyver YouTube](http://alexgyver.ru/git_banner.jpg)](https://www.youtube.com/channel/UCgtAOyEQdAyjvm9ATCi_Aig?sub_confirmation=1)
 
 <a id="chapter-0"></a>
 ## Описание проекта
-Автоматический разливатор-дозатор напитков на Arduino:
-- Сделан из чемоданчика - набора отвёрток из фикс-прайса
-- Остальные компоненты тоже из фикс-прайса
-- Электроника с Алиэкспресс
+Модифицированная версия прошивки к проекту "Наливатор by AlexGyver"
 - Система рассчитана на 1-6 рюмок
-- Подсветка рюмок:
-	- Красный - пустая
-	- Жёлтый - в процессе заполнения
-	- Зелёный - готово к употреблению
-- Надёжный механический датчик наличия рюмки
-- Складная конструкция
+- Динамическая подсветка рюмок
+- Любые виды датчиков наличия рюмок (механические, ёмкостные, ик)
 - Пищевая мембранная помпа
-- Энкодер, дисплей
-- Страница проекта на сайте: https://alexgyver.ru/GyverDrink/
+- Энкодер для управления, дисплей для отображения информации о режиме, обьёме
+- Возможность подключения шагового двигателя для более плавных и бесшумных движений
+- Работа устройства как от внешнего источника питания, так и от встроенного аккумулятора
+- Полная калибровка устройства в сервис режиме без необходимости перепрошивки (после выхода из сервис режима данные сохраняются в памяти)
+- Страница исходного проекта на сайте: https://alexgyver.ru/GyverDrink/
 
 <a id="chapter-1"></a>
 ## Папки
@@ -37,6 +32,8 @@
 ## Схемы
 ![SCHEME](https://github.com/AlexGyver/GyverDrink/blob/master/schemes/scheme1.jpg)
 ![SCHEME](https://github.com/AlexGyver/GyverDrink/blob/master/schemes/scheme2.jpg)
+![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/TTP229_configuration.jpg)
+![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/StepMot_connection.jpg)
 
 <a id="chapter-3"></a>
 ## Материалы и компоненты
@@ -52,6 +49,10 @@
 - Серво https://ali.ski/iWDe1i
 - Модуль USB https://ali.ski/5qKhEX
 - Помпа https://ali.ski/MU0lo  https://ali.ski/C_LOCk
+- Шаговый двигатель https://aliexpi.com/UvLc
+- Повышающий преобразователь https://aliexpi.com/vQ6O
+- Модуль заряда Li аккумулятора https://aliexpi.com/mlG4
+
 
 ## Вам скорее всего пригодится
 * [Всё для пайки (паяльники и примочки)](http://alexgyver.ru/all-for-soldering/)
@@ -100,7 +101,7 @@
 
 <a id="chapter-6"></a>
 ## Полезная информация
-* [Мой сайт](http://alexgyver.ru/)
+* [Сайт AlexGyver](http://alexgyver.ru/)
 * [Основной YouTube канал](https://www.youtube.com/channel/UCgtAOyEQdAyjvm9ATCi_Aig?sub_confirmation=1)
 * [YouTube канал про Arduino](https://www.youtube.com/channel/UC4axiS76D784-ofoTdo5zOA?sub_confirmation=1)
 * [Мои видеоуроки по пайке](https://www.youtube.com/playlist?list=PLOT_HeyBraBuMIwfSYu7kCKXxQGsUKcqR)
