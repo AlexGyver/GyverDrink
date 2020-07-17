@@ -25,7 +25,7 @@
 - Пищевая мембранная помпа
 - Энкодер, дисплей
 - Страница проекта на сайте: https://alexgyver.ru/GyverDrink/
-- КРУТОЕ ОБНОВЛЕНИЕ ПРОЕКТА ОТ VICLER https://github.com/VICLER/GyverDrink
+- **КРУТОЕ ОБНОВЛЕНИЕ ПРОЕКТА ОТ VICLER** https://github.com/VICLER/GyverDrink
 
 <a id="chapter-1"></a>
 ## Папки
