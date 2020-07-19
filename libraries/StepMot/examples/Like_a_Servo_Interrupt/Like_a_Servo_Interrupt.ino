@@ -1,7 +1,9 @@
 #include "StepMot.h"
 
 /* Example of using StepMot Library
- * read about another methods in StepMot.h
+ * 
+ * Open Serial port( Baud 115200) and type an angle in degrees
+ * 
  */
 
 #define STEPS_PER_REVOLUTION 2037.88642 // 28BYJ-48 geared stepper motor
@@ -13,19 +15,19 @@
 StepMot motor(STEPS_PER_REVOLUTION * MICROSTEPS, STEP_PIN, DIR_PIN, EN_PIN);
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   motor.setMode(ABSOLUTE);      // set to ABSOLUTE or RELATIVE modes (default RELATIVE)
   motor.setRPM(10);             // speed in revolutions per minute
   motor.enable();               // power on the motor
 
-  // TIMER2 Configuration
+  // TIMER2 Configuration for 20kHz refresh rate
   cli();
-  TCCR1A = 0;
-  TCCR1B = 0;
-  OCR1A = 780;            //20 kHz for update() function
-  TCCR1B |= (1 << WGM12);
-  TCCR1B |= (1 << CS10);
-  TIMSK1 |= (1 << OCIE1A);
+  TCCR2A = 0;
+  TCCR2B = 0;
+  OCR2A = 25;
+  TCCR2A |= (1 << WGM21);
+  TCCR2B |= (1 << CS20) | (1 <<CS21);   // 32 prescaler
+  TIMSK2 |= (1 << OCIE2A); // enable timer compare interrupt
   sei();
 }
 
@@ -36,9 +38,10 @@ void loop() {
     motor.setAngle(angle);
   }
   Serial.println(motor.getAngle());
+  
 }
 
-ISR(TIMER1_COMPA_vect)
+ISR(TIMER2_COMPA_vect)
 {
     motor.update();
 }

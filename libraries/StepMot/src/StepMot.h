@@ -1,5 +1,3 @@
-#pragma once
-
 /*
   Arduino library for stepper motor using STEP/DIR
   https://github.com/VICLER/StepMot
@@ -10,12 +8,13 @@
   v 1.4 - invert direction fix, small bugfixes and stability improvements
   v 1.5 - add backlash compensation. Set direction with rpm (positive -> CW, negative -> CCW)
   v 1.6 - bugfixes
-  v 1.7 - fix wrong moving direction after rotate() with backlash
+  v 1.7 - fix moving wrong direction after rotate() with backlash
   by VICLER
 */
 
-#include <Arduino.h>
+#pragma once
 
+#include <Arduino.h>
 
 enum MODE {
   RELATIVE,

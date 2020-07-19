@@ -14,7 +14,7 @@ StepMot	KEYWORD1
 
 setMode		KEYWORD2
 autoPower	KEYWORD2
-setBacklash KEYWORD2
+setBacklash	KEYWORD2
 setRPM		KEYWORD2
 enable		KEYWORD2
 disable		KEYWORD2

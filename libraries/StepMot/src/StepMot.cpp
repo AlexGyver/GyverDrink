@@ -111,9 +111,11 @@ void StepMot::rotate()
 }
 
 float StepMot::getAngle() {
+  cli();
   if(_backlash && _dir == CW) _currentAngle = _currentSteps * _anglePerStep - _backlash;
   else  _currentAngle = _currentSteps * _anglePerStep;
   _lastAngle = _currentAngle;
+  sei();
   return _currentAngle;
 }
 
