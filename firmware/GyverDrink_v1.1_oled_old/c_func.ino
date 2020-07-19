@@ -238,7 +238,7 @@ void timeoutTick() {
 }
 
 float getVoltage(){
-  return  analogRead(BATTERY_PIN) * ( 5.5 / 1023 ) + 0.14;
+  return  analogRead(BATTERY_PIN) * 5.0 / 1023;
 }
 
 uint8_t getVoltagePercent(){
