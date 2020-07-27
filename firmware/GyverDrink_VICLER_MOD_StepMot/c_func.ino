@@ -426,7 +426,7 @@ bool rainbowFadeFlow(uint8_t startBrightness, uint32_t period) {
   if (!count) return 0;
   if (timer.isReady()) {
     for (byte i = 0; i < NUM_SHOTS + 1; i++) {
-      leds[i] = mHSV(count + i * (255 / NUM_SHOTS + 1), 255, count);
+      leds[i] = mHSV(count + i * (255 / (NUM_SHOTS + 1) ), 255, count);
     }
     count--;
     strip.show();

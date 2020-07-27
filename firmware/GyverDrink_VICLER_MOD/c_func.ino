@@ -39,11 +39,11 @@ void serviceMode() {
             currShot = i;
             dispNum((i + 1) * 1000 + shotPos[i]);
           } else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
-              if(STBY_LIGHT > 0) strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
-              else  strip.setLED(i, mCOLOR(BLACK));
-              shotStates[i] = NO_GLASS;
-              currShot = -1;
-              dispNum(servoPos);
+            if (STBY_LIGHT > 0) strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
+            else  strip.setLED(i, mCOLOR(BLACK));
+            shotStates[i] = NO_GLASS;
+            currShot = -1;
+            dispNum(servoPos);
           }
           strip.show();
         }
@@ -164,9 +164,9 @@ void flowTick() {
         shotStates[i] = NO_GLASS;                                   // статус - нет рюмки
         if (i == curSelected)
           strip.setLED(curSelected, mCOLOR(WHITE));
-        else if(STBY_LIGHT > 0) 
+        else if (STBY_LIGHT > 0)
           strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
-        else strip.setLED(i, mCOLOR(BLACK)); 
+        else strip.setLED(i, mCOLOR(BLACK));
         LEDchanged = true;
         //timeoutReset();                                           // сброс таймаута
         if (i == curPumping) {
@@ -192,7 +192,13 @@ void flowTick() {
     }
     if (shotCount == 0) {                                          // если нет ни одной рюмки
       TIMEOUTtimer.start();
-      if(!parking) systemON = true;
+#if (STATUS_LED == 1)
+      if (timeoutState) {                                          // отключаем динамическую подсветку режима ожидания
+        LEDbreathingState = false;
+        LED = mCOLOR(WHITE);
+      }
+#endif
+      if (!parking) systemON = true;
     }
     else {
       TIMEOUTtimer.stop();
@@ -229,10 +235,14 @@ void flowRoutnie() {
           servo.attach();
           servo.setTargetDeg(shotPos[curPumping]);        // задаём цель
           parking = false;
+#if(STATUS_LED == 1)
+          LED = mCOLOR(ORANGE);
+          strip.show();
+#endif
           DEBUG("moving to shot: ");
           DEBUGln(i);
         }
-        else if(shotPos[i] == PARKING_POS){               // если положение рюмки совпадает с парковочным
+        else if (shotPos[i] == PARKING_POS) {             // если положение рюмки совпадает с парковочным
           servoON();                                      // вкл питание серво
           servo.attach(SERVO_PIN, PARKING_POS);
           delay(500);
@@ -248,18 +258,26 @@ void flowRoutnie() {
         servo.detach();
         systemON = false;                                 // выключили систему
         parking = true;                                   // уже на месте!
+        LEDbreathingState = true;
+        LEDchanged = true;
         DEBUGln("parked!");
       }
       else {                                              // если же в ручном режиме:
         servoON();                                        // включаем серво и паркуемся
         servo.attach();
         servo.setTargetDeg(PARKING_POS);
+#if(STATUS_LED == 1)
+        LED = mCOLOR(ORANGE);
+        LEDchanged = true;
+#endif
 
         if (servo.tick()) {                               // едем до упора
           servoOFF();                                     // выключили серво
           servo.detach();
           systemON = false;                               // выключили систему
           parking = true;                                 // на месте!
+          LEDbreathingState = true;
+          LEDchanged = true;
           DEBUGln("parked!");
         }
       }
@@ -275,6 +293,10 @@ void flowRoutnie() {
       DEBUGln("°");
       servoOFF();                                         // отключаем сервопривод
       servo.detach();
+#if(STATUS_LED == 1)
+      LED = WHITE;
+      strip.show();
+#endif
       systemState = PUMPING;                              // режим - наливание
       delay(300);
       FLOWtimer.setInterval((long)shotVolume[curPumping] * time50ml / 50);  // перенастроили таймер
@@ -314,6 +336,9 @@ void flowRoutnie() {
 void LEDtick() {
   if (LEDchanged && LEDtimer.isReady()) {
     LEDchanged = false;
+#if(STATUS_LED == 1)
+    ledBreathing(LEDbreathingState, NUM_SHOTS, timeoutState);
+#endif
     strip.show();
   }
 }
@@ -324,12 +349,16 @@ void timeoutReset() {
   timeoutState = true;
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
-  if(STBY_LIGHT > 0){
+  if (STBY_LIGHT > 0) {
     for (byte i = 0; i < NUM_SHOTS; i++) {
       if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
-      else if(shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, STBY_LIGHT);
+      else if (shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, STBY_LIGHT);
     }
   }
+#if(STATUS_LED)
+  LED = WHITE;
+#endif
+  LEDbreathingState = false;
   LEDchanged = true;
   //DEBUGln("timeout reset");
 }
@@ -343,8 +372,9 @@ void timeoutTick() {
     dispNum(thisVolume);
     servoOFF();
     servo.detach();
-    if(STBY_LIGHT > 0)
+    if (STBY_LIGHT > 0)
       for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, STBY_LIGHT / 2);
+    LEDbreathingState = true;
     LEDchanged = true;
     selectShot = -1;
     curSelected = -1;
@@ -382,15 +412,42 @@ void jerkServo() {
 }
 
 void rainbowFlow(bool _state, uint8_t _shotNum) {
-  static byte count[NUM_SHOTS] = {130};
+  static float count[NUM_SHOTS] = {130};
   if (!_state) {
     count[_shotNum] = 130;
     return;
   }
-  leds[_shotNum] = mHSV(count[_shotNum], 255, 255);
-  count[_shotNum] += 1;
+  leds[_shotNum] = mHSV((int)count[_shotNum], 255, 255);
+  count[_shotNum] += 0.5;
   LEDchanged = true;
 }
+
+#if(STATUS_LED)
+void ledBreathing(bool _state, uint8_t _shotNum, bool mode) {
+  static short _brightness = 255;
+  static int8_t _dir = -1;
+  if (!_state) {
+    _brightness = 255;
+    _dir = -1;
+    return;
+  }
+  _brightness += _dir * 5;
+  if (_brightness < 0) {
+    _brightness = 0;
+    _dir = 1;
+  }
+  else if (_brightness > 255) {
+    _brightness = 255;
+    _dir = -1;
+  }
+  if (mode) LED = mHSV(130, 255, _brightness);
+  else {
+    LED = mHSV(255, 0, _brightness);
+  }
+
+  LEDchanged = true;
+}
+#endif
 
 void showAnimation(byte mode) {
   static byte i = 0;

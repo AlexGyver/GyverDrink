@@ -77,7 +77,7 @@ void btnTick() {
 
     for (byte i = 0; i < NUM_SHOTS; i++) {    // поиск наличия рюмки
       if (!digitalRead(SW_pins[i])) {         // нашли рюмку
-        if(abs(servo.getCurrentDeg() - shotPos[i]) <= 3) {
+        if (abs(servo.getCurrentDeg() - shotPos[i]) <= 3) {
           pumpingShot = i;
           break;
         }
@@ -112,12 +112,12 @@ void btnTick() {
     DEBUG(round(volumeCount));
     DEBUGln("ml");
     delay(300);
-//    servoON();
-//    servo.setTargetDeg(PARKING_POS);
-//    while (!servo.tick()); // едем назад в нулевое положение
-//    DEBUGln("parked!");
-//    servoOFF();
-//    servo.detach();
+    //    servoON();
+    //    servo.setTargetDeg(PARKING_POS);
+    //    while (!servo.tick()); // едем назад в нулевое положение
+    //    DEBUGln("parked!");
+    //    servoOFF();
+    //    servo.detach();
     timeoutReset();
   }
 }

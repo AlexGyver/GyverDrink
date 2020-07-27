@@ -4,8 +4,8 @@ void setup() {
   DEBUGln("start");
 #endif
 
-//EEPROM.write(1001, 0);  //сброс значения TIME_50ML из памяти
-//EEPROM.write(1002, 0);  //сброс позиций углов для серво
+  //EEPROM.write(1001, 0);  //сброс значения TIME_50ML из памяти
+  //EEPROM.write(1002, 0);  //сброс позиций углов для серво
 
   // епром
   if (EEPROM.read(1000) != 47) {
@@ -77,18 +77,22 @@ void setup() {
   uint8_t startBrightness = RAINBOW_START_BRIGHTNESS;
   while (startBrightness) {
     if (nextColor.isReady()) {
-      for (byte i = 0; i < NUM_SHOTS; i++)
-        leds[i] = mHSV(startBrightness + i * (255 / NUM_SHOTS), 255, startBrightness);
+      for (byte i = 0; i < NUM_SHOTS + STATUS_LED; i++)
+        leds[i] = mHSV(startBrightness + i * (255 / (NUM_SHOTS + STATUS_LED) ), 255, startBrightness);
       startBrightness--;
       strip.show();
     }
     if (nextFrame.isReady()) showAnimation(ANIMATION_NUM);
   }
-  if(STBY_LIGHT > 0){
+  if (STBY_LIGHT > 0) {
     for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, STBY_LIGHT);
     strip.show();
   }
-  
+#if (STATUS_LED == 1)
+  LED = WHITE;
+  strip.show();
+#endif
+
 
   serviceMode();
   timeoutReset();   // сброс таймаута
