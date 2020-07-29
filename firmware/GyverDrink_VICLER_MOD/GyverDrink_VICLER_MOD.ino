@@ -1,6 +1,6 @@
 /*
-  GyverDrink VICLER_MOD_2.0
-  27.07.2020
+  GyverDrink VICLER_MOD_2.1
+  29.07.2020
 
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" на основе версии 1.3 by AlexGyver с устранением багов и дополнительным функционалом
   Исходники на GitHub: https://github.com/VICLER/GyverDrink
@@ -44,24 +44,32 @@
   alex@alexgyver.ru
 */
 
-// ======== НАСТРОЙКИ ========
+//=============================================================================================
+//                                      НАСТРОЙКИ 
+//=============================================================================================
+
 #define NUM_SHOTS     5     // количество рюмок (оно же кол-во светодиодов и кнопок!)
 #define TIMEOUT_OFF   5     // таймаут на выключение (перестаёт дёргать привод), минут
 #define SWITCH_LEVEL  0     // кнопки 1 - высокий сигнал при замыкании, 0 - низкий
 #define INVERSE_SERVO 0     // инвертировать направление вращения серво
 #define PARKING_POS   0     // угол для домашней позиции
-#define TIME_50ML     5100  // время заполнения 50 мл
+#define TIME_50ML     5000  // время заполнения 50 мл
 #define KEEP_POWER    0     // 1 - система поддержания питания ПБ, чтобы он не спал
 #define AUTO_PARKING  1     // парковка в авто режиме: 1 -> вкл, 0 -> выкл
 #define STBY_LIGHT    15    // яркость подсветки в режиме ожидания. 255 -> максимум, 0 -> выкл
-#define STATUS_LED    0     // наличие статус-светодиода. 1 -> подключен к последнему светодиоду для рюмок, 0 -> отсутствует.
+#define STATUS_LED    0     // яркость статус-светодиода. 255 -> максимум, 0 -> не подключен.
+
 #define MAX_VOLUME    200   // ограничение максимального объёма
 #define DEBUG_UART    0     // отладка
 
 // положение серво над центрами рюмок
 byte shotPos[] = {0, 45, 90, 135, 180};
 
-#if defined(ARDUINO_AVR_MICRO)  // =========== ПИНЫ Arduino Micro ===========
+//=============================================================================================
+//                                   ПИНЫ Arduino Micro 
+//=============================================================================================
+ 
+#if defined(ARDUINO_AVR_MICRO)
 #define PUMP_POWER  4
 #define SERVO_POWER 16
 #define SERVO_PIN   6
@@ -74,7 +82,11 @@ byte shotPos[] = {0, 45, 90, 135, 180};
 #define DISP_CLK    3
 const byte SW_pins[] = {14, 15, 18, 19, 20};
 
-#elif defined(ARDUINO_AVR_NANO) // =========== ПИНЫ Arduino Nano ===========
+//=============================================================================================
+//                                   ПИНЫ Arduino Nano 
+//=============================================================================================
+ 
+#elif defined(ARDUINO_AVR_NANO)
 #define PUMP_POWER  3
 #define SERVO_POWER 4
 #define SERVO_PIN   5
@@ -88,7 +100,9 @@ const byte SW_pins[] = {14, 15, 18, 19, 20};
 const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};
 #endif
 
-// =========== ЛИБЫ ===========
+//=============================================================================================
+//ЛИБЫ
+
 #include <GyverTM1637.h>
 #include <ServoSmooth.h>
 #include <microLED.h>
@@ -98,10 +112,17 @@ const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};
 #include "timer2Minim.h"
 #include "TM1637_Animation.h"
 
-// =========== ДАТА ===========
+//=============================================================================================
+//ДАТА
+
 #define COLOR_DEBTH 2                         // цветовая глубина: 1, 2, 3 (в байтах)
-LEDdata leds[NUM_SHOTS + STATUS_LED];                      // буфер ленты типа LEDdata (размер зависит от COLOR_DEBTH)
-microLED strip(leds, NUM_SHOTS + STATUS_LED, LED_PIN);     // объект лента
+#if (STATUS_LED)
+#define statusLed 1
+#else 
+#define statusLed 0
+#endif 
+LEDdata leds[NUM_SHOTS + statusLed];                // буфер ленты типа LEDdata (размер зависит от COLOR_DEBTH)
+microLED strip(leds, NUM_SHOTS + statusLed, LED_PIN);     // объект лента
 GyverTM1637 disp(DISP_CLK, DISP_DIO);
 ServoSmooth servo;
 encMinim enc(ENC_CLK, ENC_DT, ENC_SW, 1, 1);  // пин clk, пин dt, пин sw, направление (0/1), тип (0/1)
@@ -139,7 +160,8 @@ bool timeoutState = false;
 bool parking = true;
 bool LEDbreathingState = false;
 
-// =========== МАКРО ===========
+//=============================================================================================
+//МАКРО
 #define servoON() digitalWrite(SERVO_POWER, 1)
 #define servoOFF() digitalWrite(SERVO_POWER, 0)
 #define pumpON() digitalWrite(PUMP_POWER, 1)
@@ -153,6 +175,6 @@ bool LEDbreathingState = false;
 #define DEBUGln(x)
 #endif
 
-#if (STATUS_LED == 1)
+#if (STATUS_LED)
 #define LED leds[NUM_SHOTS]
 #endif

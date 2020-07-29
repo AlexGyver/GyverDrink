@@ -192,10 +192,10 @@ void flowTick() {
     }
     if (shotCount == 0) {                                          // если нет ни одной рюмки
       TIMEOUTtimer.start();
-#if (STATUS_LED == 1)
+#if (STATUS_LED)
       if (timeoutState) {                                          // отключаем динамическую подсветку режима ожидания
         LEDbreathingState = false;
-        LED = mCOLOR(WHITE);
+        LED = mHSV(255, 0, STATUS_LED); // white
       }
 #endif
       if (!parking) systemON = true;
@@ -235,8 +235,8 @@ void flowRoutnie() {
           servo.attach();
           servo.setTargetDeg(shotPos[curPumping]);        // задаём цель
           parking = false;
-#if(STATUS_LED == 1)
-          LED = mCOLOR(ORANGE);
+#if(STATUS_LED)
+          LED = mHSV(11, 255, STATUS_LED); // orange
           strip.show();
 #endif
           DEBUG("moving to shot: ");
@@ -266,8 +266,8 @@ void flowRoutnie() {
         servoON();                                        // включаем серво и паркуемся
         servo.attach();
         servo.setTargetDeg(PARKING_POS);
-#if(STATUS_LED == 1)
-        LED = mCOLOR(ORANGE);
+#if(STATUS_LED)
+        LED = mHSV(11, 255, STATUS_LED); // orange
         LEDchanged = true;
 #endif
 
@@ -293,8 +293,8 @@ void flowRoutnie() {
       DEBUGln("°");
       servoOFF();                                         // отключаем сервопривод
       servo.detach();
-#if(STATUS_LED == 1)
-      LED = WHITE;
+#if(STATUS_LED)
+      LED = mHSV(255, 0, STATUS_LED); // white
       strip.show();
 #endif
       systemState = PUMPING;                              // режим - наливание
@@ -336,7 +336,7 @@ void flowRoutnie() {
 void LEDtick() {
   if (LEDchanged && LEDtimer.isReady()) {
     LEDchanged = false;
-#if(STATUS_LED == 1)
+#if(STATUS_LED)
     ledBreathing(LEDbreathingState, NUM_SHOTS, timeoutState);
 #endif
     strip.show();
@@ -356,7 +356,7 @@ void timeoutReset() {
     }
   }
 #if(STATUS_LED)
-  LED = WHITE;
+  LED = mHSV(255, 0, STATUS_LED); // white
 #endif
   LEDbreathingState = false;
   LEDchanged = true;
@@ -424,20 +424,20 @@ void rainbowFlow(bool _state, uint8_t _shotNum) {
 
 #if(STATUS_LED)
 void ledBreathing(bool _state, uint8_t _shotNum, bool mode) {
-  static short _brightness = 255;
+  static float _brightness = STATUS_LED;
   static int8_t _dir = -1;
   if (!_state) {
-    _brightness = 255;
+    _brightness = STATUS_LED;
     _dir = -1;
     return;
   }
-  _brightness += _dir * 5;
+  _brightness += _dir * (STATUS_LED / 50.0);
   if (_brightness < 0) {
     _brightness = 0;
     _dir = 1;
   }
-  else if (_brightness > 255) {
-    _brightness = 255;
+  else if (_brightness > STATUS_LED) {
+    _brightness = STATUS_LED;
     _dir = -1;
   }
   if (mode) LED = mHSV(130, 255, _brightness);

@@ -77,8 +77,8 @@ void setup() {
   uint8_t startBrightness = RAINBOW_START_BRIGHTNESS;
   while (startBrightness) {
     if (nextColor.isReady()) {
-      for (byte i = 0; i < NUM_SHOTS + STATUS_LED; i++)
-        leds[i] = mHSV(startBrightness + i * (255 / (NUM_SHOTS + STATUS_LED) ), 255, startBrightness);
+      for (byte i = 0; i < NUM_SHOTS + statusLed; i++)
+        leds[i] = mHSV(startBrightness + i * (255 / (NUM_SHOTS + statusLed) ), 255, startBrightness);
       startBrightness--;
       strip.show();
     }
@@ -88,8 +88,8 @@ void setup() {
     for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, STBY_LIGHT);
     strip.show();
   }
-#if (STATUS_LED == 1)
-  LED = WHITE;
+#if (STATUS_LED)
+  LED = mHSV(255, 0, STATUS_LED); // white
   strip.show();
 #endif
 
