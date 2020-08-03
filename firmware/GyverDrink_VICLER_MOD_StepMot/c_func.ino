@@ -66,8 +66,10 @@ void serviceMode() {
       if (btn.holded()) break;
     }
     disp.displayByte(0x00, 0x00, 0x00, 0x00);
-    HeadLED = mCOLOR(ORANGE);
-    strip.show();
+#if(STATUS_LED)
+          LED = mHSV(11, 255, STATUS_LED); // orange
+          strip.show();
+#endif
 #ifdef STEPPER_ENDSTOP
     while (homing()) stepper.update();   // двигаемся пока не сработал концевик
     stepper.setAngle(PARKING_POS);
@@ -78,7 +80,10 @@ void serviceMode() {
 #endif
     stepper.disable();
     stepper.autoPower(STEPPER_POWERSAFE);
-    HeadLED = WHITE;
+#if(STATUS_LED)
+      LED = mHSV(255, 0, STATUS_LED); // white
+      strip.show();
+#endif
 
     // сохраняем настройки таймера налива
     if (pumpTime > 0) {
@@ -150,7 +155,8 @@ void flowTick() {
         else  strip.setLED(i, mCOLOR(ORANGE));                            // подсветили
         LEDchanged = true;
         shotCount++;                                                // обновили счётчик поставленных рюмок
-        dispNum(shotVolume[i]);                                     // отобразили объём поставленной рюмки
+        if (systemState != PUMPING)
+          dispNum(shotVolume[i]);                                     // отобразили объём поставленной рюмки
         DEBUG("set glass: ");
         DEBUG(i);
         DEBUG(", volume: ");
@@ -173,10 +179,11 @@ void flowTick() {
           pumpOFF();                                                // помпу выкл
           DEBUG("abort fill for shot: ");
           DEBUGln(i);
+          volumeCount = 0;                                            // обнулили счётчик объёма жидкости реального времени
         }
-        volumeCount = 0;                                            // обнулили счётчик объёма жидкости реального времени
         shotCount--;                                                // обновили счётчик поставленных рюмок
-        dispNum(thisVolume);                                        // отобразили общий объём
+        if (systemState != PUMPING)
+          dispNum(thisVolume);                                        // отобразили общий объём
         DEBUG("take glass: ");
         DEBUGln(i);
       }
@@ -189,10 +196,12 @@ void flowTick() {
     }
     if (shotCount == 0) {                                          // если нет ни одной рюмки
       TIMEOUTtimer.start();                                        // запускаем таймер для режима ожидания
+#if (STATUS_LED)  
       if (timeoutState) {                                          // отключаем динамическую подсветку режима ожидания
         LEDbreathing = false;
-        HeadLED = mCOLOR(WHITE);
+        LED = mHSV(255, 0, STATUS_LED); // white
       }
+#endif
       if(!parking) systemON = true;
     }
     else {
@@ -203,6 +212,14 @@ void flowTick() {
       flowRoutnie();        // крутим отработку кнопок и поиск рюмок
     } else {                // ручной
       if (btn.clicked()) {  // клик!
+        if (systemState == PUMPING) {
+          pumpOFF();                                          // помпа выкл
+          shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
+          curPumping = -1;                                    // снимаем выбор рюмки
+          systemState = WAIT;                                 // режим работы - ждать
+          WAITtimer.reset();
+          DEBUGln("ABORT");
+        }
         systemON = true;    // система активирована
         timeoutReset();     // таймаут сброшен
       }
@@ -230,8 +247,10 @@ void flowRoutnie() {
           stepper.setAngle(shotPos[curPumping]);          // задаём цель
           parking = false;
           atHome = false;
-          HeadLED = mCOLOR(ORANGE);
+#if(STATUS_LED)
+          LED = mHSV(11, 255, STATUS_LED); // orange
           strip.show();
+#endif
           DEBUG("moving to shot: ");
           DEBUGln(i);
         }
@@ -239,8 +258,10 @@ void flowRoutnie() {
       }
     }
     if (noGlass && !parking) {                            // если не нашли ни одной пустой рюмки
-      HeadLED = mCOLOR(ORANGE);
-      LEDchanged = true;
+#if(STATUS_LED)
+        LED = mHSV(11, 255, STATUS_LED); // orange
+        LEDchanged = true;
+#endif
 
 #ifdef STEPPER_ENDSTOP
       if (PARKING_POS == 0) homing();                     // если есть концевик и он в парковочном положении -> едем до концевика
@@ -264,8 +285,10 @@ void flowRoutnie() {
     if (stepper.ready()) {                               // если приехали
       DEBUG("reached position: ");
       DEBUGln(stepper.getAngle());
-      HeadLED = WHITE;
+#if(STATUS_LED)
+      LED = mHSV(255, 0, STATUS_LED); // white
       strip.show();
+#endif
       delay(300);
       systemState = PUMPING;                             // режим - наливание
       FLOWtimer.setInterval((long)shotVolume[curPumping] * time50ml / 50);  // перенастроили таймер
@@ -306,7 +329,9 @@ void flowRoutnie() {
 void LEDtick() {
   if (LEDchanged && LEDtimer.isReady()) {
     LEDchanged = false;
-    breathing(LEDbreathing, NUM_SHOTS, timeoutState);
+#if(STATUS_LED)
+    ledBreathing(LEDbreathingState, NUM_SHOTS, timeoutState);
+#endif
     strip.show();
   }
 }
@@ -322,7 +347,9 @@ void timeoutReset() {
       else if(shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, STBY_LIGHT);
     }
   }
-  HeadLED = WHITE;
+#if(STATUS_LED)
+  LED = mHSV(255, 0, STATUS_LED); // white
+#endif
   LEDbreathing = false;
   LEDchanged = true;
   timeoutState = true;
@@ -394,39 +421,40 @@ bool homing() {
 }
 #endif
 
-
+#if(STATUS_LED)
 void breathing(bool _state, uint8_t _shotNum, bool mode) {
-  static short _brightness = 255;
+  static float _brightness = STATUS_LED;
   static int8_t _dir = -1;
   if (!_state) {
-    _brightness = 255;
+    _brightness = STATUS_LED;
     _dir = -1;
     return;
   }
-  _brightness += _dir * 10;
+  _brightness += _dir * (STATUS_LED / 50.0);
   if (_brightness < 0) {
     _brightness = 0;
     _dir = 1;
   }
-  else if (_brightness > 255) {
-    _brightness = 255;
+  else if (_brightness > STATUS_LED) {
+    _brightness = STATUS_LED;
     _dir = -1;
   }
-  if (mode) HeadLED = mHSV(130, 255, _brightness);
+  if (mode) LED = mHSV(130, 255, _brightness);
   else {
-    HeadLED = mHSV(255, 0, _brightness);
+    LED = mHSV(255, 0, _brightness);
   }
 
   LEDchanged = true;
 }
+#endif
 
 bool rainbowFadeFlow(uint8_t startBrightness, uint32_t period) {
   static timerMinim timer(period);
   static uint8_t count = startBrightness;
   if (!count) return 0;
   if (timer.isReady()) {
-    for (byte i = 0; i < NUM_SHOTS + 1; i++) {
-      leds[i] = mHSV(count + i * (255 / (NUM_SHOTS + 1) ), 255, count);
+    for (byte i = 0; i < NUM_SHOTS + statusLed; i++) {
+      leds[i] = mHSV(count + i * (255 / (NUM_SHOTS + statusLed) ), 255, count);
     }
     count--;
     strip.show();

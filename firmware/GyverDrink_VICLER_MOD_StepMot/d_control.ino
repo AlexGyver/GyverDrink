@@ -1,6 +1,7 @@
 // кнопки-крутилки
 
 void encTick() {
+  if (systemState == PUMPING) return;
   enc.tick();
   if (enc.isTurn()) {
     volumeChanged = true;

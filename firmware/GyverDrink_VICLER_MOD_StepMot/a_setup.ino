@@ -92,7 +92,9 @@ void setup() {
 
   //strip.clear();
   if(STBY_LIGHT > 0)  for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, STBY_LIGHT);
-  HeadLED = WHITE;
+#if (STATUS_LED)
+  LED = mHSV(255, 0, STATUS_LED); // white
+#endif
   strip.show();
 
   serviceMode();    // калибровка
