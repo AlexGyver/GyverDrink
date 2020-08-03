@@ -2,6 +2,7 @@
 
 void encTick() {
   enc.tick();
+  if (systemState == PUMPING) return;
   if (enc.isTurn()) {
     timeoutReset();
     if (enc.isLeft()) {

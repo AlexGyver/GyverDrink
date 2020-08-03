@@ -154,7 +154,8 @@ void flowTick() {
         else  strip.setLED(i, mCOLOR(ORANGE));                      // подсветили оранжевым
         LEDchanged = true;
         shotCount++;                                                // инкрементировали счётчик поставленных рюмок
-        dispNum(shotVolume[i]);
+        if (systemState != PUMPING)
+          dispNum(shotVolume[i]);
         DEBUG("set glass: ");
         DEBUG(i);
         DEBUG(", volume: ");
@@ -176,10 +177,11 @@ void flowTick() {
           pumpOFF();                                                // помпу выкл
           DEBUG("abort fill for shot: ");
           DEBUGln(i);
+          volumeCount = 0;
         }
-        volumeCount = 0;
         shotCount--;
-        dispNum(thisVolume);
+        if (systemState != PUMPING)
+          dispNum(thisVolume);
         DEBUG("take glass: ");
         DEBUGln(i);
       }
@@ -208,6 +210,14 @@ void flowTick() {
       flowRoutnie();        // крутим отработку кнопок и поиск рюмок
     } else {                // ручной
       if (btn.clicked()) {  // клик!
+        if (systemState == PUMPING) {
+          pumpOFF();                                          // помпа выкл
+          shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
+          curPumping = -1;                                    // снимаем выбор рюмки
+          systemState = WAIT;                                 // режим работы - ждать
+          WAITtimer.reset();
+          DEBUGln("ABORT");
+        }
         systemON = true;    // система активирована
         timeoutReset();     // таймаут сброшен
       }

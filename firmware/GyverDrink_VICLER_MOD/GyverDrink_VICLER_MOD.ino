@@ -1,6 +1,6 @@
 /*
-  GyverDrink VICLER_MOD_2.1
-  29.07.2020
+  GyverDrink VICLER_MOD_2.2
+  03.08.2020
 
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" на основе версии 1.3 by AlexGyver с устранением багов и дополнительным функционалом
   Исходники на GitHub: https://github.com/VICLER/GyverDrink
@@ -13,7 +13,8 @@
       Возврат крана в домашнее положение и сброс счётчика объёма жидкости происходит после снятия рюмки
    - шаг изменения объёма 1мл
    - вывод налитого объёма в реальном времени. Так же и во время прокачки (сброс после снятия рюмки)
-   - сохранение последнего выбранного объёма сразу после изменения
+   - сохранение последнего выбранного объёма в постоянной памяти
+   - возможность отменить налив в любое время нажатием на кнопку
    - убраны буквы для отображения режима (если автоматический, по караям отображаются штрихи)
    - объём на дисплее отображается по центру
    - плавный цветовой переход во время налива (от ORANGE до AQUA)
@@ -115,14 +116,14 @@ const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};
 //=============================================================================================
 //ДАТА
 
-#define COLOR_DEBTH 2                         // цветовая глубина: 1, 2, 3 (в байтах)
+#define COLOR_DEBTH 2 // цветовая глубина: 1, 2, 3 (в байтах)
 #if (STATUS_LED)
 #define statusLed 1
 #else 
 #define statusLed 0
 #endif 
-LEDdata leds[NUM_SHOTS + statusLed];                // буфер ленты типа LEDdata (размер зависит от COLOR_DEBTH)
-microLED strip(leds, NUM_SHOTS + statusLed, LED_PIN);     // объект лента
+LEDdata leds[NUM_SHOTS + statusLed];  // буфер ленты типа LEDdata (размер зависит от COLOR_DEBTH)
+microLED strip(leds, NUM_SHOTS + statusLed, LED_PIN); // объект лента
 GyverTM1637 disp(DISP_CLK, DISP_DIO);
 ServoSmooth servo;
 encMinim enc(ENC_CLK, ENC_DT, ENC_SW, 1, 1);  // пин clk, пин dt, пин sw, направление (0/1), тип (0/1)
@@ -133,7 +134,7 @@ timerMinim LEDtimer(30);
 timerMinim FLOWdebounce(15);
 timerMinim FLOWtimer(2000);
 timerMinim WAITtimer(500);
-timerMinim TIMEOUTtimer(10000);   // таймаут дёргания приводом
+timerMinim TIMEOUTtimer(10000); // таймаут дёргания приводом
 timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
 
 #define MIN_COLOR 48                          // ORANGE mWHEEL
@@ -151,8 +152,8 @@ enum {NO_GLASS, EMPTY, IN_PROCESS, READY} shotStates[NUM_SHOTS];
 enum {SEARCH, MOVING, WAIT, PUMPING} systemState;
 bool workMode = 0;  // 0 manual, 1 auto
 uint16_t time50ml = 0;
-uint8_t thisVolume = 47;
-uint8_t shotVolume[NUM_SHOTS];
+uint16_t thisVolume = 47;
+uint16_t shotVolume[NUM_SHOTS];
 float volumeTick = 15.0f * 50.0f / time50ml;
 float volumeCount = 0.0f;
 bool systemON = false;
@@ -162,6 +163,7 @@ bool LEDbreathingState = false;
 
 //=============================================================================================
 //МАКРО
+
 #define servoON() digitalWrite(SERVO_POWER, 1)
 #define servoOFF() digitalWrite(SERVO_POWER, 0)
 #define pumpON() digitalWrite(PUMP_POWER, 1)
