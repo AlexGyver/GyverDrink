@@ -147,13 +147,13 @@ void flowTick() {
   if (FLOWdebounce.isReady()) {
     for (byte i = 0; i < NUM_SHOTS; i++) {
       bool swState = !digitalRead(SW_pins[i]) ^ SWITCH_LEVEL;
-      if (swState && shotStates[i] == NO_GLASS) {  // поставили пустую рюмку
-        timeoutReset();                                             // сброс таймаута
-        shotStates[i] = EMPTY;                                      // флаг на заправку
+      if (swState && shotStates[i] == NO_GLASS) {                       // поставили пустую рюмку
+        timeoutReset();                                                 // сброс таймаута
+        shotStates[i] = EMPTY;                                          // флаг на заправку
         if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
-        else  strip.setLED(i, mCOLOR(ORANGE));                      // подсветили оранжевым
+        else  strip.setLED(i, mCOLOR(ORANGE));                          // подсветили оранжевым
         LEDchanged = true;
-        shotCount++;                                                // инкрементировали счётчик поставленных рюмок
+        shotCount++;                                                    // инкрементировали счётчик поставленных рюмок
         if (systemState != PUMPING)
           dispNum(shotVolume[i]);
         DEBUG("set glass: ");
@@ -161,7 +161,7 @@ void flowTick() {
         DEBUG(", volume: ");
         DEBUGln(shotVolume[i]);
       }
-      if (!swState && shotStates[i] != NO_GLASS) {   // убрали пустую/полную рюмку
+      if (!swState && shotStates[i] != NO_GLASS) {                  // убрали пустую/полную рюмку
         shotStates[i] = NO_GLASS;                                   // статус - нет рюмки
         if (i == curSelected)
           strip.setLED(curSelected, mCOLOR(WHITE));
@@ -192,10 +192,10 @@ void flowTick() {
         rainbowFlow(0, i);
       }
     }
-    if (shotCount == 0) {                                          // если нет ни одной рюмки
+    if (shotCount == 0) {               // если нет ни одной рюмки
       TIMEOUTtimer.start();
 #if (STATUS_LED)
-      if (timeoutState) {                                          // отключаем динамическую подсветку режима ожидания
+      if (timeoutState) {               // отключаем динамическую подсветку режима ожидания
         LEDbreathingState = false;
         LED = mHSV(255, 0, STATUS_LED); // white
       }
@@ -206,22 +206,22 @@ void flowTick() {
       TIMEOUTtimer.stop();
     }
 
-    if (workMode) {         // авто
-      flowRoutnie();        // крутим отработку кнопок и поиск рюмок
-    } else {                // ручной
-      if (btn.clicked()) {  // клик!
-        if (systemState == PUMPING) {
-          pumpOFF();                                          // помпа выкл
-          shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
-          curPumping = -1;                                    // снимаем выбор рюмки
-          systemState = WAIT;                                 // режим работы - ждать
+    if (workMode) {                         // авто
+      flowRoutnie();                        // крутим отработку кнопок и поиск рюмок
+    } else {                                // ручной
+      if (btn.clicked()) {                  // клик!
+        if (systemState == PUMPING) {       // нажатие кнопки во время налива
+          pumpOFF();                        // помпа выкл
+          shotStates[curPumping] = READY;   // налитая рюмка, статус: готов
+          curPumping = -1;                  // снимаем выбор рюмки
+          systemState = WAIT;               // режим работы - ждать
           WAITtimer.reset();
           DEBUGln("ABORT");
         }
-        systemON = true;    // система активирована
-        timeoutReset();     // таймаут сброшен
+        systemON = true;                    // система активирована
+        timeoutReset();                     // таймаут сброшен
       }
-      if (systemON) flowRoutnie();  // если активны - ищем рюмки и всё такое
+      if (systemON) flowRoutnie();          // если активны - ищем рюмки и всё такое
     }
   }
 }
@@ -293,8 +293,9 @@ void flowRoutnie() {
       }
       dispNum(thisVolume);
     }
-    else if (!workMode && noGlass)                        // если в ручном режиме, припаркованны и нет рюмок - отключаемся нахрен
+    else if (!workMode && noGlass) {                       // если в ручном режиме, припаркованны и нет рюмок - отключаемся нахрен
       systemON = false;
+    }
 
   } else if (systemState == MOVING) {                     // движение к рюмке
     if (servo.tick()) {                                   // если приехали
@@ -359,31 +360,32 @@ void timeoutReset() {
   timeoutState = true;
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
-  if (STBY_LIGHT > 0) {
-    for (byte i = 0; i < NUM_SHOTS; i++) {
-      if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
-      else if (shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, STBY_LIGHT);
-    }
+#if (STBY_LIGHT > 0)
+  for (byte i = 0; i < NUM_SHOTS; i++) {
+    if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
+    else if (shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, STBY_LIGHT);
   }
+#endif
 #if(STATUS_LED)
   LED = mHSV(255, 0, STATUS_LED); // white
-#endif
   LEDbreathingState = false;
+#endif
   LEDchanged = true;
-  //DEBUGln("timeout reset");
+  DEBUGln("timeout reset");
 }
 
 // сам таймаут
 void timeoutTick() {
   if (timeoutState && TIMEOUTtimer.isReady() && systemState == SEARCH) {
-    //DEBUGln("timeout");
+    DEBUGln("timeout");
     timeoutState = false;
     disp.brightness(0);
     dispNum(thisVolume);
     servoOFF();
     servo.detach();
-    if (STBY_LIGHT > 0)
-      for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, STBY_LIGHT / 2);
+#if (STBY_LIGHT > 0)
+    for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, STBY_LIGHT / 2);
+#endif
     LEDbreathingState = true;
     LEDchanged = true;
     selectShot = -1;
@@ -400,7 +402,6 @@ void timeoutTick() {
       jerkServo();
     } else {
       //disp.displayByte(0x00, 0x00, 0x00, 0x00);
-      //disp.point(false);
       for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mCOLOR(BLACK);
     }
   }
