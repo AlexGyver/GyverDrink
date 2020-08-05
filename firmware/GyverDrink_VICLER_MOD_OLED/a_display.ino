@@ -28,6 +28,15 @@ void printStr(const char str[], int8_t x = Append, int8_t y = Append) {
 
 void printNum(int num, int8_t x = -4, int8_t y = -4) {
   char cstr[4];
+  static int last_num = 0;
+  if ( (num == 99 && last_num == 100) || (num < 10 && last_num > 9)) {
+    //    disp.setFont(CenturyGothic10x16);
+    //    printStr("               ", Center, 2);
+    //    printStr("               ", Center, 4);
+    //    printStr("               ", Center, 6);
+    //    disp.setFont(CenturyNum22x34);
+  }
+  last_num = num;
   itoa(num, cstr, 10);
   printStr(cstr, x, y);
 }
@@ -51,16 +60,13 @@ void displayPage(bool page) {
   }
   else if (page == _AUTO) {
     disp.setFont(CenturyGothic10x16);
-    printStr("Авто режим", Left, 0);
+    printStr("Авто режим    ", Left, 0);
   }
 
 #ifdef BATTERY_PIN
   disp.setFont(Battery19x9);
   printNum(get_battery_percent(), Right);
 #endif
-
-  //  disp.setFont(Battery19x9);
-  //  printNum(3, Right);
 
   disp.setFont(CenturyNum22x34);
   printNum(thisVolume, Center, 3);

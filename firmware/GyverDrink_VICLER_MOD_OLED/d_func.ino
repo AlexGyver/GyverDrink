@@ -144,12 +144,8 @@ void flowTick() {
         DEBUG("take glass: ");
         DEBUGln(i);
       }
-      if (shotStates[i] == READY) {
-        rainbowFlow(1, i);
-      }
-      else {
-        rainbowFlow(0, i);
-      }
+      if (shotStates[i] == READY) rainbowFlow(1, i);
+      else  rainbowFlow(0, i);
     }
     if (shotCount == 0) {                                          // если нет ни одной рюмки
       TIMEOUTtimer.start();
@@ -164,33 +160,12 @@ void flowTick() {
         DEBUGln("SystemON");
       }
     }
-    else {
-      TIMEOUTtimer.stop();
-    }
+    else  TIMEOUTtimer.stop();
 
-    if (workMode) {         // авто
-      flowRoutnie();        // крутим отработку кнопок и поиск рюмок
-    }
-    else {                // ручной
-      if (btn.clicked()) {  // клик!
-        DEBUGln("Button pressed");
-        if (systemState == PUMPING) {
-          pumpOFF();                                          // помпа выкл
-          shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
-          curPumping = -1;                                    // снимаем выбор рюмки
-          systemState = WAIT;                                 // режим работы - ждать
-          WAITtimer.reset();
-          DEBUGln("ABORT");
-        }
-        systemON = true;    // система активирована
-        DEBUGln("SystemON");
-        timeoutReset();     // таймаут сброшен
-      }
-      if (systemON) {
-        DEBUGln("flowRoutine");
-        flowRoutnie();  // если активны - ищем рюмки и всё такое
-      }
-    }
+    if (workMode)           // авто
+      flowRoutnie();       // крутим отработку кнопок и поиск рюмок
+    else if (systemON)    // ручной
+      flowRoutnie();     // если активны - ищем рюмки и всё такое
   }
 }
 
@@ -355,8 +330,6 @@ void timeoutTick() {
   if (timeoutState && TIMEOUTtimer.isReady() && systemState == SEARCH) {
     DEBUGln("timeout");
     timeoutState = false;
-    //disp.brightness(0);
-    //dispNum(thisVolume);
     servoOFF();
     servo.detach();
 #if (STBY_LIGHT)
@@ -367,39 +340,27 @@ void timeoutTick() {
     selectShot = -1;
     curSelected = -1;
     systemON = false;
+#if (TIMEOUT_OFF > 0)
     POWEROFFtimer.reset();
+    POWEROFFtimer.start();
+#endif
     EEPROM.put(0, thisVolume);
-    jerkServo();
   }
 
-  // дёргаем питание серво, это приводит к скачку тока и powerbank не отключает систему
-  if (!timeoutState && TIMEOUTtimer.isReady()) {
-    if (!POWEROFFtimer.isReady()) {   // пока не сработал таймер полного отключения
-      jerkServo();
-    } else {
-      //disp.displayByte(0x00, 0x00, 0x00, 0x00);
-      //disp.point(false);
-      for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mCOLOR(BLACK);
-    }
+#if (TIMEOUT_OFF > 0)
+  if (POWEROFFtimer.isReady()) {
+    for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mCOLOR(BLACK);
+#if(STATUS_LED)
+    LED = mHSV(255, 0, 0);  // off
+    LEDbreathingState = false;
+#endif
+    LEDchanged = true;
   }
-}
-
-void jerkServo() {
-  if (KEEP_POWER) {
-    //disp.brightness(7);
-    servoON();
-    servo.attach();
-    servo.write(servo.getCurrentDeg() + 2);
-    delay(100);
-    servo.write(servo.getCurrentDeg());
-    delay(100);
-    servo.detach();
-    servoOFF();
-    //disp.brightness(1);
-  }
+#endif
 }
 
 void rainbowFlow(bool _state, uint8_t _shotNum) {
+#if (RAINBOW_FLOW)
   static float count[NUM_SHOTS] = {130};
   if (!_state) {
     count[_shotNum] = 130;
@@ -408,6 +369,7 @@ void rainbowFlow(bool _state, uint8_t _shotNum) {
   leds[_shotNum] = mHSV((int)count[_shotNum], 255, 255);
   count[_shotNum] += 0.5;
   LEDchanged = true;
+#endif
 }
 
 #if(STATUS_LED)
