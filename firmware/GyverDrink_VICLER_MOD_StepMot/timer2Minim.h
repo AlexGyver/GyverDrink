@@ -40,8 +40,8 @@ void timerMinim::stop() {
 
 // алгоритм таймера v2.0
 boolean timerMinim::isReady() {
-  if(_stop) return 0;
-  
+  if (_stop) return 0;
+
   uint32_t thisMls = millis();
   if (thisMls - _timer >= _interval) {
     do {

@@ -91,7 +91,7 @@ void setup() {
   stepper.disable();
 
   //strip.clear();
-  if(STBY_LIGHT > 0)  for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, STBY_LIGHT);
+  if (STBY_LIGHT > 0)  for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, STBY_LIGHT);
 #if (STATUS_LED)
   LED = mHSV(255, 0, STATUS_LED); // white
 #endif

@@ -14,7 +14,7 @@ void encTick() {
       if (curSelected >= 0) shotVolume[curSelected] -= 1;
       else thisVolume -= 1;
     }
-    shotVolume[curSelected] = constrain(shotVolume[curSelected], 1, 200);
+    if (curSelected) shotVolume[(byte)curSelected] = constrain(shotVolume[(byte)curSelected], 1, 200);
     thisVolume = constrain(thisVolume, 1, 200);
     if (curSelected >= 0) {
       dispNum(shotVolume[curSelected]);
@@ -33,6 +33,20 @@ void encTick() {
 }
 
 void btnTick() {
+  if (btn.clicked()) {                        // клик!
+    timeoutReset();                           // таймаут сброшен
+    DEBUGln("Button pressed");
+    if (systemState == PUMPING) {
+      pumpOFF();                              // помпа выкл
+      shotStates[curPumping] = READY;         // налитая рюмка, статус: готов
+      curPumping = -1;                        // снимаем выбор рюмки
+      systemState = WAIT;                     // режим работы - ждать
+      WAITtimer.reset();
+      DEBUGln("ABORT");
+    }
+    if (!workMode) systemON = true;           // система активирована
+  }
+  
   if (btn.holded()) {
     timeoutReset();
     workMode = !workMode;
@@ -77,7 +91,7 @@ void btnTick() {
     for (byte i = 0; i < NUM_SHOTS; i++) {
       if (!digitalRead(SW_pins[i])) {
         stepper.enable();
-        pumpingShot = i; 
+        pumpingShot = i;
       }
     }
     if (pumpingShot == -1) return;
