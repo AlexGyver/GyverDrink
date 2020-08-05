@@ -162,6 +162,7 @@ bool systemON = false;
 bool timeoutState = false;
 bool parking = true;
 bool LEDbreathingState = false;
+bool volumeChanged = false;
 
 //=============================================================================================
 //МАКРО

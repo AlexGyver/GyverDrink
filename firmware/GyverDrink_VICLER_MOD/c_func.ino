@@ -112,9 +112,9 @@ void dispMode() {
 }
 
 void dispNum(uint16_t num) {
-//  static uint16_t lastNum = 65535;
-//  if (num == lastNum) return;
-//  lastNum = num;
+  //  static uint16_t lastNum = 65535;
+  //  if (num == lastNum) return;
+  //  lastNum = num;
 
   if (num < 100) {
     if (!workMode) disp.displayByte(0, 0x00);
@@ -378,7 +378,10 @@ void timeoutTick() {
     POWEROFFtimer.reset();
     POWEROFFtimer.start();
 #endif
-    EEPROM.put(0, thisVolume);
+    if (volumeChanged) {
+      volumeChanged = false;
+      EEPROM.put(0, thisVolume);
+    }
   }
 
 #if(TIMEOUT_OFF > 0)

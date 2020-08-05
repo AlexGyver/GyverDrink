@@ -5,6 +5,7 @@ void encTick() {
   if (systemState == PUMPING) return;
   if (enc.isTurn()) {
     timeoutReset();
+    volumeChanged = true;
     if (enc.isLeft()) {
       if (curSelected >= 0) shotVolume[curSelected] += 1;
       else thisVolume += 1;
