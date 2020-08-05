@@ -33,10 +33,23 @@ void encTick() {
 }
 
 void btnTick() {
+  if (btn.clicked()) {                        // клик!
+    timeoutReset();                           // таймаут сброшен
+    DEBUGln("Button pressed");
+    if (systemState == PUMPING) {
+      pumpOFF();                              // помпа выкл
+      shotStates[curPumping] = READY;         // налитая рюмка, статус: готов
+      curPumping = -1;                        // снимаем выбор рюмки
+      systemState = WAIT;                     // режим работы - ждать
+      WAITtimer.reset();
+      DEBUGln("ABORT");
+    }
+    if (!workMode) systemON = true;           // система активирована
+  }
+
   if (btn.holded()) {
-    timeoutReset();
     workMode = !workMode;
-    dispMode();
+    timeoutReset();
     if (!workMode && curPumping >= 0) {
       DEBUG("abort fill for shot: ");
       DEBUGln(curPumping);
