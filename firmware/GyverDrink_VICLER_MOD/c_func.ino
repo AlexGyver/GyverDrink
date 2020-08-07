@@ -1,5 +1,6 @@
 // различные функции
 
+// сервисный режим
 void serviceMode() {
   if (!digitalRead(BTN_PIN)) {
     byte serviceText[] = {_S, _E, _r, _U, _i, _C, _E};
@@ -169,7 +170,6 @@ void flowTick() {
           strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
         else strip.setLED(i, mCOLOR(BLACK));
         LEDchanged = true;
-        //timeoutReset();                                           // сброс таймаута
         if (i == curPumping) {
           curPumping = -1; // снимаем выбор рюмки
           systemState = WAIT;                                       // режим работы - ждать
@@ -201,14 +201,14 @@ void flowTick() {
     else  TIMEOUTtimer.stop();
 
     if (workMode)           // авто
-      flowRoutnie();       // крутим отработку кнопок и поиск рюмок
+      flowRoutine();       // крутим отработку кнопок и поиск рюмок
     else if (systemON)    // ручной
-      flowRoutnie();     // если активны - ищем рюмки и всё такое
+      flowRoutine();     // если активны - ищем рюмки и всё такое
   }
 }
 
 // поиск и заливка
-void flowRoutnie() {
+void flowRoutine() {
 
   if (systemState == SEARCH) {                            // если поиск рюмки
     bool noGlass = true;
@@ -227,7 +227,7 @@ void flowRoutnie() {
           servo.setTargetDeg(shotPos[curPumping]);        // задаём цель
           parking = false;
 #if(STATUS_LED)
-          LED = mHSV(11, 255, STATUS_LED); // orange
+          LED = mHSV(20, 255, STATUS_LED); // orange
           strip.show();
 #endif
           DEBUG("moving to shot: ");
@@ -258,7 +258,7 @@ void flowRoutnie() {
         servo.attach();
         servo.setTargetDeg(PARKING_POS);
 #if(STATUS_LED)
-        LED = mHSV(11, 255, STATUS_LED); // orange
+        LED = mHSV(20, 255, STATUS_LED); // orange
         LEDchanged = true;
 #endif
 
@@ -324,12 +324,15 @@ void flowRoutnie() {
   }
 }
 
-// отрисовка светодиодов по флагу (50мс)
+// отрисовка светодиодов по флагу (30мс)
 void LEDtick() {
   if (LEDchanged && LEDtimer.isReady()) {
     LEDchanged = false;
 #if(STATUS_LED)
     ledBreathing(LEDbreathingState, NUM_SHOTS, timeoutState);
+#endif
+#if(KEEP_POWER)
+    keepPower();
 #endif
     strip.show();
   }
@@ -337,13 +340,16 @@ void LEDtick() {
 
 // сброс таймаута
 void timeoutReset() {
-  if (!timeoutState) disp.brightness(7);
-  dispMode();
-  dispNum(thisVolume);
+  if (!timeoutState) {
+    disp.brightness(7);
+    dispMode();
+    dispNum(thisVolume);
+  }
   timeoutState = true;
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
-#if (STBY_LIGHT > 0)
+  keepPowerState = false;
+#if (STBY_LIGHT)
   for (byte i = 0; i < NUM_SHOTS; i++) {
     if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
     else if (shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, STBY_LIGHT);
@@ -352,6 +358,9 @@ void timeoutReset() {
 #if(STATUS_LED)
   LED = mHSV(255, 0, STATUS_LED); // white
   LEDbreathingState = false;
+#endif
+#if (KEEP_POWER)
+  KEEP_POWERtimer.reset();
 #endif
   LEDchanged = true;
   DEBUGln("timeout reset");
@@ -366,7 +375,7 @@ void timeoutTick() {
     dispNum(thisVolume);
     servoOFF();
     servo.detach();
-#if (STBY_LIGHT > 0)
+#if (STBY_LIGHT)
     for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, STBY_LIGHT / 2);
 #endif
     LEDbreathingState = true;
@@ -374,9 +383,8 @@ void timeoutTick() {
     selectShot = -1;
     curSelected = -1;
     systemON = false;
-#if (TIMEOUT_OFF > 0)
+#if (TIMEOUT_OFF)
     POWEROFFtimer.reset();
-    POWEROFFtimer.start();
 #endif
     if (volumeChanged) {
       volumeChanged = false;
@@ -384,7 +392,14 @@ void timeoutTick() {
     }
   }
 
-#if(TIMEOUT_OFF > 0)
+#if(KEEP_POWER)
+  if (KEEP_POWERtimer.isReady() && (shotCount == 0) && ( (KEEP_POWER < STBY_TIME) || !timeoutState) && (curSelected == -1)) {
+    keepPowerState = 1;
+    LEDchanged = true;
+  }
+#endif
+
+#if(TIMEOUT_OFF)
   if (POWEROFFtimer.isReady() && !timeoutState) {
     disp.displayByte(0x00, 0x00, 0x00, 0x00);
     for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mCOLOR(BLACK);
@@ -393,10 +408,49 @@ void timeoutTick() {
     LEDbreathingState = false;
 #endif
     LEDchanged = true;
+    POWEROFFtimer.stop();
   }
 #endif
 }
 
+// поддержание питания повербанка коротким повышением потребления
+#if(KEEP_POWER)
+void keepPower() {
+  static bool _dir = 1;
+  static float _brightness = 1;
+  uint8_t stby_brightness = STBY_LIGHT;
+#if (TIMEOUT_OFF)
+  stby_brightness = STBY_LIGHT * POWEROFFtimer.isOn();
+  if (!timeoutState) stby_brightness /= 2;
+#endif
+
+
+  if (!keepPowerState) return;
+
+  if (_brightness >= (255 - stby_brightness) ) {
+    _brightness = 255 - stby_brightness;
+    _dir = 0;
+  }
+
+  for (byte i = NUM_SHOTS - 1; i > 0; i--) leds[i] = leds[i - 1];
+  leds[0] = mHSV(20, 255, stby_brightness + (int)_brightness);
+
+  if (_dir) _brightness *= 1.5;
+  else      _brightness /= 1.5;
+
+  if (_brightness <= 1) {
+    _brightness = 1;
+    _dir = 1;
+    keepPowerState = 0;
+    for (byte i = 0; i < NUM_SHOTS; i++)
+      leds[i] = mHSV(20, 255, stby_brightness);
+  }
+
+  LEDchanged = true;
+}
+#endif
+
+// динамическая подсветка светодиодов
 void rainbowFlow(bool _state, uint8_t _shotNum) {
 #if (RAINBOW_FLOW)
   static float count[NUM_SHOTS] = {130};
@@ -410,6 +464,7 @@ void rainbowFlow(bool _state, uint8_t _shotNum) {
 #endif
 }
 
+// дыхание статус-светодиода
 #if(STATUS_LED)
 void ledBreathing(bool _state, uint8_t _shotNum, bool mode) {
   static float _brightness = STATUS_LED;
@@ -437,6 +492,7 @@ void ledBreathing(bool _state, uint8_t _shotNum, bool mode) {
 }
 #endif
 
+// анимация TM1637
 void showAnimation(byte mode) {
   static byte i = 0;
   if (mode == 0) {

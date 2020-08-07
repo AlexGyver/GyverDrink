@@ -1,6 +1,6 @@
 /*
-  GyverDrink VICLER_MOD_2.4
-  05.08.2020
+  GyverDrink VICLER_MOD_2.5
+  07.08.2020
 
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" на основе версии 1.3 by AlexGyver с устранением багов и дополнительным функционалом
   Исходники на GitHub: https://github.com/VICLER/GyverDrink
@@ -50,12 +50,14 @@
 //=============================================================================================
 
 #define NUM_SHOTS     5     // количество рюмок (оно же кол-во светодиодов и кнопок!)
-#define TIMEOUT_OFF   5     // таймаут на выключение дисплея и светодиодов в минутах. Если 0 -> таймаут отключен
+#define TIMEOUT_OFF   0     // таймаут на выключение дисплея и светодиодов в минутах. Если 0 -> таймаут отключен
+#define KEEP_POWER    0     // интервал пинания повербанка в секундах 
 #define SWITCH_LEVEL  0     // кнопки 1 -> высокий сигнал при замыкании, 0 - низкий
 #define INVERSE_SERVO 0     // инвертировать направление вращения серво
 #define PARKING_POS   0     // угол для домашней позиции
 #define TIME_50ML     5000  // время заполнения 50 мл
 #define AUTO_PARKING  1     // парковка в авто режиме: 1 -> вкл, 0 -> выкл
+#define STBY_TIME     10    // таймаут режима ожидания в секундах
 #define STBY_LIGHT    15    // яркость подсветки в режиме ожидания. 255 -> максимум, 0 -> выкл
 #define RAINBOW_FLOW  1     // 1 -> динамическая подсветка налитых рюмок, 0 -> статическая
 #define STATUS_LED    0     // яркость статус-светодиода. 255 -> максимум, 0 -> не подключен.
@@ -134,8 +136,11 @@ timerMinim LEDtimer(30);
 timerMinim FLOWdebounce(15);
 timerMinim FLOWtimer(2000);
 timerMinim WAITtimer(500);
-timerMinim TIMEOUTtimer(10000); // таймаут дёргания приводом
-#if (TIMEOUT_OFF > 0)
+timerMinim TIMEOUTtimer(STBY_TIME * 1000L); // таймаут дёргания приводом
+#if (KEEP_POWER)
+timerMinim KEEP_POWERtimer(KEEP_POWER * 1000L);
+#endif
+#if (TIMEOUT_OFF)
 timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
 #endif
 
@@ -163,6 +168,7 @@ bool timeoutState = false;
 bool parking = true;
 bool LEDbreathingState = false;
 bool volumeChanged = false;
+bool keepPowerState = false;
 
 //=============================================================================================
 //МАКРО

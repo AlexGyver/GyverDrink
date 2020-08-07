@@ -11,6 +11,7 @@ class timerMinim
     void reset();                         // ручной сброс таймера на установленный интервал
     void stop();
     void start();
+    bool isOn();
     uint32_t getInterval();
 
   private:
@@ -41,6 +42,10 @@ void timerMinim::start() {
 
 void timerMinim::stop() {
   _stop = true;
+}
+
+bool timerMinim::isOn() {
+  return !_stop;
 }
 
 // алгоритм таймера v2.0
