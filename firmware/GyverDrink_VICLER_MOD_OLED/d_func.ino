@@ -307,7 +307,7 @@ void LEDtick() {
 
 // сброс таймаута
 void timeoutReset() {
-  //if (!timeoutState) disp.brightness(7);
+  if (!timeoutState) displayPage(workMode);
   timeoutState = true;
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
@@ -418,24 +418,28 @@ uint8_t get_battery_percent() {
 }
 
 bool battery_watchdog() {
-  static uint16_t lastCheck = 0;
-  static bool ok = 0;
-  if (millis() - lastCheck >= 1000) {
-    lastCheck = millis();
+  static uint16_t lastMillis = 0;
+  static bool ok, lastOk = 0;
+  if (millis() - lastMillis >= 1000) {
+    lastMillis = millis();
     ok = (get_battery_voltage() < BATTERY_LOW) ? 1 : 0;
     if (ok) {
-      disp.clear();
-      if (STBY_LIGHT > 0)
-        for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, 0);
+      for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, 0);
 #if(STATUS_LED)
-      LED = mHSV(255, 0, _brightness);
+      LED = mHSV(255, 0, 0);
       strip.show();
 #endif
+      disp.clear();
+      timeoutState = false;
       delay(500);
+    }
+    else if(lastOk) {
+      timeoutReset();
     }
     disp.setFont(Battery19x9);
     printNum(get_battery_percent(), Right, 0);
   }
+  lastOk = ok;
   return ok;
 }
 #endif
