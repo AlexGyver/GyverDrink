@@ -421,9 +421,8 @@ void keepPower() {
   uint8_t stby_brightness = STBY_LIGHT;
 #if (TIMEOUT_OFF)
   stby_brightness = STBY_LIGHT * POWEROFFtimer.isOn();
-  if (!timeoutState) stby_brightness /= 2;
 #endif
-
+  if (!timeoutState) stby_brightness /= 2;
 
   if (!keepPowerState) return;
 
