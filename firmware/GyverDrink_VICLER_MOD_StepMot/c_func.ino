@@ -171,7 +171,6 @@ void flowTick() {
         else
           strip.setLED(i, mCOLOR(BLACK));                             // нигра
         LEDchanged = true;
-        //timeoutReset();                                           // сброс таймаута
         if (i == curPumping) {
           curPumping = -1; // снимаем выбор рюмки
           systemState = WAIT;                                       // режим работы - ждать
@@ -205,14 +204,14 @@ void flowTick() {
     }
 
     if (workMode)            // авто
-      flowRoutnie();        // крутим отработку кнопок и поиск рюмок
+      flowRoutine();        // крутим отработку кнопок и поиск рюмок
     else if (systemON)    // ручной
-      flowRoutnie();      // если активны - ищем рюмки и всё такое
+      flowRoutine();      // если активны - ищем рюмки и всё такое
   }
 }
 
 // поиск и заливка
-void flowRoutnie() {
+void flowRoutine() {
   if (systemState == SEARCH) {                            // если поиск рюмки
     bool noGlass = true;
     for (byte i = 0; i < NUM_SHOTS; i++) {
@@ -321,9 +320,12 @@ void LEDtick() {
 
 // сброс таймаута
 void timeoutReset() {
-  if (!timeoutState)  disp.brightness(7);
-  dispMode();
-  dispNum(thisVolume);
+  if (!timeoutState)  {
+    disp.brightness(7);
+    dispMode();
+    dispNum(thisVolume);
+  }
+
 #if (STBY_LIGHT > 0)
   for (byte i = 0; i < NUM_SHOTS; i++) {
     if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
