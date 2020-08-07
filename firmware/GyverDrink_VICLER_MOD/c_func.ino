@@ -340,8 +340,8 @@ void LEDtick() {
 
 // сброс таймаута
 void timeoutReset() {
-  if (!timeoutState) {
-    disp.brightness(7);
+  if (!timeoutState)  disp.brightness(7);
+  if(systemState != PUMPING){
     dispMode();
     dispNum(thisVolume);
   }
