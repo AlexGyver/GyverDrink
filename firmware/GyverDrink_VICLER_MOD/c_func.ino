@@ -69,7 +69,8 @@ void serviceMode() {
         break;
       }
     }
-    disp.clear();
+    //disp.clear();
+    disp.displayByte(0x00, 0x00, 0x00, 0x00);
     while (!servo.tick());
     servoOFF();
     servo.detach();
