@@ -14,7 +14,7 @@ void serviceMode() {
     long pumpTime = 0;
     timerMinim timer100(100);
     dispNum(PARKING_POS);
-    bool flag;
+    bool flag = false;
     while (1) {
       enc.tick();
       static int currShot = -1;
@@ -23,10 +23,10 @@ void serviceMode() {
         // работа помпы со счётчиком
         if (!digitalRead(ENC_SW)) {
           if (flag) pumpTime += 100;
-          else pumpTime = 0;
+          else  pumpTime = 0;
           disp.displayInt(pumpTime);
-          pumpON();
           flag = true;
+          pumpON();
         } else {
           pumpOFF();
           flag = false;
@@ -51,7 +51,6 @@ void serviceMode() {
       }
 
       if (enc.isTurn()) {   // крутим серво от энкодера
-        pumpTime = 0;
         if (enc.isLeft()) servoPos += 1;
         if (enc.isRight())  servoPos -= 1;
         servoPos = constrain(servoPos, 0, 180);
@@ -342,7 +341,7 @@ void LEDtick() {
 // сброс таймаута
 void timeoutReset() {
   if (!timeoutState)  disp.brightness(7);
-  if(systemState != PUMPING){
+  if (systemState != PUMPING) {
     dispMode();
     dispNum(thisVolume);
   }
@@ -526,5 +525,49 @@ void showAnimation(byte mode) {
   else if (mode == 7) {
     if (i >= 12) i = 0;
     disp.displayByte(AnimationData_7[i++]);
+  }
+}
+
+void readEEPROM() {
+  // чтение последнего налитого объёма
+  if (EEPROM.read(1000) != 47) {
+    EEPROM.write(1000, 47);
+    EEPROM.put(0, thisVolume);
+  }
+  else EEPROM.get(0, thisVolume);
+  for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
+
+  // чтение значения таймера для 50мл
+  if (EEPROM.read(1001) != 47) {
+    EEPROM.write(1001, 47);
+    EEPROM.put(10, TIME_50ML);
+  }
+  else EEPROM.get(10, time50ml);
+  volumeTick = 15.0f * 50.0f / time50ml;
+
+  // чтение позиций серво над рюмками
+  if (EEPROM.read(1002) != 47) {
+    EEPROM.write(1002, 47);
+    for (byte i = 0; i < NUM_SHOTS; i++) {
+      EEPROM.write(100 + i, initShotPos[i]);
+      shotPos[i] = initShotPos[i];
+    }
+  }
+  else {
+    for (byte i = 0; i < NUM_SHOTS; i++)
+      EEPROM.get(100 + i, shotPos[i]);
+  }
+}
+
+void resetEEPROM() {
+  // сброс калибровки времени на 50мл
+  EEPROM.write(1001, 47);
+  EEPROM.put(10, TIME_50ML);
+
+  // сброс позиций серво над рюмками
+  EEPROM.write(1002, 47);
+  for (byte i = 0; i < NUM_SHOTS; i++) {
+    EEPROM.write(100 + i, initShotPos[i]);
+    shotPos[i] = initShotPos[i];
   }
 }

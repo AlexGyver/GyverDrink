@@ -4,33 +4,9 @@ void setup() {
   DEBUGln("start");
 #endif
 
-  //EEPROM.write(1001, 0);  //сброс значения TIME_50ML из памяти
-  //EEPROM.write(1002, 0);  //сброс позиций углов для серво
-
   // епром
-  if (EEPROM.read(1000) != 47) {
-    EEPROM.write(1000, 47);
-    EEPROM.put(0, thisVolume);
-  }
-  EEPROM.get(0, thisVolume);
-  for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
-
-  if (EEPROM.read(1001) != 47) {
-    EEPROM.write(1001, 47);
-    EEPROM.put(10, TIME_50ML);
-  }
-  EEPROM.get(10, time50ml);
-  volumeTick = 15.0f * 50.0f / time50ml;
-
-  if (EEPROM.read(1002) != 47) {
-    EEPROM.write(1002, 47);
-    for (byte i = 0; i < NUM_SHOTS; i++)
-      EEPROM.write(100 + i, shotPos[i]);
-  }
-  for (byte i = 0; i < NUM_SHOTS; i++)
-    EEPROM.get(100 + i, shotPos[i]);
-
-
+  readEEPROM();
+  
   // тыкаем ленту
   strip.setBrightness(255);
   strip.clear();

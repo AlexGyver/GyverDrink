@@ -133,4 +133,14 @@ void btnTick() {
     delay(300);
     timeoutReset();
   }
+  if(btn.holdedFor(5)){
+    byte resetText[] = {_r, _E, _S, _E, _t};
+    disp.runningString(resetText, sizeof(resetText), 150);
+    while (!digitalRead(BTN_PIN));
+    workMode = !workMode;
+    dispMode();
+    dispNum(thisVolume);
+    resetEEPROM();
+    readEEPROM();
+  }
 }

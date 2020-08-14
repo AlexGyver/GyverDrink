@@ -17,6 +17,7 @@ class buttonMinim {
     boolean clicked();
     boolean holding();
     boolean holded();
+    boolean holdedFor(uint8_t sec);
   private:
     buttonMinimFlags flags;
     void tick();
@@ -84,6 +85,14 @@ boolean buttonMinim::holded() {
   buttonMinim::tick();
   if (flags.holdF && flags.holdedFlag) {
     flags.holdedFlag = false;
+    return true;
+  }
+  else return false;
+}
+
+boolean buttonMinim::holdedFor(uint8_t sec){
+  buttonMinim::tick();
+  if(flags.holdF && (millis() - _btnTimer > sec * 1000)){
     return true;
   }
   else return false;
