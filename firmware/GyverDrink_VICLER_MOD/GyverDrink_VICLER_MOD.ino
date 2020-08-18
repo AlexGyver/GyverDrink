@@ -63,12 +63,11 @@
 #define RAINBOW_FLOW  1     // 1 -> динамическая подсветка налитых рюмок, 0 -> статическая
 #define STATUS_LED    0     // яркость статус-светодиода. 255 -> максимум, 0 -> не подключен.
 #define MAX_VOLUME    200   // ограничение максимального объёма
+#define DEBUG_UART    0     // отладка
 
 // положение серво над центрами рюмок
 // номер рюмки          1   2   3   4    5 
 #define SHOT_POSITIONS  0, 45, 90, 135, 180
-
-#define DEBUG_UART    0     // отладка
 
 //=============================================================================================
 //                                   ПИНЫ Arduino Micro
@@ -138,7 +137,7 @@ timerMinim LEDtimer(30);
 timerMinim FLOWdebounce(15);
 timerMinim FLOWtimer(2000);
 timerMinim WAITtimer(500);
-timerMinim TIMEOUTtimer(STBY_TIME * 1000L); // таймаут дёргания приводом
+timerMinim TIMEOUTtimer(STBY_TIME * 1000L); // таймаут режима ожидания
 #if (KEEP_POWER)
 timerMinim KEEP_POWERtimer(KEEP_POWER * 1000L);
 #endif
