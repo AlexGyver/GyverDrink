@@ -432,8 +432,7 @@ void timeoutReset() {
   disp.setContrast(255);
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
-  if (!showMenu) {
-    keepPowerState = false;
+  if (!showMenu && !keepPowerState) {
     for (byte i = 0; i < NUM_SHOTS; i++) {
       if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
       else if (shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, settingsList[stby_light]);
@@ -443,8 +442,7 @@ void timeoutReset() {
   LED = mHSV(255, 0, STATUS_LED); // white
   LEDbreathingState = false;
 #endif
-  if (settingsList[keep_power] && !showMenu)
-    KEEP_POWERtimer.reset();
+  //if (settingsList[keep_power] && !showMenu)  KEEP_POWERtimer.reset();
   LEDchanged = true;
   //DEBUGln("timeout reset");
 }
@@ -657,7 +655,7 @@ bool battery_watchdog() {
     else if (!lastOkStatus) timeoutReset();
     lastOkStatus = batOk;
   }
-  if(POWEROFFtimer.isOn()) displayBattery(batOk);
+  if(POWEROFFtimer.isOn() || timeoutState) displayBattery(batOk);
   return batOk;
 }
 
