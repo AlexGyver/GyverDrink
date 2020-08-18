@@ -55,7 +55,7 @@
 // any other value means variable width font in FontCreator2 (thiele)
 // format with pixel padding
 
-#include "Glass30x30.h"
+#include "MonoNum22x32.h"
 #include "Battery19x9.h"
 #include "CenturyNum.h"
 #include "CenturyNum22x34.h"
