@@ -586,7 +586,7 @@ void keepPower() {
   static float _brightness = 1;
   uint8_t stby_brightness = settingsList[stby_light];
   if (settingsList[timeout_off]) {
-    stby_brightness = settingsList[stby_light] * POWEROFFtimer.isOn();
+    stby_brightness = settingsList[stby_light] * (POWEROFFtimer.isOn() || timeoutState);
   }
   if (!timeoutState) stby_brightness /= 2;
 
