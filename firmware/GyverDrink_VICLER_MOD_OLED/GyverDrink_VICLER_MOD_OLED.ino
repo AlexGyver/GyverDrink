@@ -206,6 +206,8 @@ float battery_cal = BATTERY_CAL;
 uint16_t shots_overall = 0, volume_overall = 0;
 bool keepPowerState = false;
 bool volumeChanged = false;
+char bootscreen[] = {"Der Наливатор"};
+float versionNum = 1.3;
 
 enum {
   timeout_off = 0,

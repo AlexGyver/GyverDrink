@@ -54,7 +54,11 @@ void setup() {
 #define RAINBOW_START_BRIGHTNESS 250
 
   timerMinim nextColor(1000 / RAINBOW_FPS);
+  timerMinim nextChar(100);
   uint8_t startBrightness = RAINBOW_START_BRIGHTNESS;
+  disp.setFont(CenturyGothic10x16);
+  disp.setCursor(15, 3);
+//  disp.set2X();
   while (startBrightness) {
     if (nextColor.isReady()) {
       for (byte i = 0; i < NUM_SHOTS + statusLed; i++)
@@ -62,7 +66,16 @@ void setup() {
       startBrightness--;
       strip.show();
     }
+    if(nextChar.isReady()){
+      static uint8_t index = 0;
+      if (bootscreen[index] != '\0') disp.print(bootscreen[index++]);
+      else {
+        disp.setFont(SystemFont5x7);
+        printFloat(versionNum, 1, Right, 7);
+      }
+    }
   }
+  disp.clear();
   if (settingsList[stby_light] > 0) {
     for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, settingsList[stby_light]);
     strip.show();

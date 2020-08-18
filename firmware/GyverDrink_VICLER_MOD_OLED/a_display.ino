@@ -71,7 +71,7 @@ uint8_t menuItemsNum[MENU_PAGES] = { 5, 3, 11, 4, 3 };  // количество 
 void displayMode(workModes mode);
 void serviceRoutine(serviceModes mode);
 
-void printStr(const char str[], int8_t x = Append, int8_t y = Append) {
+void printStr(const char str[], int8_t x = Append, int8_t y = Append, uint16_t _delay = 0) {
   if (x == Append) disp.setCol(disp.col());
   else if (x == Left)   disp.setCol(0);
   else if (x == Center) disp.setCol((128 - disp.strWidth(str)) / 2);
@@ -84,13 +84,19 @@ void printStr(const char str[], int8_t x = Append, int8_t y = Append) {
   while (1) {
     if (*str == '\0') break;
     disp.print(*str++);
+    if(_delay) delay(_delay);
   }
 }
 
-void printNum(float num, int8_t x = -4, int8_t y = -4) {
-  char cstr[6];
+void printNum(uint16_t num, int8_t x = -4, int8_t y = -4) {
+  char cstr[10];
   itoa(num, cstr, 10);
-  //dtostrf(num, 6, 2, cstr);
+  printStr(cstr, x, y);
+}
+
+void printFloat(float num, uint8_t decimals, int8_t x = -4, int8_t y = -4){
+  char cstr[10];
+  dtostrf(num, 4, decimals, cstr);
   printStr(cstr, x, y);
 }
 

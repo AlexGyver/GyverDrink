@@ -143,18 +143,11 @@ void serviceRoutine(serviceModes mode) {
     while (1) {
       enc.tick();
 
-      if (timer100.isReady()) {
-        disp.setCursor(35, 4);
-        disp.print(get_battery_voltage());
-      }
+      if (timer100.isReady()) printFloat(get_battery_voltage(), 2, Center, 4);
 
       if (enc.isTurn()) {
-        if (enc.isLeft()) {
-          battery_cal += 0.01;
-        }
-        if (enc.isRight()) {
-          battery_cal -= 0.01;
-        }
+        if (enc.isLeft())  battery_cal += 0.01;
+        if (enc.isRight()) battery_cal -= 0.01;
       }
 
       if (btn.holded()) {
