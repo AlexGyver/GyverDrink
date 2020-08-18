@@ -82,8 +82,7 @@ void serviceRoutine(serviceModes mode) {
     printStr("                      \n");
     printVolume(servoPos);
     for (byte i = 0; i < NUM_SHOTS; i++) {
-      if (settingsList[stby_light] > 0) strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
-      else  strip.setLED(i, mCOLOR(BLACK));
+      strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
     }
     servo.attach();
     while (1) {
@@ -98,8 +97,7 @@ void serviceRoutine(serviceModes mode) {
           currShot = i;
           printVolume(shotPos[i]);
         } else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
-          if (settingsList[stby_light] > 0) strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
-          else  strip.setLED(i, mCOLOR(BLACK));
+          strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
           strip.show();
           shotStates[i] = NO_GLASS;
           currShot = -1;
@@ -148,7 +146,6 @@ void serviceRoutine(serviceModes mode) {
       if (timer100.isReady()) {
         disp.setCursor(35, 4);
         disp.print(get_battery_voltage());
-        disp.print("V");
       }
 
       if (enc.isTurn()) {
@@ -175,7 +172,7 @@ void settingsMenuHandler(uint8_t row) {
   disp.setInvertMode(1);
   disp.setFont(Callibri15);
   printStr(MenuPages[menuPage][menuItem], 0, row);
-  printStr("                  ");
+  printStr("                      ");
   printNum(settingsList[menuItem - 1], Right);
   while (1) {
     enc.tick();
@@ -198,7 +195,7 @@ void settingsMenuHandler(uint8_t row) {
       disp.setInvertMode(1);
       disp.setFont(Callibri15);
       printStr(MenuPages[menuPage][menuItem], 0, row);
-      printStr("                  ");
+      printStr("                      ");
       printNum(settingsList[menuItem - 1], Right);
     }
     if (encBtn.clicked()) {
@@ -212,6 +209,7 @@ void settingsMenuHandler(uint8_t row) {
       EEPROM.update(eeAddress._stby_light, settingsList[stby_light]);
       EEPROM.update(eeAddress._rainbow_flow, settingsList[rainbow_flow]);
       EEPROM.update(eeAddress._max_volume, settingsList[max_volume]);
+      if(thisVolume > settingsList[max_volume]) thisVolume = settingsList[max_volume];
       timeoutReset();
       break;
     }
@@ -429,11 +427,9 @@ void timeoutReset() {
   disp.setContrast(255);
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
-  if (settingsList[stby_light] > 0) {
-    for (byte i = 0; i < NUM_SHOTS; i++) {
-      if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
-      else if (shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, settingsList[stby_light]);
-    }
+  for (byte i = 0; i < NUM_SHOTS; i++) {
+    if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
+    else if (shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, settingsList[stby_light]);
   }
 #if(STATUS_LED)
   LED = mHSV(255, 0, STATUS_LED); // white
@@ -560,14 +556,15 @@ void ledBreathing(bool _state, bool mode) {
 #endif
 
 #ifdef BATTERY_PIN
-float k = 0.05, filteredValue = 4.2;
-float filter(float value){
+float k = 0.1, filteredValue = 4.2;
+float filter(float value) {
   filteredValue = (1.0 - k) * filteredValue + k * value;
   return filteredValue;
 }
 float get_battery_voltage() {
-  battery_voltage = analogRead(BATTERY_PIN) * (4.8 * battery_cal) / 1023.f;
-  return filter(battery_voltage);
+  battery_voltage = filter(analogRead(BATTERY_PIN) * (4.5 * battery_cal) / 1023.f);
+  DEBUGln(battery_voltage);
+  return battery_voltage;
 }
 
 uint8_t get_battery_percent() {
@@ -586,13 +583,14 @@ bool battery_watchdog() {
   static bool batOk, lastOkStatus = 1;
   if (millis() - lastMillis >= 1000) {
     lastMillis = millis();
-    batOk = (get_battery_voltage() < BATTERY_LOW) ? 0 : 1;
+    batOk = (get_battery_voltage() < (float)BATTERY_LOW) ? 0 : 1;
     if (!batOk) {
       for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, 0);
 #if(STATUS_LED)
       LED = mHSV(255, 0, 0);
 #endif
       strip.show();
+      showMenu = false;
       timeoutState = false;
     }
     else if (!lastOkStatus) timeoutReset();
@@ -723,13 +721,13 @@ void readEEPROM() {
   else EEPROM.get(eeAddress._max_volume, settingsList[max_volume]);
 
   // чтение статистики
-  if(EEPROM.read(1012) != 47){
+  if (EEPROM.read(1012) != 47) {
     EEPROM.write(1012, 47);
     EEPROM.put(eeAddress._shots_overall, 0);
   }
   else EEPROM.get(eeAddress._shots_overall, shots_overall);
 
-  if(EEPROM.read(1013) != 47){
+  if (EEPROM.read(1013) != 47) {
     EEPROM.write(1013, 47);
     EEPROM.put(eeAddress._volume_overall, 0);
   }
@@ -786,6 +784,6 @@ void resetEEPROM() {
   // сброс максимального объёма
   EEPROM.update(1011, 47);
   EEPROM.put(eeAddress._max_volume, MAX_VOLUME);
-  
+
   readEEPROM();
 }
