@@ -6,26 +6,38 @@ void encTick() {
   if (enc.isTurn()) {
     timeoutReset();
     if (enc.isLeft()) {
-      if (curSelected >= 0) shotVolume[curSelected] += 1;
-      else thisVolume += 1;
+      if (showMenu) {
+        menuItem++;
+      }
+      else {
+        if (curSelected >= 0) shotVolume[curSelected] += 1;
+        else thisVolume += 1;
+      }
     }
     if (enc.isRight()) {
-      if (curSelected >= 0) shotVolume[curSelected] -= 1;
-      else thisVolume -= 1;
+      if (showMenu) {
+        menuItem--;
+      }
+      else {
+        if (curSelected >= 0) shotVolume[curSelected] -= 1;
+        else thisVolume -= 1;
+      }
     }
-    if (curSelected) shotVolume[(byte)curSelected] = constrain(shotVolume[(byte)curSelected], 1, MAX_VOLUME);
-    thisVolume = constrain(thisVolume, 1, MAX_VOLUME);
+    if(showMenu){
+      displayMenu();
+      return;
+    }
+    if (curSelected) shotVolume[(byte)curSelected] = constrain(shotVolume[(byte)curSelected], 1, settingsList[max_volume]);
+    thisVolume = constrain(thisVolume, 1, settingsList[max_volume]);
     if (curSelected >= 0) {
-      disp.setFont(CenturyNum22x34);
-      printNum(shotVolume[curSelected], Center, 3);
+      printVolume(shotVolume[curSelected]);
       DEBUG("shot ");
       DEBUG(curSelected);
       DEBUG(" volume: ");
       DEBUGln(shotVolume[curSelected]);
     }
     else {
-      disp.setFont(CenturyNum22x34);
-      printNum(thisVolume, Center, 3);
+      printVolume(thisVolume);
       for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
       DEBUG("main volume: ");
       DEBUGln(thisVolume);
@@ -42,19 +54,32 @@ void btnTick() {
       pumpOFF();                            // помпа выкл
       shotStates[curPumping] = READY;       // налитая рюмка, статус: готов
       curPumping = -1;                      // снимаем выбор рюмки
+      EEPROM.put(eeAddress._shots_overall, shots_overall += 1);
+      delay(5);
+      EEPROM.put(eeAddress._volume_overall, volume_overall += volumeCount);
       systemState = WAIT;                   // режим работы - ждать
       WAITtimer.reset();
       DEBUGln("ABORT");
     }
-    if (!workMode) systemON = true;         // система активирована
+    if (workMode == ManualMode) systemON = true;         // система активирована
   }
 
   if (btn.holded()) {
     timeoutReset();
-    workMode = !workMode;
-    //disp.clear();
-    displayPage(workMode);
-    if (!workMode && curPumping >= 0) {
+    showMenu = !showMenu;
+    if (showMenu) {
+      disp.clear();
+      displayMenu();
+    }
+    else {
+      disp.clear();
+      displayMode(workMode);
+      printVolume(thisVolume);
+      menuItem = 0;
+      menuPage = MENU_PAGE;
+    }
+
+    if ( (workMode == ManualMode) && curPumping >= 0) {
       DEBUG("abort fill for shot: ");
       DEBUGln(curPumping);
       curPumping = -1; // снимаем выбор рюмки
@@ -64,7 +89,7 @@ void btnTick() {
       systemON = true;
       DEBUGln("SystemON");
     }
-    if (workMode) {
+    if (workMode == AutoMode) {
       DEBUGln("automatic mode");
     }
     else {
@@ -73,75 +98,35 @@ void btnTick() {
   }
   if (encBtn.clicked()) {
     timeoutReset();
-    selectShot++;
-    if (selectShot == NUM_SHOTS)  selectShot = -1;
-    curSelected = selectShot;
-    if (curSelected >= 0) {
-      DEBUG("shot selected: ");
-      DEBUGln(curSelected);
+    if (showMenu) {
+      selectItem = 1;
+      displayMenu();
     }
     else {
-      DEBUGln("no shots selected");
-    }
+      selectShot++;
+      if (selectShot == NUM_SHOTS)  selectShot = -1;
+      curSelected = selectShot;
+      if (curSelected >= 0) {
+        DEBUG("shot selected: ");
+        DEBUGln(curSelected);
+      }
+      else {
+        DEBUGln("no shots selected");
+      }
 
-
-    for (byte i = 0; i < NUM_SHOTS; i++) {
-      if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
-      else if (shotStates[i] == EMPTY) strip.setLED(i, mCOLOR(ORANGE));
-      else if (STBY_LIGHT > 0)  strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
-      else strip.setLED(i, mCOLOR(BLACK));
+      for (byte i = 0; i < NUM_SHOTS; i++) {
+        if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
+        else if (shotStates[i] == EMPTY) strip.setLED(i, mCOLOR(ORANGE));
+        else if (settingsList[stby_light] > 0)  strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
+        else strip.setLED(i, mCOLOR(BLACK));
+      }
+      if (curSelected >= 0) printVolume(shotVolume[curSelected]);
+      else printVolume(thisVolume);
+      LEDchanged = true;
     }
-    if (curSelected >= 0) {
-      disp.setFont(CenturyNum22x34);
-      printNum(shotVolume[curSelected], Center, 3);
-    }
-    else {
-      disp.setFont(CenturyNum22x34);
-      printNum(thisVolume, Center, 3);
-    }
-    LEDchanged = true;
   }
   if (encBtn.holding()) {
-    if (workMode) return;
-
-    for (byte i = 0; i < NUM_SHOTS; i++) {    // поиск наличия рюмки
-      if (!digitalRead(SW_pins[i])) {         // нашли рюмку
-        if (abs(servo.getCurrentDeg() - shotPos[i]) <= 3) {
-          curPumping = i;
-          break;
-        }
-        servoON();
-        servo.attach();
-        servo.setTargetDeg(shotPos[i]);
-        curPumping = i;
-        parking = false;
-      }
-    }
-    if (curPumping == -1) return; // нет рюмок -> нет прокачки, ищем заново ^
-    //if (!timeoutState) disp.brightness(7);
-    DEBUG("pumping into shot ");
-    DEBUGln(curPumping);
-    while (!servo.tick()); // едем к рюмке
-    servoOFF();
-    delay(300); // небольшая задержка перед наливом
-
-    pumpON(); // включаем помпу
-    timerMinim timer20(20);
-    while (!digitalRead(SW_pins[curPumping]) && !digitalRead(ENC_SW)) // пока стоит рюмка и зажат энкодер, продолжаем наливать
-    {
-      if (timer20.isReady()) {
-        volumeCount += 20 * 50.0 / time50ml;
-        disp.setFont(CenturyNum22x34);
-        printNum(round(volumeCount), Center, 3);
-        strip.setLED(curPumping, mWHEEL( (int)(volumeCount * 10 + MIN_COLOR) % 1530) );
-        strip.show();
-      }
-    }
-    pumpOFF();
-    DEBUG("pumping stopped, volume: ");
-    DEBUG(round(volumeCount));
-    DEBUGln("ml");
-    delay(300);
-    timeoutReset();
+    if (workMode == AutoMode) return;
+    prePump();
   }
 }

@@ -2,7 +2,7 @@
 
 void loop() {
 #ifdef BATTERY_PIN
-  if (battery_watchdog()) return;
+  if (!battery_watchdog()) return;
 #endif
   encTick();
   btnTick();

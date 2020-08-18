@@ -4,32 +4,11 @@ void setup() {
   DEBUGln("start");
 #endif
 
-  //EEPROM.write(1001, 0);  //сброс значения TIME_50ML из памяти
-  //EEPROM.write(1002, 0);  //сброс позиций углов для серво
-
   // епром
-  if (EEPROM.read(1000) != 47) {
-    EEPROM.write(1000, 47);
-    EEPROM.put(0, thisVolume);
-  }
-  EEPROM.get(0, thisVolume);
-  for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
+  readEEPROM();
 
-  if (EEPROM.read(1001) != 47) {
-    EEPROM.write(1001, 47);
-    EEPROM.put(10, TIME_50ML);
-  }
-  EEPROM.get(10, time50ml);
-  volumeTick = 15.0f * 50.0f / time50ml;
-
-  if (EEPROM.read(1002) != 47) {
-    EEPROM.write(1002, 47);
-    for (byte i = 0; i < NUM_SHOTS; i++)
-      EEPROM.write(100 + i, shotPos[i]);
-  }
-  for (byte i = 0; i < NUM_SHOTS; i++)
-    EEPROM.get(100 + i, shotPos[i]);
-
+  if (settingsList[timeout_off] > 0)
+    POWEROFFtimer.setInterval(settingsList[timeout_off] * 60000L);
 
   // тыкаем ленту
   strip.setBrightness(255);
@@ -51,10 +30,10 @@ void setup() {
 
   // настройка серво
   servoON();
-  servo.setDirection(INVERSE_SERVO);
-  servo.attach(SERVO_PIN, PARKING_POS);
+  servo.setDirection(settingsList[inverse_servo]);
+  servo.attach(SERVO_PIN, settingsList[parking_pos]);
   delay(500);
-  servo.setCurrentDeg(PARKING_POS);
+  servo.setCurrentDeg(settingsList[parking_pos]);
   servo.setSpeed(15);
   servo.setAccel(0.2);
   servo.detach();
@@ -70,7 +49,7 @@ void setup() {
   */
 
 #define RAINBOW_FPS 50
-#define RAINBOW_START_BRIGHTNESS 250
+#define RAINBOW_START_BRIGHTNESS 50
 
   timerMinim nextColor(1000 / RAINBOW_FPS);
   uint8_t startBrightness = RAINBOW_START_BRIGHTNESS;
@@ -82,8 +61,8 @@ void setup() {
       strip.show();
     }
   }
-  if (STBY_LIGHT > 0) {
-    for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, STBY_LIGHT);
+  if (settingsList[stby_light] > 0) {
+    for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, settingsList[stby_light]);
     strip.show();
   }
 #if (STATUS_LED)
@@ -91,11 +70,9 @@ void setup() {
   strip.show();
 #endif
 
-
-  serviceMode();
   timeoutReset();   // сброс таймаута
   TIMEOUTtimer.start();
-  displayPage(workMode);
+  displayMode(workMode);
 
   DEBUG("- main volume: ");
   DEBUGln(thisVolume);
