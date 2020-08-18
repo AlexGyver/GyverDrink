@@ -192,6 +192,7 @@ void settingsMenuHandler(uint8_t row) {
       if (menuItem == 6) settingsList[stby_light] =     constrain(settingsList[stby_light], 0, 255);
       if (menuItem == 7) settingsList[rainbow_flow] =   constrain(settingsList[rainbow_flow], 0, 1);
       if (menuItem == 8) settingsList[max_volume] =     constrain(settingsList[max_volume], 0, 255);
+      if (menuItem == 9) settingsList[keep_power] =     constrain(settingsList[keep_power], 0, 255);
       disp.setInvertMode(1);
       disp.setFont(Callibri15);
       printStr(MenuPages[menuPage][menuItem], 0, row);
@@ -209,7 +210,10 @@ void settingsMenuHandler(uint8_t row) {
       EEPROM.update(eeAddress._stby_light, settingsList[stby_light]);
       EEPROM.update(eeAddress._rainbow_flow, settingsList[rainbow_flow]);
       EEPROM.update(eeAddress._max_volume, settingsList[max_volume]);
-      if(thisVolume > settingsList[max_volume]) thisVolume = settingsList[max_volume];
+      if (thisVolume > settingsList[max_volume]) thisVolume = settingsList[max_volume];
+      EEPROM.update(eeAddress._keep_power, settingsList[keep_power]);
+      KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
+      KEEP_POWERtimer.reset();
       timeoutReset();
       break;
     }
@@ -416,6 +420,7 @@ void LEDtick() {
 #if(STATUS_LED)
     ledBreathing(LEDbreathingState, timeoutState);
 #endif
+    if (settingsList[keep_power]) keepPower();
     strip.show();
   }
 }
@@ -427,14 +432,19 @@ void timeoutReset() {
   disp.setContrast(255);
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
-  for (byte i = 0; i < NUM_SHOTS; i++) {
-    if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
-    else if (shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, settingsList[stby_light]);
+  if (!showMenu) {
+    keepPowerState = false;
+    for (byte i = 0; i < NUM_SHOTS; i++) {
+      if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
+      else if (shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, settingsList[stby_light]);
+    }
   }
 #if(STATUS_LED)
   LED = mHSV(255, 0, STATUS_LED); // white
   LEDbreathingState = false;
 #endif
+  if (settingsList[keep_power] && !showMenu)
+    KEEP_POWERtimer.reset();
   LEDchanged = true;
   //DEBUGln("timeout reset");
 }
@@ -455,21 +465,39 @@ void timeoutTick() {
     selectShot = -1;
     curSelected = -1;
     systemON = false;
-    if (settingsList[timeout_off] > 0) {
+    if (settingsList[timeout_off]) {
       POWEROFFtimer.reset();
       POWEROFFtimer.start();
     }
-    EEPROM.put(0, thisVolume);
+    if (volumeChanged) {
+      volumeChanged = false;
+      EEPROM.put(0, thisVolume);
+    }
   }
 
-  if (settingsList[timeout_off] > 0) {
-    if (POWEROFFtimer.isReady()) {
+  if (settingsList[keep_power]) {
+    if (KEEP_POWERtimer.isReady() && (shotCount == 0) && ( (settingsList[keep_power] < settingsList[stby_time]) || !timeoutState || showMenu) && (curSelected == -1)) {
+      keepPowerState = 1;
+      LEDchanged = true;
+    }
+  }
+
+  if (settingsList[timeout_off]) {
+    if (POWEROFFtimer.isReady() && !timeoutState) {
       for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mCOLOR(BLACK);
 #if(STATUS_LED)
       LED = mHSV(255, 0, 0);  // off
       LEDbreathingState = false;
 #endif
       LEDchanged = true;
+      disp.clear();
+      POWEROFFtimer.stop();
+      if (showMenu) {
+        menuPage = MENU_PAGE;
+        menuItem = 1;
+        showMenu = false;
+      }
+
     }
   }
 }
@@ -555,6 +583,39 @@ void ledBreathing(bool _state, bool mode) {
 }
 #endif
 
+void keepPower() {
+  static bool _dir = 1;
+  static float _brightness = 1;
+  uint8_t stby_brightness = settingsList[stby_light];
+  if (settingsList[timeout_off]) {
+    stby_brightness = settingsList[stby_light] * POWEROFFtimer.isOn();
+  }
+  if (!timeoutState) stby_brightness /= 2;
+
+  if (!keepPowerState) return;
+
+  if (_brightness >= (255 - stby_brightness) ) {
+    _brightness = 255 - stby_brightness;
+    _dir = 0;
+  }
+
+  for (byte i = NUM_SHOTS - 1; i > 0; i--) leds[i] = leds[i - 1];
+  leds[0] = mHSV(20, 255, stby_brightness + (int)_brightness);
+
+  if (_dir) _brightness *= 1.5;
+  else      _brightness /= 1.5;
+
+  if (_brightness <= 1) {
+    _brightness = 1;
+    _dir = 1;
+    keepPowerState = 0;
+    for (byte i = 0; i < NUM_SHOTS; i++)
+      leds[i] = mHSV(20, 255, stby_brightness);
+  }
+
+  LEDchanged = true;
+}
+
 #ifdef BATTERY_PIN
 float k = 0.1, filteredValue = 4.2;
 float filter(float value) {
@@ -596,7 +657,7 @@ bool battery_watchdog() {
     else if (!lastOkStatus) timeoutReset();
     lastOkStatus = batOk;
   }
-  displayBattery(batOk);
+  if(POWEROFFtimer.isOn()) displayBattery(batOk);
   return batOk;
 }
 
@@ -732,6 +793,13 @@ void readEEPROM() {
     EEPROM.put(eeAddress._volume_overall, 0);
   }
   else EEPROM.get(eeAddress._volume_overall, volume_overall);
+
+  // функция пинания повербанка
+  if (EEPROM.read(1014) != 47) {
+    EEPROM.write(1014, 47);
+    EEPROM.put(eeAddress._keep_power, KEEP_POWER);
+  }
+  else EEPROM.get(eeAddress._keep_power, settingsList[keep_power]);
 }
 
 void resetEEPROM() {
@@ -784,6 +852,9 @@ void resetEEPROM() {
   // сброс максимального объёма
   EEPROM.update(1011, 47);
   EEPROM.put(eeAddress._max_volume, MAX_VOLUME);
+
+  EEPROM.update(1014, 47);
+  EEPROM.put(eeAddress._keep_power, KEEP_POWER);
 
   readEEPROM();
 }

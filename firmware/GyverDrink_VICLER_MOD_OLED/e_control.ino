@@ -12,6 +12,7 @@ void encTick() {
       else {
         if (curSelected >= 0) shotVolume[curSelected] += 1;
         else thisVolume += 1;
+        volumeChanged = true;
       }
     }
     if (enc.isRight()) {
@@ -21,6 +22,7 @@ void encTick() {
       else {
         if (curSelected >= 0) shotVolume[curSelected] -= 1;
         else thisVolume -= 1;
+        volumeChanged = true;
       }
     }
     if(showMenu){
@@ -65,8 +67,8 @@ void btnTick() {
   }
 
   if (btn.holded()) {
-    timeoutReset();
     showMenu = !showMenu;
+    timeoutReset();
     if (showMenu) {
       disp.clear();
       displayMenu();

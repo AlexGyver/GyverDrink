@@ -1,6 +1,6 @@
 /*
-  GyverDrink VICLER_MOD_OLED_1.2 Beta
-  18.08.2020
+  GyverDrink VICLER_MOD_OLED_1.3 Beta
+  19.08.2020
 
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" на основе версии 1.5 by AlexGyver с OLED дисплеем и расширенным функционалом
   Исходники на GitHub: https://github.com/VICLER/GyverDrink
@@ -34,6 +34,7 @@
       - stby_light: яркость подсветки в режиме ожидания. 255 -> максимум, 0 -> выкл
       - rainbow_flow: динамическая подсветка налитых рюмок, 0 -> статическая(цвет не переливается)
       - max_volume: ограничение максимального объёма, отображаемого на дисплее
+      - keep_power: интервал пинания повербанка в секундах. 0 -> функция отключена
       - сброс всех настроек до значений, прописанных в этом файле за исключением статистики
    -  калибровка объёма за единицу времени, калибровка углов сервопривода для рюмок и калибровка напряжения аккумулятора в меню. Напряжение подстраивается энкодером до измеренного
    -  ведение статистики. Количество налитых рюмок и общий объём. При нажатии на кнопку энкодера, соответствующее значение сбрасывается
@@ -69,6 +70,7 @@
 //                            Настройки, изменяемые из меню
 //=============================================================================================
 #define TIMEOUT_OFF   5     // таймаут на выключение дисплея и светодиодов в минутах. Если 0 -> таймаут отключен
+#define KEEP_POWER    0     // интервал пинания повербанка в секундах. 0 -> функция отключена
 #define INVERSE_SERVO 0     // инвертировать направление вращения серво
 #define PARKING_POS   0     // угол для домашней позиции
 #define TIME_50ML     5000  // время заполнения 50 мл
@@ -166,6 +168,7 @@ timerMinim FLOWtimer(2000);
 timerMinim WAITtimer(500);
 timerMinim TIMEOUTtimer(STBY_TIME * 1000L); // таймаут режима ожидания
 timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
+timerMinim KEEP_POWERtimer(KEEP_POWER * 1000L);
 
 #define MIN_COLOR 48                          // ORANGE mWHEEL
 #define MAX_COLOR 765                         // AQUA mWHEEL
@@ -199,6 +202,8 @@ bool LEDbreathingState = false;
 float battery_voltage = 4.2;
 float battery_cal = BATTERY_CAL;
 uint16_t shots_overall = 0, volume_overall = 0;
+bool keepPowerState = false;
+bool volumeChanged = false;
 
 enum {
   timeout_off = 0,
@@ -208,7 +213,8 @@ enum {
   stby_time,
   stby_light,
   rainbow_flow,
-  max_volume
+  max_volume,
+  keep_power
 };
 uint8_t settingsList[] = { 
   TIMEOUT_OFF,
@@ -218,7 +224,8 @@ uint8_t settingsList[] = {
   STBY_TIME,
   STBY_LIGHT,
   RAINBOW_FLOW,
-  MAX_VOLUME
+  MAX_VOLUME,
+  KEEP_POWER
 };
 
 struct EEPROMAddress { 
@@ -236,6 +243,7 @@ struct EEPROMAddress {
   uint16_t _max_volume = _rainbow_flow + sizeof(settingsList[rainbow_flow]);
   uint16_t _shots_overall = _max_volume + sizeof(settingsList[max_volume]);
   uint16_t _volume_overall = _shots_overall + sizeof(shots_overall);
+  uint16_t _keep_power = _volume_overall + sizeof(volume_overall);
 } eeAddress;
 
 //=============================================================================================

@@ -18,7 +18,7 @@ MenuPageName menuPage = MENU_PAGE; // актуальная страница
 uint8_t menuItem = 0;
 bool showMenu = 0, selectItem = 0;
 
-const char* MenuPages[MENU_PAGES][11] = {
+const char* MenuPages[MENU_PAGES][12] = {
   {
     "---------Меню---------",
     " Режим",
@@ -45,6 +45,7 @@ const char* MenuPages[MENU_PAGES][11] = {
     " stby_light",
     " rainbow_flow",
     " max_volume",
+    " keep_power",
     " сброс EEPROM",
     " Назад"
   },
@@ -65,7 +66,7 @@ const char* MenuPages[MENU_PAGES][11] = {
   }
 };
 
-uint8_t menuItemsNum[MENU_PAGES] = { 5, 3, 10, 4, 3 };  // количество строк на каждой странице
+uint8_t menuItemsNum[MENU_PAGES] = { 5, 3, 11, 4, 3 };  // количество строк на каждой странице
 
 void displayMode(workModes mode);
 void serviceRoutine(serviceModes mode);

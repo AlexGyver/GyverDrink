@@ -9,6 +9,8 @@ void setup() {
 
   if (settingsList[timeout_off] > 0)
     POWEROFFtimer.setInterval(settingsList[timeout_off] * 60000L);
+  if(settingsList[keep_power] > 0)
+    KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
 
   // тыкаем ленту
   strip.setBrightness(255);
@@ -49,7 +51,7 @@ void setup() {
   */
 
 #define RAINBOW_FPS 50
-#define RAINBOW_START_BRIGHTNESS 50
+#define RAINBOW_START_BRIGHTNESS 250
 
   timerMinim nextColor(1000 / RAINBOW_FPS);
   uint8_t startBrightness = RAINBOW_START_BRIGHTNESS;
