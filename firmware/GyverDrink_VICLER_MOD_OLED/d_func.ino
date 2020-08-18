@@ -202,18 +202,20 @@ void settingsMenuHandler(uint8_t row) {
     if (encBtn.clicked()) {
       EEPROM.update(eeAddress._timeout_off, settingsList[timeout_off]);
       EEPROM.update(eeAddress._inverse_servo, settingsList[inverse_servo]);
-      servo.setDirection(settingsList[inverse_servo]);
       EEPROM.update(eeAddress._parking_pos, settingsList[parking_pos]);
       EEPROM.update(eeAddress._auto_parking, settingsList[auto_parking]);
       EEPROM.update(eeAddress._stby_time, settingsList[stby_time]);
-      TIMEOUTtimer.setInterval(settingsList[stby_time] * 1000L); // таймаут режима ожидания
       EEPROM.update(eeAddress._stby_light, settingsList[stby_light]);
       EEPROM.update(eeAddress._rainbow_flow, settingsList[rainbow_flow]);
       EEPROM.update(eeAddress._max_volume, settingsList[max_volume]);
-      if (thisVolume > settingsList[max_volume]) thisVolume = settingsList[max_volume];
       EEPROM.update(eeAddress._keep_power, settingsList[keep_power]);
+      TIMEOUTtimer.setInterval(settingsList[stby_time] * 1000L); // таймаут режима ожидания
+      TIMEOUTtimer.reset();
       KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
       KEEP_POWERtimer.reset();
+      servo.setDirection(settingsList[inverse_servo]);
+      servo.attach(SERVO_PIN, settingsList[parking_pos]);
+      if (thisVolume > settingsList[max_volume]) thisVolume = settingsList[max_volume];
       timeoutReset();
       break;
     }
@@ -288,7 +290,7 @@ void flowTick() {
 
 // поиск и заливка
 void flowRoutnie() {
-  if (showMenu) return;
+  if (showMenu && parking) return;
 
   if (systemState == SEARCH) {                            // если поиск рюмки
     bool noGlass = true;
