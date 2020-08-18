@@ -13,7 +13,7 @@ void serviceMode() {
     uint16_t pumpTime = 0;
     timerMinim timer100(100);
     dispNum(PARKING_POS);
-    bool flag;
+    bool flag = false;
     while (1) {
       enc.tick();
       stepper.update();
@@ -51,7 +51,6 @@ void serviceMode() {
       }
 
       if (enc.isTurn()) {   // крутим серво от энкодера
-        pumpTime = 0;
         if (enc.isLeft()) stepperPos += 1;
         if (enc.isRight())  stepperPos -= 1;
         stepperPos = constrain(stepperPos, 0, 240);
