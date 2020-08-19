@@ -85,7 +85,7 @@ void printStr(const char str[], int8_t x = Append, int8_t y = Append, uint16_t _
   while (1) {
     if (*str == '\0') break;
     disp.print(*str++);
-    if(_delay) delay(_delay);
+    if (_delay) delay(_delay);
   }
 }
 
@@ -95,7 +95,7 @@ void printNum(uint16_t num, int8_t x = -4, int8_t y = -4) {
   printStr(cstr, x, y);
 }
 
-void printFloat(float num, uint8_t decimals, int8_t x = -4, int8_t y = -4){
+void printFloat(float num, uint8_t decimals, int8_t x = -4, int8_t y = -4) {
   char cstr[10];
   dtostrf(num, 4, decimals, cstr);
   printStr(cstr, x, y);
@@ -121,14 +121,14 @@ void displayMenu() {
       }
     }
     else if (menuPage == MODE_PAGE) { // выбор елемента на странице "Режим"
-        workMode = (workModes)(menuItem - 1);
-        menuItem = 1;
-        selectItem = 0;
-        showMenu = false;
-        menuPage = MENU_PAGE;
-        disp.clear();
-        displayMode(workMode);
-        return;
+      workMode = (workModes)(menuItem - 1);
+      menuItem = 1;
+      selectItem = 0;
+      showMenu = false;
+      menuPage = MENU_PAGE;
+      disp.clear();
+      displayMode(workMode);
+      return;
     }
     else if (menuPage == SETTINGS_PAGE) {
       if (menuItem == menuItemsNum[menuPage]) { // нажали "Назад"
@@ -136,7 +136,7 @@ void displayMenu() {
         menuPage = MENU_PAGE;
         disp.clear();
       }
-      else if(menuItem == menuItemsNum[menuPage] - 1){ // сброс настроек
+      else if (menuItem == menuItemsNum[menuPage] - 1) { // сброс настроек
         resetEEPROM();
         menuItem = 1;
         selectItem = 0;
@@ -167,11 +167,11 @@ void displayMenu() {
         menuPage = MENU_PAGE;
         disp.clear();
       }
-      else if(menuItem == 1){
+      else if (menuItem == 1) {
         EEPROM.update(1012, 47);
         EEPROM.put(eeAddress._shots_overall, 0);
       }
-      else if(menuItem == 2){
+      else if (menuItem == 2) {
         EEPROM.update(1013, 47);
         EEPROM.put(eeAddress._volume_overall, 0);
       }
@@ -181,7 +181,7 @@ void displayMenu() {
   }
 
   menuItem = constrain(menuItem, 1, menuItemsNum[menuPage]);
-  
+
   disp.setFont(CenturyGothic10x16);
   disp.setInvertMode(0);
   printStr(MenuPages[menuPage][0], 0, 0);
@@ -191,31 +191,31 @@ void displayMenu() {
   else if (menuItem < firstItem) firstItem = menuItem;
 
   for (uint8_t i = firstItem; i < (firstItem + 3); i++) {
-    if(menuItem % 4 == i % 4){
+    if (menuItem % 4 == i % 4) {
       disp.setInvertMode(1);
       selectedRow = disp.row();
     }
     else disp.setInvertMode(0);
-    
-    if(menuPage == SETTINGS_PAGE){
-      if(i < menuItemsNum[menuPage] - 1) disp.setFont(Callibri15);
+
+    if (menuPage == SETTINGS_PAGE) {
+      if (i < menuItemsNum[menuPage] - 1) disp.setFont(Callibri15);
       else disp.setFont(CenturyGothic10x16);
       printStr(MenuPages[menuPage][i]);
       disp.setFont(CenturyGothic10x16);
       printStr("                  ");
-      if(i < menuItemsNum[menuPage] - 1) printNum(settingsList[i-1], Right);
+      if (i < menuItemsNum[menuPage] - 1) printNum(settingsList[i - 1], Right);
       printStr("\n");
     }
-    else if(menuPage == STATISTICS_PAGE){
+    else if (menuPage == STATISTICS_PAGE) {
       disp.setFont(CenturyGothic10x16);
       printStr(MenuPages[menuPage][i]);
       printStr("                  ");
       disp.setFont(Callibri15);
-      if(i == 1) printNum(shots_overall, Right);
-      if(i == 2) printNum(volume_overall, Right);
+      if (i == 1) printNum(shots_overall, Right);
+      if (i == 2) printNum(volume_overall, Right);
       printStr("\n");
     }
-    else{
+    else {
       printStr(MenuPages[menuPage][i]);
       printStr("                  \n");
     }

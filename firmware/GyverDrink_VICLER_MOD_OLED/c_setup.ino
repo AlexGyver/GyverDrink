@@ -9,7 +9,7 @@ void setup() {
 
   if (settingsList[timeout_off] > 0)
     POWEROFFtimer.setInterval(settingsList[timeout_off] * 60000L);
-  if(settingsList[keep_power] > 0)
+  if (settingsList[keep_power] > 0)
     KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
 
   // тыкаем ленту
@@ -66,7 +66,7 @@ void setup() {
       startBrightness--;
       strip.show();
     }
-    if(nextChar.isReady()){
+    if (nextChar.isReady()) {
       static uint8_t index = 0;
       if (bootscreen[index] != '\0') disp.print(bootscreen[index++]);
       else {

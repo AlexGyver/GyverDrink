@@ -25,7 +25,7 @@ void encTick() {
         volumeChanged = true;
       }
     }
-    if(showMenu){
+    if (showMenu) {
       displayMenu();
       return;
     }

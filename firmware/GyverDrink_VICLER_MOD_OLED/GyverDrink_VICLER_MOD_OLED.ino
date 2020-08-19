@@ -39,7 +39,7 @@
       - инверсия цветов дисплея
    -  калибровка объёма за единицу времени, калибровка углов сервопривода для рюмок и калибровка напряжения аккумулятора в меню. Напряжение подстраивается энкодером до измеренного
    -  ведение статистики. Количество налитых рюмок и общий объём. При нажатии на кнопку энкодера, соответствующее значение сбрасывается
-      
+
 */
 
 /*
@@ -222,7 +222,7 @@ enum {
   keep_power,
   invert_display
 };
-uint8_t settingsList[] = { 
+uint8_t settingsList[] = {
   TIMEOUT_OFF,
   INVERSE_SERVO,
   PARKING_POS,
@@ -235,7 +235,7 @@ uint8_t settingsList[] = {
   INVERT_DISPLAY
 };
 
-struct EEPROMAddress { 
+struct EEPROMAddress {
   uint8_t _thisVolume = 0;
   uint8_t _time50ml = sizeof(thisVolume);
   uint8_t _shotPos = _time50ml + sizeof(time50ml);

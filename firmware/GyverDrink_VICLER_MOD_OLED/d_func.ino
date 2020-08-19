@@ -180,8 +180,8 @@ void settingsMenuHandler(uint8_t row) {
         settingsList[parameter] -= 1;
       }
 
-      if(settingsList[timeout_off] > 15) settingsList[timeout_off] = 0;
-      if(settingsList[parking_pos] > 180) settingsList[parking_pos] = 0;
+      if (settingsList[timeout_off] > 15) settingsList[timeout_off] = 0;
+      if (settingsList[parking_pos] > 180) settingsList[parking_pos] = 0;
 
       disp.setInvertMode(1);
       disp.setFont(Callibri15);
@@ -191,11 +191,11 @@ void settingsMenuHandler(uint8_t row) {
       timeoutReset();
     }
 
-    if( (parameter == inverse_servo) || (parameter == auto_parking) || (parameter == rainbow_flow) || (parameter == invert_display) ){
+    if ( (parameter == inverse_servo) || (parameter == auto_parking) || (parameter == rainbow_flow) || (parameter == invert_display) ) {
       settingsList[parameter] = !settingsList[parameter];
       bypass = true;
-    } 
- 
+    }
+
     if (encBtn.clicked() || bypass) {
       EEPROM.update(eeAddress._timeout_off, settingsList[timeout_off]);
       EEPROM.update(eeAddress._inverse_servo, settingsList[inverse_servo]);
@@ -207,7 +207,7 @@ void settingsMenuHandler(uint8_t row) {
       EEPROM.update(eeAddress._max_volume, settingsList[max_volume]);
       EEPROM.update(eeAddress._keep_power, settingsList[keep_power]);
       EEPROM.update(eeAddress._invert_display, settingsList[invert_display]);
-      
+
       TIMEOUTtimer.setInterval(settingsList[stby_time] * 1000L); // таймаут режима ожидания
       TIMEOUTtimer.reset();
       KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
@@ -661,7 +661,7 @@ bool battery_watchdog() {
     else if (!lastOkStatus) timeoutReset();
     lastOkStatus = batOk;
   }
-  if(POWEROFFtimer.isOn() || timeoutState) displayBattery(batOk);
+  if (POWEROFFtimer.isOn() || timeoutState) displayBattery(batOk);
   return batOk;
 }
 
