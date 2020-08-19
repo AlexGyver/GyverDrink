@@ -57,9 +57,8 @@
 
 #include "MonoNum22x32.h"
 #include "Battery19x9.h"
-#include "CenturyNum.h"
-#include "CenturyNum22x34.h"
-
+#include "CenturyGothic10x16.h" // cyrillic
+#include "OpenSans10x16.h"		// cyrillic
 
 #include "Battery219x9.h"
 #include "Battery22x12.h"

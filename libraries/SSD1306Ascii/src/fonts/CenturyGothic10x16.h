@@ -39,11 +39,11 @@
 #include <inttypes.h>
 #include <avr/pgmspace.h>
 
-#ifndef CENTURYGOTHIC10X16_H
-#define CENTURYGOTHIC10X16_H
+#ifndef _CenturyGothic10x16_H
+#define _CenturyGothic10x16_H
 
-#define CENTURYGOTHIC10X16_WIDTH 10
-#define CENTURYGOTHIC10X16_HEIGHT 16
+#define CenturyGothic10x16_WIDTH 10
+#define CenturyGothic10x16_HEIGHT 16
 
 GLCDFONTDECL(CenturyGothic10x16) = {
     //0x29, 0x16, // size
