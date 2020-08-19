@@ -187,7 +187,7 @@ enum {NO_GLASS, EMPTY, IN_PROCESS, READY} shotStates[NUM_SHOTS];
 enum {SEARCH, MOVING, WAIT, PUMPING} systemState;
 enum serviceModes {VOLUME = 1, SERVO, BATTERY};
 serviceModes serviceMode;
-enum workModes {ManualMode, ComboMode, AutoMode};
+enum workModes {ManualMode, AutoMode, ComboMode};
 workModes workMode;
 uint16_t time50ml = 0;
 #define INIT_VOLUME 47
@@ -236,22 +236,22 @@ uint8_t settingsList[] = {
 };
 
 struct EEPROMAddress {
-  uint8_t _thisVolume = 0;
-  uint8_t _time50ml = sizeof(thisVolume);
-  uint8_t _shotPos = _time50ml + sizeof(time50ml);
-  uint8_t _battery_cal = _shotPos + sizeof(byte) * NUM_SHOTS;
-  uint8_t _timeout_off = _battery_cal + sizeof(battery_cal);
-  uint16_t _inverse_servo = _timeout_off + sizeof(settingsList[timeout_off]);
-  uint16_t _parking_pos = _inverse_servo + sizeof(settingsList[inverse_servo]);
-  uint16_t _auto_parking = _parking_pos + sizeof(settingsList[parking_pos]);
-  uint16_t _stby_time = _auto_parking + sizeof(settingsList[auto_parking]);
-  uint16_t _stby_light = _stby_time + sizeof(settingsList[stby_time]);
-  uint16_t _rainbow_flow = _stby_light + sizeof(settingsList[stby_light]);
-  uint16_t _max_volume = _rainbow_flow + sizeof(settingsList[rainbow_flow]);
-  uint16_t _shots_overall = _max_volume + sizeof(settingsList[max_volume]);
-  uint16_t _volume_overall = _shots_overall + sizeof(shots_overall);
-  uint16_t _keep_power = _volume_overall + sizeof(volume_overall);
-  uint16_t _invert_display = _keep_power + sizeof(keep_power);
+  const uint16_t _thisVolume = 0;
+  const uint16_t _time50ml = sizeof(thisVolume);
+  const uint16_t _shotPos = _time50ml + sizeof(time50ml);
+  const uint16_t _battery_cal = _shotPos + sizeof(byte) * NUM_SHOTS;
+  const uint16_t _timeout_off = _battery_cal + sizeof(battery_cal);
+  const uint16_t _inverse_servo = _timeout_off + sizeof(settingsList[timeout_off]);
+  const uint16_t _parking_pos = _inverse_servo + sizeof(settingsList[inverse_servo]);
+  const uint16_t _auto_parking = _parking_pos + sizeof(settingsList[parking_pos]);
+  const uint16_t _stby_time = _auto_parking + sizeof(settingsList[auto_parking]);
+  const uint16_t _stby_light = _stby_time + sizeof(settingsList[stby_time]);
+  const uint16_t _rainbow_flow = _stby_light + sizeof(settingsList[stby_light]);
+  const uint16_t _max_volume = _rainbow_flow + sizeof(settingsList[rainbow_flow]);
+  const uint16_t _shots_overall = _max_volume + sizeof(settingsList[max_volume]);
+  const uint16_t _volume_overall = _shots_overall + sizeof(shots_overall);
+  const uint16_t _keep_power = _volume_overall + sizeof(volume_overall);
+  const uint16_t _invert_display = _keep_power + sizeof(keep_power);
 } eeAddress;
 
 //=============================================================================================

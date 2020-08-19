@@ -7,9 +7,9 @@ void setup() {
   // епром
   readEEPROM();
 
-  if (settingsList[timeout_off] > 0)
+  if (settingsList[timeout_off])
     POWEROFFtimer.setInterval(settingsList[timeout_off] * 60000L);
-  if (settingsList[keep_power] > 0)
+  if (settingsList[keep_power])
     KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
 
   // тыкаем ленту

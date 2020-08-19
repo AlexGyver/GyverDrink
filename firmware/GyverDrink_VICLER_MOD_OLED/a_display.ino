@@ -31,22 +31,21 @@ const char* MenuPages[MENU_PAGES][13] = {
   {
     "--------Режим--------",
     " Ручной",
-    " Комбо",
     " Автоматический"
   },
 
   {
     "------Настройки------",
-    " timeout_off",
-    " inverse_servo",
-    " parking_pos",
-    " auto_parking",
-    " stby_time",
-    " stby_light",
-    " rainbow_flow",
-    " max_volume",
-    " keep_power",
-    " invert_display",
+    " timeout off",
+    " inverse servo",
+    " parking pos",
+    " auto parking",
+    " stby time",
+    " stby light",
+    " rainbow flow",
+    " max volume",
+    " keep power",
+    " invert display",
     " Сброс",
     " Назад"
   },
@@ -67,7 +66,7 @@ const char* MenuPages[MENU_PAGES][13] = {
   }
 };
 
-uint8_t menuItemsNum[MENU_PAGES] = { 5, 3, 12, 4, 3 };  // количество строк на каждой странице
+uint8_t menuItemsNum[MENU_PAGES] = { 5, 2, 12, 4, 3 };  // количество строк на каждой странице
 
 void displayMode(workModes mode);
 void serviceRoutine(serviceModes mode);
@@ -136,16 +135,6 @@ void displayMenu() {
         menuPage = MENU_PAGE;
         disp.clear();
       }
-      else if (menuItem == menuItemsNum[menuPage] - 1) { // сброс настроек
-        resetEEPROM();
-        menuItem = 1;
-        selectItem = 0;
-        showMenu = false;
-        menuPage = MENU_PAGE;
-        disp.clear();
-        displayMode(workMode);
-        return;
-      }
       else {
         settingsMenuHandler(selectedRow);
       }
@@ -170,12 +159,13 @@ void displayMenu() {
       else if (menuItem == 1) {
         EEPROM.update(1012, 47);
         EEPROM.put(eeAddress._shots_overall, 0);
+        readEEPROM();
       }
       else if (menuItem == 2) {
         EEPROM.update(1013, 47);
         EEPROM.put(eeAddress._volume_overall, 0);
+        readEEPROM();
       }
-      readEEPROM();
     }
     selectItem = 0;
   }
@@ -238,8 +228,8 @@ void printVolume(uint16_t volume, int8_t x = -2) {
 void displayMode(workModes mode) {
   disp.setFont(CenturyGothic10x16);
   if (mode == ManualMode)     printStr(" Ручной режим", Left, 0);
-  else if (mode == ComboMode) printStr(" Комбо режим    ", Left, 0);
   else if (mode == AutoMode)  printStr(" Авто режим    ", Left, 0);
+  //else if (mode == ComboMode) printStr(" Комбо режим    ", Left, 0);
 
   printVolume(thisVolume);
 }

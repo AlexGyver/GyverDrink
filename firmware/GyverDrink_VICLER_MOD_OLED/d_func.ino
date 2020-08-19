@@ -186,13 +186,19 @@ void settingsMenuHandler(uint8_t row) {
       disp.setInvertMode(1);
       disp.setFont(Callibri15);
       printStr(MenuPages[menuPage][menuItem], 0, row);
-      printStr("                     ");
+      printStr("                      ");
       printNum(settingsList[parameter], Right);
       timeoutReset();
     }
 
     if ( (parameter == inverse_servo) || (parameter == auto_parking) || (parameter == rainbow_flow) || (parameter == invert_display) ) {
       settingsList[parameter] = !settingsList[parameter];
+      bypass = true;
+    }
+
+    if(menuItem == menuItemsNum[menuPage] - 1){
+      resetEEPROM();
+      readEEPROM();
       bypass = true;
     }
 
@@ -404,7 +410,6 @@ void flowRoutnie() {
       pumpOFF();                                          // помпа выкл
       shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
       EEPROM.put(eeAddress._shots_overall, shots_overall += 1);
-      delay(5);
       EEPROM.put(eeAddress._volume_overall, volume_overall += volumeCount);
       curPumping = -1;                                    // снимаем выбор рюмки
       systemState = WAIT;                                 // режим работы - ждать
