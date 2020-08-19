@@ -18,7 +18,7 @@ MenuPageName menuPage = MENU_PAGE; // актуальная страница
 uint8_t menuItem = 0;
 bool showMenu = 0, selectItem = 0;
 
-const char* MenuPages[MENU_PAGES][12] = {
+const char* MenuPages[MENU_PAGES][13] = {
   {
     "---------Меню---------",
     " Режим",
@@ -29,14 +29,14 @@ const char* MenuPages[MENU_PAGES][12] = {
   },
 
   {
-    "--------Режим-------",
+    "--------Режим--------",
     " Ручной",
     " Комбо",
     " Автоматический"
   },
 
   {
-    "------Настройки-----",
+    "------Настройки------",
     " timeout_off",
     " inverse_servo",
     " parking_pos",
@@ -46,7 +46,8 @@ const char* MenuPages[MENU_PAGES][12] = {
     " rainbow_flow",
     " max_volume",
     " keep_power",
-    " сброс EEPROM",
+    " invert_display",
+    " Сброс",
     " Назад"
   },
 
@@ -59,14 +60,14 @@ const char* MenuPages[MENU_PAGES][12] = {
   },
 
   {
-    "------Статистика-----",
+    "------Статистика------",
     " Кол-во рюмок",
     " Объ¿м",
     " Назад"
   }
 };
 
-uint8_t menuItemsNum[MENU_PAGES] = { 5, 3, 11, 4, 3 };  // количество строк на каждой странице
+uint8_t menuItemsNum[MENU_PAGES] = { 5, 3, 12, 4, 3 };  // количество строк на каждой странице
 
 void displayMode(workModes mode);
 void serviceRoutine(serviceModes mode);
@@ -236,9 +237,9 @@ void printVolume(uint16_t volume, int8_t x = -2) {
 
 void displayMode(workModes mode) {
   disp.setFont(CenturyGothic10x16);
-  if (mode == ManualMode)     printStr("Ручной режим", Left, 0);
-  else if (mode == ComboMode) printStr("Комбо режим    ", Left, 0);
-  else if (mode == AutoMode)  printStr("Авто режим    ", Left, 0);
+  if (mode == ManualMode)     printStr(" Ручной режим", Left, 0);
+  else if (mode == ComboMode) printStr(" Комбо режим    ", Left, 0);
+  else if (mode == AutoMode)  printStr(" Авто режим    ", Left, 0);
 
   printVolume(thisVolume);
 }

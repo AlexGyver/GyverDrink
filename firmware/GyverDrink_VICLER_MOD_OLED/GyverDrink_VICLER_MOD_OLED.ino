@@ -1,7 +1,7 @@
+//GyverDrink VICLER_MOD_OLED//
+#define VERSION 1.4
+//19.08.2020
 /*
-  GyverDrink VICLER_MOD_OLED_1.3
-  19.08.2020
-
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" на основе версии 1.5 by AlexGyver с OLED дисплеем и расширенным функционалом
   Исходники на GitHub: https://github.com/VICLER/GyverDrink
    -  OLED дисплей на контроллере SSD1306 (0.96") или SH1106(1.3")(по умолчанию) изменение типа дисплея в файле c_setup в секции // старт дисплея. Дисплей подключается контактами SCK и SDA к пинам А5, А4 Arduino Nano
@@ -36,9 +36,9 @@
       - max_volume: ограничение максимального объёма, отображаемого на дисплее
       - keep_power: интервал пинания повербанка в секундах. 0 -> функция отключена
       - сброс всех настроек до значений, прописанных в этом файле за исключением статистики
+      - инверсия цветов дисплея
    -  калибровка объёма за единицу времени, калибровка углов сервопривода для рюмок и калибровка напряжения аккумулятора в меню. Напряжение подстраивается энкодером до измеренного
    -  ведение статистики. Количество налитых рюмок и общий объём. При нажатии на кнопку энкодера, соответствующее значение сбрасывается
-   
       
 */
 
@@ -83,6 +83,7 @@
 #define BATTERY_CAL   1.0   // калибровка напряжения аккумулятора. 
 #define BATTERY_LOW   3.3   // минимальное напряжение аккумулятора
 #define MAX_VOLUME    200   // ограничение максимального объёма
+#define INVERT_DISPLAY 0    // инверсия цветов дисплея
 
 //=============================================================================================
 //                           положение серво над центрами рюмок
@@ -145,7 +146,6 @@ const byte SW_pins[] = {SENSOR_PINS};
 #include "timer2Minim.h"
 #include "SSD1306Ascii.h"
 #include "SSD1306AsciiAvrI2c.h"
-#include "fonts/CyrillicFonts.h"
 
 //=============================================================================================
 //ДАТА
@@ -206,8 +206,9 @@ float battery_cal = BATTERY_CAL;
 uint16_t shots_overall = 0, volume_overall = 0;
 bool keepPowerState = false;
 bool volumeChanged = false;
+bool invertState = 0;
 char bootscreen[] = {"Der Наливатор"};
-float versionNum = 1.3;
+float versionNum = VERSION;
 
 enum {
   timeout_off = 0,
@@ -218,7 +219,8 @@ enum {
   stby_light,
   rainbow_flow,
   max_volume,
-  keep_power
+  keep_power,
+  invert_display
 };
 uint8_t settingsList[] = { 
   TIMEOUT_OFF,
@@ -229,7 +231,8 @@ uint8_t settingsList[] = {
   STBY_LIGHT,
   RAINBOW_FLOW,
   MAX_VOLUME,
-  KEEP_POWER
+  KEEP_POWER,
+  INVERT_DISPLAY
 };
 
 struct EEPROMAddress { 
@@ -248,6 +251,7 @@ struct EEPROMAddress {
   uint16_t _shots_overall = _max_volume + sizeof(settingsList[max_volume]);
   uint16_t _volume_overall = _shots_overall + sizeof(shots_overall);
   uint16_t _keep_power = _volume_overall + sizeof(volume_overall);
+  uint16_t _invert_display = _keep_power + sizeof(keep_power);
 } eeAddress;
 
 //=============================================================================================

@@ -20,6 +20,7 @@ void setup() {
   // старт дисплея
   disp.begin(&SH1106_128x64, 0x3C);             // SH1106
   //oled.begin(&Adafruit128x64, I2C_ADDRESS);  // SSD1306
+  disp.invertDisplay((bool)settingsList[invert_display]);
 
   // настройка пинов
   pinMode(PUMP_POWER, 1);
@@ -58,7 +59,6 @@ void setup() {
   uint8_t startBrightness = RAINBOW_START_BRIGHTNESS;
   disp.setFont(CenturyGothic10x16);
   disp.setCursor(15, 3);
-//  disp.set2X();
   while (startBrightness) {
     if (nextColor.isReady()) {
       for (byte i = 0; i < NUM_SHOTS + statusLed; i++)

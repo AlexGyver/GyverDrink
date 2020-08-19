@@ -162,37 +162,43 @@ void serviceRoutine(serviceModes mode) {
 }
 
 void settingsMenuHandler(uint8_t row) {
+  bool bypass = false;
+  uint8_t parameter = menuItem - 1;
   disp.setInvertMode(1);
   disp.setFont(Callibri15);
   printStr(MenuPages[menuPage][menuItem], 0, row);
-  printStr("                      ");
+  printStr("                     ");
   printNum(settingsList[menuItem - 1], Right);
   while (1) {
     enc.tick();
+    LEDtick();
+    timeoutTick();
 
     if (enc.isTurn()) {
       if (enc.isLeft()) {
-        settingsList[menuItem - 1] += 1;
+        settingsList[parameter] += 1;
       }
       if (enc.isRight()) {
-        settingsList[menuItem - 1] -= 1;
+        settingsList[parameter] -= 1;
       }
-      if (menuItem == 1) settingsList[timeout_off] =    constrain(settingsList[timeout_off], 0, 15);
-      if (menuItem == 2) settingsList[inverse_servo] =  constrain(settingsList[inverse_servo], 0, 1);
-      if (menuItem == 3) settingsList[parking_pos] =    constrain(settingsList[parking_pos], 0, 180);
-      if (menuItem == 4) settingsList[auto_parking] =   constrain(settingsList[auto_parking], 0, 1);
-      if (menuItem == 5) settingsList[stby_time] =      constrain(settingsList[stby_time], 0, 255);
-      if (menuItem == 6) settingsList[stby_light] =     constrain(settingsList[stby_light], 0, 255);
-      if (menuItem == 7) settingsList[rainbow_flow] =   constrain(settingsList[rainbow_flow], 0, 1);
-      if (menuItem == 8) settingsList[max_volume] =     constrain(settingsList[max_volume], 0, 255);
-      if (menuItem == 9) settingsList[keep_power] =     constrain(settingsList[keep_power], 0, 255);
+
+      if(settingsList[timeout_off] > 15) settingsList[timeout_off] = 0;
+      if(settingsList[parking_pos] > 180) settingsList[parking_pos] = 0;
+
       disp.setInvertMode(1);
       disp.setFont(Callibri15);
       printStr(MenuPages[menuPage][menuItem], 0, row);
-      printStr("                      ");
-      printNum(settingsList[menuItem - 1], Right);
+      printStr("                     ");
+      printNum(settingsList[parameter], Right);
+      timeoutReset();
     }
-    if (encBtn.clicked()) {
+
+    if( (parameter == inverse_servo) || (parameter == auto_parking) || (parameter == rainbow_flow) || (parameter == invert_display) ){
+      settingsList[parameter] = !settingsList[parameter];
+      bypass = true;
+    } 
+ 
+    if (encBtn.clicked() || bypass) {
       EEPROM.update(eeAddress._timeout_off, settingsList[timeout_off]);
       EEPROM.update(eeAddress._inverse_servo, settingsList[inverse_servo]);
       EEPROM.update(eeAddress._parking_pos, settingsList[parking_pos]);
@@ -202,13 +208,20 @@ void settingsMenuHandler(uint8_t row) {
       EEPROM.update(eeAddress._rainbow_flow, settingsList[rainbow_flow]);
       EEPROM.update(eeAddress._max_volume, settingsList[max_volume]);
       EEPROM.update(eeAddress._keep_power, settingsList[keep_power]);
+      EEPROM.update(eeAddress._invert_display, settingsList[invert_display]);
+      
       TIMEOUTtimer.setInterval(settingsList[stby_time] * 1000L); // таймаут режима ожидания
       TIMEOUTtimer.reset();
       KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
-      KEEP_POWERtimer.reset();
       servo.setDirection(settingsList[inverse_servo]);
+      servoON();
       servo.attach(SERVO_PIN, settingsList[parking_pos]);
+      servoOFF();
       if (thisVolume > settingsList[max_volume]) thisVolume = settingsList[max_volume];
+      for (byte i = 0; i < NUM_SHOTS; i++) {
+        if (shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, settingsList[stby_light]);
+      }
+      disp.invertDisplay(settingsList[invert_display]);
       timeoutReset();
       break;
     }
@@ -427,7 +440,7 @@ void timeoutReset() {
   disp.setContrast(255);
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
-  if (!showMenu && !keepPowerState) {
+  if (!keepPowerState) {
     for (byte i = 0; i < NUM_SHOTS; i++) {
       if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
       else if (shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, settingsList[stby_light]);
@@ -793,6 +806,12 @@ void readEEPROM() {
     EEPROM.put(eeAddress._keep_power, KEEP_POWER);
   }
   else EEPROM.get(eeAddress._keep_power, settingsList[keep_power]);
+
+  if (EEPROM.read(1015) != 47) {
+    EEPROM.write(1015, 47);
+    EEPROM.put(eeAddress._invert_display, INVERT_DISPLAY);
+  }
+  else EEPROM.get(eeAddress._invert_display, settingsList[invert_display]);
 }
 
 void resetEEPROM() {
@@ -848,6 +867,9 @@ void resetEEPROM() {
 
   EEPROM.update(1014, 47);
   EEPROM.put(eeAddress._keep_power, KEEP_POWER);
+
+  EEPROM.update(1015, 47);
+  EEPROM.put(eeAddress._invert_display, INVERT_DISPLAY);
 
   readEEPROM();
 }
