@@ -7,8 +7,8 @@ void serviceRoutine(serviceModes mode) {
     disp.setInvertMode(1);
     printStr("  Калибр. объ¿ма  \n", 0, 0);
     disp.setInvertMode(0);
-    printStr("Поставьте рюмку и\n", 0, 3);
-    printStr("налейте 50мл\n");
+    printStr(" Поставьте рюмку\n", 0, 3);
+    printStr(" Налейте 50мл\n");
     while (curPumping == -1) {
       for (byte i = 0; i < NUM_SHOTS; i++) {    // поиск наличия рюмки
         if (!digitalRead(SW_pins[i])) {         // нашли рюмку
@@ -70,16 +70,15 @@ void serviceRoutine(serviceModes mode) {
   }
   else if (mode == SERVO) {         // калибровка углов серво
     int servoPos = settingsList[parking_pos];
+    printStr("Поставьте рюмку\n", 0, 0);
+    printStr("Выставите угол\n");
+    printStr("Уберите рюмку\n");
+    printStr("Повторите для всех");
+    delay(5000);
+    disp.clear();
     disp.setInvertMode(1);
     printStr("   Калибр. серво   \n", 0, 0);
     disp.setInvertMode(0);
-    printStr("Поставьте рюмку и\n", 0, 2);
-    printStr("выставите угол.\n");
-    printStr("Уберите рюмку\n");
-    delay(3000);
-    printStr("                         \n", 0, 2);
-    printStr("                      \n");
-    printStr("                      \n");
     printVolume(servoPos);
     for (byte i = 0; i < NUM_SHOTS; i++) {
       strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
@@ -103,7 +102,6 @@ void serviceRoutine(serviceModes mode) {
           currShot = -1;
           printVolume(servoPos);
         }
-
       }
       if (enc.isTurn()) {   // крутим серво от энкодера
         if (enc.isLeft()) servoPos += 1;
