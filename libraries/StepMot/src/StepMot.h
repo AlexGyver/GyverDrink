@@ -52,6 +52,7 @@ class StepMot
     void step();                      // make one step
     bool ready();                     // get status if target is reached
     bool update();                    // this method drives the motor, so it must be in the loop() function. Returns true if the motor is moving and false otherwise
+    bool enabled();                   // get status if motor is enabled
 
   private:
     const float _stepsPerRevolution = 0.0f;

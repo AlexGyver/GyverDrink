@@ -57,6 +57,10 @@ void StepMot::disable() {
   }
 }
 
+bool StepMot::enabled(){
+  return _enabled;
+}
+
 void StepMot::setDir(bool dir) {
   _dir = dir;
   if (_inverted) digitalWrite(_dirPin, !_dir);
