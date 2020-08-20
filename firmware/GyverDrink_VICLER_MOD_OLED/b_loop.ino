@@ -2,7 +2,7 @@
 
 void loop() {
 #ifdef BATTERY_PIN
-  if (!battery_watchdog()) return;
+  while(!battery_watchdog() && menuPage != CALIBRATION_PAGE);
 #endif
   encTick();
   btnTick();

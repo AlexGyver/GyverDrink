@@ -7,7 +7,42 @@ void setup() {
   // епром
   readEEPROM();
 
-  if (settingsList[timeout_off]) {
+// старт дисплея
+#if defined OLED_SH1106
+  disp.begin(&SH1106_128x64, 0x3C);
+#elif defined OLED_SSD1306
+  oled.begin(&Adafruit128x64, 0x3C);
+#endif
+  disp.invertDisplay((bool)settingsList[invert_display]);
+
+// проверка напряжения аккумулятора перед началом работы
+#ifdef BATTERY_PIN
+  float batCheck = 0;
+  for (byte i = 0; i < 20; i++) {
+    batCheck += get_battery_voltage() / 20;
+    delay(1);
+  }
+  DEBUG("Battery voltage: ");
+  DEBUG(batCheck);
+  DEBUGln("V");
+  while (get_battery_voltage() < BATTERY_LOW) {
+    disp.setFont(Battery19x9);
+    printNum(get_battery_percent(), Right, 0);
+    delay(500);
+    disp.clear();
+    get_battery_voltage();
+    delay(500);
+    if (btn.holded()) {
+      disp.clear();
+      showMenu = true;
+      serviceRoutine(BATTERY);
+      showMenu = false;
+      break;
+    }
+}
+#endif
+
+if (settingsList[timeout_off]) {
     POWEROFFtimer.setInterval(settingsList[timeout_off] * 60000L);
     POWEROFFtimer.start();
   }
@@ -21,14 +56,6 @@ void setup() {
   strip.setBrightness(255);
   strip.clear();
   DEBUGln("strip init");
-
-  // старт дисплея
-#if defined OLED_SH1106
-  disp.begin(&SH1106_128x64, 0x3C);
-#elif defined OLED_SSD1306
-  oled.begin(&Adafruit128x64, 0x3C);
-#endif
-  disp.invertDisplay((bool)settingsList[invert_display]);
 
   // настройка пинов
   pinMode(PUMP_POWER, 1);
@@ -50,7 +77,6 @@ void setup() {
   servo.detach();
   servoOFF();
   DEBUGln("servo init");
-
 
   /*
      - Радуга. Начальная яркость задаётся в RAINBOW_START_BRIGHTNESS ... (максимум 255). С этого значения яркость плавно убавляется до 0.
@@ -107,7 +133,7 @@ void setup() {
   DEBUG("- shots quantity: ");
   DEBUGln(NUM_SHOTS);
   DEBUG("- parking position: ");
-  DEBUGln(PARKING_POS);
+  DEBUGln(parking_pos);
   DEBUGln("- shot positions:");
   for (byte i = 0; i < NUM_SHOTS; i++) {
     DEBUG(i);

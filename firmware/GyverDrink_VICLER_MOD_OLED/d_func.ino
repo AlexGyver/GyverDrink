@@ -1,5 +1,8 @@
 // различные функции
 void serviceRoutine(serviceModes mode) {
+  //==============================================================================
+  //                            калибровка объёма
+  //==============================================================================
   if (mode == VOLUME) {                      // калибровка объёма
     long pumpTime = 0;
     timerMinim timer100(100);
@@ -68,6 +71,9 @@ void serviceRoutine(serviceModes mode) {
       EEPROM.put(eeAddress._time50ml, pumpTime);
     }
   }
+  //==============================================================================
+  //                       настройка серводвигателя
+  //==============================================================================
   else if (mode == SERVO) {         // калибровка углов серво
     int servoPos = settingsList[parking_pos];
     printStr("Поставьте рюмку\n", 0, 0);
@@ -90,17 +96,36 @@ void serviceRoutine(serviceModes mode) {
       // зажигаем светодиоды от кнопок
       for (byte i = 0; i < NUM_SHOTS; i++) {
         if (!digitalRead(SW_pins[i]) && shotStates[i] != EMPTY) {
-          strip.setLED(i, mCOLOR(WHITE));
+          strip.setLED(i, mHSV(255, 0, 50));
           strip.show();
           shotStates[i] = EMPTY;
           currShot = i;
+          shotCount++;
+          servoPos = shotPos[currShot];
+          servo.write(servoPos);
+          servo.setCurrentDeg(servoPos);
           printVolume(shotPos[i]);
         } else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
           strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
           strip.show();
           shotStates[i] = NO_GLASS;
-          currShot = -1;
-          printVolume(servoPos);
+          if (currShot == i)  currShot = -1;
+          shotCount--;
+          if (shotCount == 0) { // убрали последнюю рюмку
+              servoPos = settingsList[parking_pos];
+              servo.write(servoPos);
+              servo.setCurrentDeg(servoPos);
+              printVolume(servoPos);
+          }
+          else continue;  // если ещё есть поставленные рюмки -> ищем заново и попадаем в следующий блок
+        }
+        else if (shotStates[i] == EMPTY && currShot == -1) { // если стоит рюмка
+            currShot = i;
+            servoPos = shotPos[currShot];
+            servo.write(servoPos);
+            servo.setCurrentDeg(servoPos);
+            printVolume(servoPos);
+            continue;
         }
       }
       if (enc.isTurn()) {   // крутим серво от энкодера
@@ -111,6 +136,7 @@ void serviceRoutine(serviceModes mode) {
         servo.write(servoPos);
         delay(10);
         servo.setCurrentDeg(servoPos);
+        if (shotCount == 0) settingsList[parking_pos] = servoPos;
         if (shotStates[currShot] == EMPTY) {
           shotPos[currShot] = servoPos;
           printVolume(shotPos[currShot]);
@@ -131,9 +157,15 @@ void serviceRoutine(serviceModes mode) {
     // сохраняем значения углов в память
     EEPROM.update(1002, 47);
     for (byte i = 0; i < NUM_SHOTS; i++)  EEPROM.update(eeAddress._shotPos + i, shotPos[i]);
+    EEPROM.update(1006, 47);
+    EEPROM.put(eeAddress._parking_pos, PARKING_POS);
   }
+  //==============================================================================
+  //                     калибровка напряжения аккумулятора
+  //==============================================================================
   else if (mode == BATTERY) {
     disp.setInvertMode(1);
+    disp.setFont(CenturyGothic10x16);
     printStr("  Калибр. аккум-а  \n", 0, 0);
     disp.setInvertMode(0);
     timerMinim timer100(100);
@@ -629,8 +661,10 @@ void keepPower() {
 }
 
 #ifdef BATTERY_PIN
-float k = 0.1, filteredValue = 4.2;
 float filter(float value) {
+  static float k = 1.0, filteredValue = 4.0;
+  if(battery_voltage < (BATTERY_LOW)) k = 1.0;
+  else k = 0.1;
   filteredValue = (1.0 - k) * filteredValue + k * value;
   return filteredValue;
 }
@@ -674,7 +708,7 @@ bool battery_watchdog() {
 }
 
 void displayBattery(bool batOk) {
-  if (showMenu && batOk) return;
+  if ( batOk && showMenu ) return;
 
   static uint32_t currentMillis, lastDisplay = 0, lastBlink = 0;
   static bool blinkState = true;
