@@ -7,15 +7,15 @@ void setup() {
   // епром
   readEEPROM();
 
-  if (settingsList[timeout_off] > 0){
+  if (settingsList[timeout_off]) {
     POWEROFFtimer.setInterval(settingsList[timeout_off] * 60000L);
     POWEROFFtimer.start();
   }
-  if (settingsList[keep_power] > 0){
+  if (settingsList[keep_power]) {
     KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
     KEEP_POWERtimer.start();
   }
-    
+
 
   // тыкаем ленту
   strip.setBrightness(255);
@@ -23,8 +23,11 @@ void setup() {
   DEBUGln("strip init");
 
   // старт дисплея
-  disp.begin(&SH1106_128x64, 0x3C);             // SH1106
-  //oled.begin(&Adafruit128x64, I2C_ADDRESS);  // SSD1306
+#if defined OLED_SH1106
+  disp.begin(&SH1106_128x64, 0x3C);
+#elif defined OLED_SSD1306
+  oled.begin(&Adafruit128x64, 0x3C);
+#endif
   disp.invertDisplay((bool)settingsList[invert_display]);
 
   // настройка пинов
