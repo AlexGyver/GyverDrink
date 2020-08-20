@@ -197,7 +197,7 @@ void serviceMode() {
         if (enc.isTurn()) {
           if (enc.isLeft())   battery_cal += 0.01;
           if (enc.isRight())  battery_cal -= 0.01;
-          battery_cal = constrain(battery_cal, 0, 2.0);
+          battery_cal = constrain(battery_cal, 0, 3.0);
         }
         if (btn.holded()) {
           disp.displayByte(0x00, 0x00, 0x00, 0x00);
