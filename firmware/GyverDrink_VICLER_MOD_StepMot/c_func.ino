@@ -239,16 +239,19 @@ void flowRoutine() {
       }
     }
     if (noGlass && !parking) {                            // если не нашли ни одной пустой рюмки
+      if (!stepper.enabled()) {
 #if(STATUS_LED)
-      LED = mHSV(11, 255, STATUS_LED); // orange
-      LEDchanged = true;
+        LED = mHSV(11, 255, STATUS_LED); // orange
+        LEDchanged = true;
 #endif
 
 #ifdef STEPPER_ENDSTOP
-      if (PARKING_POS == 0) homing();                     // если есть концевик и он в парковочном положении -> едем до концевика
-      else stepper.setAngle(PARKING_POS);                 // иначе едем до парковочной позиции
+        if (PARKING_POS == 0) homing();                     // если есть концевик и он в парковочном положении -> едем до концевика
+        else stepper.setAngle(PARKING_POS);                 // иначе едем до парковочной позиции
 #endif
-      stepper.setAngle(PARKING_POS);
+        stepper.setAngle(PARKING_POS);
+      }
+
       if (stepper.ready()) {                              // приехали
         stepper.disable();                                // выключили шаговик
         systemON = false;                                 // выключили систему

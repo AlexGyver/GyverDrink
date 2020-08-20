@@ -1,6 +1,6 @@
 /*
-  GyverDrink VICLER_MOD_StepMot_v2.0
-  05.08.2020
+  GyverDrink VICLER_MOD_StepMot_v2.1
+  19.08.2020
 
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" на основе версии 1.5 by AlexGyver с заменой серводвигателя на шаговый мотор, устранением багов и дополнительным функционалом
   Исходники на GitHub: https://github.com/VICLER/GyverDrink
