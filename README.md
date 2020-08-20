@@ -110,4 +110,4 @@
 
 <a id="chapter-7"></a>
 ## Поддержка
-* [PayPal](paypal.me/vicler)
+* [PayPal](http://paypal.me/vicler)
