@@ -90,9 +90,9 @@ boolean buttonMinim::holded() {
   else return false;
 }
 
-boolean buttonMinim::holdedFor(uint8_t sec){
+boolean buttonMinim::holdedFor(uint8_t sec) {
   buttonMinim::tick();
-  if(flags.holdF && (millis() - _btnTimer > sec * 1000)){
+  if (flags.holdF && (millis() - _btnTimer > sec * 1000)) {
     return true;
   }
   else return false;

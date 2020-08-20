@@ -7,184 +7,209 @@ void serviceMode() {
     disp.runningString(serviceText, sizeof(serviceText), 150);
     while (!digitalRead(BTN_PIN));  // ждём отпускания
     DEBUGln("service Mode");
-    delay(200);
-    servoON();
-    servo.attach();
-    int servoPos = parking_pos;
     timerMinim timer100(100);
-    dispNum(servoPos);
+
     //==============================================================================
     //             настройка углов под стопки и парковочной позиции
     //==============================================================================
-    while (1) {
-      enc.tick();
-      static int currShot = -1;
+    if (serviceState == SERVO) {
+      servoON();
+      servo.attach();
+      int servoPos = parking_pos;
+      dispNum(servoPos);
+      while (1) {
+        enc.tick();
+        static int currShot = -1;
 
-      if (timer100.isReady()) {   // период 100 мс
+        if (timer100.isReady()) {   // период 100 мс
 
-        // зажигаем светодиоды от кнопок
-        for (byte i = 0; i < NUM_SHOTS; i++) {
-          if (!digitalRead(SW_pins[i]) && shotStates[i] != EMPTY) { // поставили рюмку
-            strip.setLED(i, mHSV(255, 0, 50));
-            strip.show();
-            shotStates[i] = EMPTY;
-            currShot = i;
-            shotCount++;
-            servoPos = shotPos[currShot];
-            dispNum((i + 1) * 1000 + shotPos[i]);
-            servo.write(servoPos);
-            servo.setCurrentDeg(servoPos);
-          } 
-          else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {  // убрали рюмку
-            if (STBY_LIGHT > 0) strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
-            else  strip.setLED(i, mCOLOR(BLACK));
-            strip.show();
-            shotStates[i] = NO_GLASS;
-            if(currShot == i)  currShot = -1;
-            shotCount--;
-            if (shotCount == 0) { // убрали последнюю рюмку
-              servoPos = parking_pos;
+          // зажигаем светодиоды от кнопок
+          for (byte i = 0; i < NUM_SHOTS; i++) {
+            if (!digitalRead(SW_pins[i]) && shotStates[i] != EMPTY) { // поставили рюмку
+              strip.setLED(i, mHSV(255, 0, 50));
+              strip.show();
+              shotStates[i] = EMPTY;
+              currShot = i;
+              shotCount++;
+              servoPos = shotPos[currShot];
+              dispNum((i + 1) * 1000 + shotPos[i]);
               servo.write(servoPos);
               servo.setCurrentDeg(servoPos);
             }
-            else continue;  // если ещё есть поставленные рюмки -> ищем заново и попадаем в следующий блок
-            dispNum(servoPos);
-          }
-          else if(shotStates[i] == EMPTY && currShot == -1){ // если стоит рюмка
-            currShot = i;
-            servoPos = shotPos[currShot];
-            dispNum((i + 1) * 1000 + shotPos[i]);
-            servo.write(servoPos);
-            servo.setCurrentDeg(servoPos);
-            continue;
+            else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {  // убрали рюмку
+              if (STBY_LIGHT > 0) strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
+              else  strip.setLED(i, mCOLOR(BLACK));
+              strip.show();
+              shotStates[i] = NO_GLASS;
+              if (currShot == i)  currShot = -1;
+              shotCount--;
+              if (shotCount == 0) { // убрали последнюю рюмку
+                servoPos = parking_pos;
+                servo.write(servoPos);
+                servo.setCurrentDeg(servoPos);
+                dispNum(servoPos);
+              }
+              else continue;  // если ещё есть поставленные рюмки -> ищем заново и попадаем в следующий блок
+            }
+            else if (shotStates[i] == EMPTY && currShot == -1) { // если стоит рюмка
+              currShot = i;
+              servoPos = shotPos[currShot];
+              dispNum((i + 1) * 1000 + shotPos[i]);
+              servo.write(servoPos);
+              servo.setCurrentDeg(servoPos);
+              continue;
+            }
           }
         }
-      }
 
-      if (enc.isTurn()) {   // крутим серво от энкодера
-        if (enc.isLeft()) servoPos += 1;
-        if (enc.isRight())  servoPos -= 1;
-        servoPos = constrain(servoPos, 0, 180);
-        servo.write(servoPos);
-        servo.setCurrentDeg(servoPos);
-        if(shotCount == 0) parking_pos = servoPos;
-        if (shotStates[currShot] == EMPTY) {
-          shotPos[currShot] = servoPos;
-          dispNum((currShot + 1) * 1000 + shotPos[currShot]);
+        if (enc.isTurn()) {   // крутим серво от энкодера
+          if (enc.isLeft()) servoPos += 1;
+          if (enc.isRight())  servoPos -= 1;
+          servoPos = constrain(servoPos, 0, 180);
+          servo.write(servoPos);
+          servo.setCurrentDeg(servoPos);
+          if (shotCount == 0) parking_pos = servoPos;
+          if (shotStates[currShot] == EMPTY) {
+            shotPos[currShot] = servoPos;
+            dispNum((currShot + 1) * 1000 + shotPos[currShot]);
+          }
+          else dispNum(servoPos);
         }
-        else dispNum(servoPos);
-      }
 
-      if (btn.holded()) {
-        disp.displayByte(0x00, 0x00, 0x00, 0x00);
-        break;
+        if (btn.holded()) {
+          disp.displayByte(0x00, 0x00, 0x00, 0x00);
+          serviceState = VOLUME;
+          servoOFF();
+          break;
+        }
       }
+      // сохраняем значения углов в память
+      EEPROM.update(1002, 47);
+      for (byte i = 0; i < NUM_SHOTS; i++)  EEPROM.update(6 + i, shotPos[i]);
+      // сохраняем значение домашней позиции
+      EEPROM.update(1003, 47);
+      EEPROM.update(13, parking_pos);
     }
     //==============================================================================
     //                            калибровка объёма
     //==============================================================================
-    while (!digitalRead(BTN_PIN));  // ждём отпускания
-    long pumpTime = 0;
-    bool flag = false;
-    disp.displayInt(pumpTime);
-    while (1) {
+    if (serviceState == VOLUME) {
+      while (!digitalRead(BTN_PIN));  // ждём отпускания
+      long pumpTime = 0;
+      bool flag = false;
+      disp.displayInt(pumpTime);
+      while (1) {
 
-      if (timer100.isReady()) {
-        // работа помпы со счётчиком
-        if (!digitalRead(ENC_SW) && shotCount) {
-          if (flag) pumpTime += 100;
-          else  pumpTime = 0;
-          disp.displayInt(pumpTime);
-          flag = true;
-          pumpON();
-        } else {
-          pumpOFF();
-          flag = false;
-        }
-
-        for (byte i = 0; i < NUM_SHOTS; i++) {
-          if (!digitalRead(SW_pins[i]) && shotStates[i] != EMPTY) {
-            strip.setLED(i, mHSV(20, 255, 255));
-            strip.show();
-            shotStates[i] = EMPTY;
-            shotCount++;
-            servo.write(shotPos[i]);
-            servo.setCurrentDeg(shotPos[i]);
+        if (timer100.isReady()) {
+          // работа помпы со счётчиком
+          if (!digitalRead(ENC_SW) && shotCount) {
+            if (flag) pumpTime += 100;
+            else  pumpTime = 0;
+            disp.displayInt(pumpTime);
+            flag = true;
+            pumpON();
+          } else {
+            pumpOFF();
+            flag = false;
           }
-          else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
-            if (STBY_LIGHT > 0) strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
-            else  strip.setLED(i, mCOLOR(BLACK));
-            strip.show();
-            shotStates[i] = NO_GLASS;
-            shotCount--;
-            if (shotCount == 0) {
-              servo.write(parking_pos);
-              servo.setCurrentDeg(parking_pos);
+
+          for (byte i = 0; i < NUM_SHOTS; i++) {
+            if (!digitalRead(SW_pins[i]) && shotStates[i] != EMPTY) {
+              strip.setLED(i, mHSV(20, 255, 255));
+              strip.show();
+              shotStates[i] = EMPTY;
+              shotCount++;
+              servoON();
+              servo.setTargetDeg(shotPos[i]);
+              while (!servo.tick());
+              servoOFF();
+              //servo.write(shotPos[i]);
+              //servo.setCurrentDeg(shotPos[i]);
             }
-            else if(shotPos[i] == servo.getCurrentDeg()){
-              for (byte i = 0; i < NUM_SHOTS; i++){
-                if(shotStates[i] == EMPTY) {
-                  servo.write(shotPos[i]);
-                  servo.setCurrentDeg(shotPos[i]);
-                  continue;
+            else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
+              if (STBY_LIGHT > 0) strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
+              else  strip.setLED(i, mCOLOR(BLACK));
+              strip.show();
+              shotStates[i] = NO_GLASS;
+              shotCount--;
+              if (shotCount == 0) {
+                servoON();
+                servo.setTargetDeg(parking_pos);
+                while (!servo.tick());
+                servoOFF();
+                //servo.write(parking_pos);
+                //servo.setCurrentDeg(parking_pos);
+              }
+              else if (shotPos[i] == servo.getCurrentDeg()) {
+                for (byte i = 0; i < NUM_SHOTS; i++) {
+                  if (shotStates[i] == EMPTY) {
+                    servoON();
+                    servo.setTargetDeg(shotPos[i]);
+                    while (!servo.tick());
+                    servoOFF();
+                    //servo.write(shotPos[i]);
+                    //servo.setCurrentDeg(shotPos[i]);
+                    continue;
+                  }
                 }
               }
             }
           }
         }
-      }
-      if (btn.holded()) {
-        servo.setTargetDeg(parking_pos);
-        disp.displayByte(0x00, 0x00, 0x00, 0x00);
-        for (byte i = 0; i < NUM_SHOTS; i++) {
-          if (STBY_LIGHT > 0) strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
-          else  strip.setLED(i, mCOLOR(BLACK));
+
+        if (btn.holded()) {
+          servo.setTargetDeg(parking_pos);
+          disp.displayByte(0x00, 0x00, 0x00, 0x00);
+          for (byte i = 0; i < NUM_SHOTS; i++) {
+            if (STBY_LIGHT > 0) strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
+            else  strip.setLED(i, mCOLOR(BLACK));
+          }
+          while (!servo.tick());
+          servoOFF();
+          servo.detach();
+#ifdef BATTERY_PIN
+          serviceState = BATTERY;
+#else
+          serviceState = SERVO;
+#endif
+          break;
         }
-        while (!servo.tick());
-        servoOFF();
-        servo.detach();
-        break;
+      }
+      // сохраняем настройки таймера налива
+      if (pumpTime > 0) {
+        time50ml = pumpTime;
+        volumeTick = 15.0f * 50.0f / time50ml;
+        EEPROM.update(1001, 47);
+        EEPROM.put(2, pumpTime);
       }
     }
     //==============================================================================
     //                     калибровка напряжения аккумулятора
     //==============================================================================
 #ifdef BATTERY_PIN
-    while (!digitalRead(BTN_PIN));  // ждём отпускания
-    dispNum(get_battery_voltage() * 1000, 1);
-    while (1) {
-      enc.tick();
-      if (timer100.isReady()) dispNum(get_battery_voltage() * 1000, 1);
+    if (serviceState == BATTERY) {
+      while (!digitalRead(BTN_PIN));  // ждём отпускания
+      dispNum(get_battery_voltage() * 1000, 1);
+      while (1) {
+        enc.tick();
+        if (timer100.isReady()) dispNum(get_battery_voltage() * 1000, 1);
 
-      if (enc.isTurn()) {
-        if (enc.isLeft())   battery_cal += 0.01;
-        if (enc.isRight())  battery_cal -= 0.01;
-        battery_cal = constrain(battery_cal, 0, 2.0);
+        if (enc.isTurn()) {
+          if (enc.isLeft())   battery_cal += 0.01;
+          if (enc.isRight())  battery_cal -= 0.01;
+          battery_cal = constrain(battery_cal, 0, 2.0);
+        }
+        if (btn.holded()) {
+          disp.displayByte(0x00, 0x00, 0x00, 0x00);
+          serviceState = SERVO;
+          break;
+        }
       }
-      if (btn.holded()) {
-        disp.displayByte(0x00, 0x00, 0x00, 0x00);
-        break;
-      }
+      // сохраняем калибровку аккумулятора
+      EEPROM.update(1004, 47);
+      EEPROM.put(14, battery_cal);
     }
 #endif
-
-
-    // сохраняем настройки таймера налива
-    if (pumpTime > 0) {
-      time50ml = pumpTime;
-      volumeTick = 15.0f * 50.0f / time50ml;
-      EEPROM.update(1001, 47);
-      EEPROM.put(2, pumpTime);
-    }
-    // сохраняем значения углов в память
-    EEPROM.update(1002, 47);
-    for (byte i = 0; i < NUM_SHOTS; i++)  EEPROM.update(6 + i, shotPos[i]);
-    // сохраняем значение домашней позиции
-    EEPROM.update(1003, 47);
-    EEPROM.update(13, parking_pos);
-    // сохраняем калибровку аккумулятора 
-    EEPROM.update(1004, 47);
-    EEPROM.put(14, battery_cal);
 
     DEBUG("time for 1ml: ");
     DEBUGln(time50ml / 50);
@@ -232,7 +257,7 @@ void dispNum(uint16_t num, bool mode) {
     if (!workMode) disp.displayByte(3, 0x00);
     else disp.displayByte(3, 0x40);
   }
-  else if(mode == 1){
+  else if (mode == 1) {
     disp.display(0, num / 1000);              // тысячные
     disp.display(1, (num % 1000) / 100);     // сотые
     disp.display(2, (num % 100) / 10);      // десятые
@@ -600,8 +625,10 @@ void ledBreathing(bool _state, uint8_t _shotNum, bool mode) {
 #endif
 
 #ifdef BATTERY_PIN
-float k = 0.1, filteredValue = 4.2;
 float filter(float value) {
+  static float k = 1.0, filteredValue = 4.0;
+  if (battery_voltage < (BATTERY_LOW)) k = 1.0;
+  else k = 0.1;
   filteredValue = (1.0 - k) * filteredValue + k * value;
   return filteredValue;
 }
@@ -715,7 +742,7 @@ void readEEPROM() {
   else EEPROM.get(13, parking_pos);
 
   //чтение калибровки аккумулятора
-  if(EEPROM.read(1004) != 47){
+  if (EEPROM.read(1004) != 47) {
     EEPROM.write(1004, 47);
     EEPROM.put(14, 1.0);
   }

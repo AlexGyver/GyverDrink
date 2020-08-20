@@ -1,4 +1,5 @@
 void dispNum(uint16_t num, bool mode = 0);
+
 void setup() {
 #if (DEBUG_UART == 1)
   Serial.begin(9600);
@@ -6,9 +7,7 @@ void setup() {
 #endif
 
   // епром
-  //EEPROM.write(1004, 0);
   readEEPROM();
-
 #ifdef BATTERY_PIN
   float get_battery_voltage();
   float batCheck = 0;
@@ -22,6 +21,8 @@ void setup() {
     delay(500);
     disp.displayByte(0x00, 0x00, 0x00, 0x00);
     delay(500);
+    serviceState = BATTERY;
+    if (btn.holded())  serviceMode();
   }
 #endif
 
