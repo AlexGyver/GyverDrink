@@ -652,7 +652,7 @@ uint8_t get_battery_percent() {
 }
 
 bool battery_watchdog() {
-  static uint16_t lastMillis = 0;
+  static uint32_t lastMillis = 0;
   static bool batOk, lastOkStatus = 1;
   if (millis() - lastMillis >= 1000) {
     lastMillis = millis();
