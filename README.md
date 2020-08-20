@@ -7,6 +7,7 @@
 * [Как скачать и прошить](#chapter-4)
 * [FAQ](#chapter-5)
 * [Полезная информация](#chapter-6)
+* [Поддержка](#chapter-7)
 
 <a id="chapter-0"></a>
 ## Описание проекта
@@ -16,9 +17,11 @@
 - Любые виды датчиков наличия рюмок (механические, ёмкостные, ик)
 - Пищевая мембранная помпа
 - Энкодер для управления, дисплей для отображения информации о режиме, обьёме
+- Доступны семисегментный дисплей на контроллере TM1637 и OLED на контроллерах SSD1306 (0.96") или SH1106 (1.3")
 - Возможность подключения шагового двигателя для более плавных и бесшумных движений
-- Работа устройства как от внешнего источника питания, так и от встроенного аккумулятора
+- Работа устройства как от внешнего источника питания, так и от встроенного аккумулятора с мониторингом напряжения
 - Полная калибровка устройства в сервис режиме без необходимости перепрошивки (после выхода из сервис режима данные сохраняются в памяти)
+- Полноценное меню с настройками, калибровкой и статистикой в OLED версии прошивки
 - Страница исходного проекта на сайте: https://alexgyver.ru/GyverDrink/
 
 <a id="chapter-1"></a>
@@ -97,12 +100,14 @@
 В: Сколько стоит?  
 О: Ничего не продаю.
 
-### Вопросы по этому проекту
-
 <a id="chapter-6"></a>
 ## Полезная информация
 * [Сайт AlexGyver](http://alexgyver.ru/)
-* [Основной YouTube канал](https://www.youtube.com/channel/UCgtAOyEQdAyjvm9ATCi_Aig?sub_confirmation=1)
-* [YouTube канал про Arduino](https://www.youtube.com/channel/UC4axiS76D784-ofoTdo5zOA?sub_confirmation=1)
-* [Мои видеоуроки по пайке](https://www.youtube.com/playlist?list=PLOT_HeyBraBuMIwfSYu7kCKXxQGsUKcqR)
-* [Мои видеоуроки по Arduino](http://alexgyver.ru/arduino_lessons/)
+* [Основной YouTube канал AlexGyver](https://www.youtube.com/channel/UCgtAOyEQdAyjvm9ATCi_Aig?sub_confirmation=1)
+* [YouTube канал про Arduino от AlexGyver](https://www.youtube.com/channel/UC4axiS76D784-ofoTdo5zOA?sub_confirmation=1)
+* [Видеоуроки по пайке](https://www.youtube.com/playlist?list=PLOT_HeyBraBuMIwfSYu7kCKXxQGsUKcqR)
+* [Видеоуроки по Arduino](http://alexgyver.ru/arduino_lessons/)
+
+<a id="chapter-7"></a>
+## Поддержка
+* [PayPal](paypal.me/vicler)
