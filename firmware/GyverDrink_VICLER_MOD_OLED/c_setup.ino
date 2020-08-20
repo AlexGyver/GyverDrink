@@ -7,10 +7,15 @@ void setup() {
   // епром
   readEEPROM();
 
-  if (settingsList[timeout_off])
+  if (settingsList[timeout_off] > 0){
     POWEROFFtimer.setInterval(settingsList[timeout_off] * 60000L);
-  if (settingsList[keep_power])
+    POWEROFFtimer.start();
+  }
+  if (settingsList[keep_power] > 0){
     KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
+    KEEP_POWERtimer.start();
+  }
+    
 
   // тыкаем ленту
   strip.setBrightness(255);

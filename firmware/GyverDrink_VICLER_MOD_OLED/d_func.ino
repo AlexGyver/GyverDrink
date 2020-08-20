@@ -165,12 +165,10 @@ void settingsMenuHandler(uint8_t row) {
   disp.setInvertMode(1);
   disp.setFont(Callibri15);
   printStr(MenuPages[menuPage][menuItem], 0, row);
-  printStr("                     ");
+  printStr("                      ");
   printNum(settingsList[menuItem - 1], Right);
   while (1) {
     enc.tick();
-    LEDtick();
-    timeoutTick();
 
     if (enc.isTurn()) {
       if (enc.isLeft()) {
@@ -183,11 +181,20 @@ void settingsMenuHandler(uint8_t row) {
       if (settingsList[timeout_off] > 15) settingsList[timeout_off] = 0;
       if (settingsList[parking_pos] > 180) settingsList[parking_pos] = 0;
 
+      if (settingsList[stby_time]) {
+        TIMEOUTtimer.setInterval(settingsList[stby_time] * 1000L); // таймаут режима ожидания
+        TIMEOUTtimer.reset();
+      }
+      if (settingsList[keep_power]) KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
+      else keepPowerState = 0;
+
+
       disp.setInvertMode(1);
       disp.setFont(Callibri15);
       printStr(MenuPages[menuPage][menuItem], 0, row);
       printStr("                      ");
       printNum(settingsList[parameter], Right);
+
       timeoutReset();
     }
 
@@ -196,7 +203,7 @@ void settingsMenuHandler(uint8_t row) {
       bypass = true;
     }
 
-    if(menuItem == menuItemsNum[menuPage] - 1){
+    if (menuItem == menuItemsNum[menuPage] - 1) {
       resetEEPROM();
       readEEPROM();
       bypass = true;
@@ -214,9 +221,6 @@ void settingsMenuHandler(uint8_t row) {
       EEPROM.update(eeAddress._keep_power, settingsList[keep_power]);
       EEPROM.update(eeAddress._invert_display, settingsList[invert_display]);
 
-      TIMEOUTtimer.setInterval(settingsList[stby_time] * 1000L); // таймаут режима ожидания
-      TIMEOUTtimer.reset();
-      KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
       servo.setDirection(settingsList[inverse_servo]);
       servoON();
       servo.attach(SERVO_PIN, settingsList[parking_pos]);
@@ -229,6 +233,9 @@ void settingsMenuHandler(uint8_t row) {
       timeoutReset();
       break;
     }
+
+    timeoutTick();
+    LEDtick();
   }
 }
 
@@ -300,7 +307,7 @@ void flowTick() {
 
 // поиск и заливка
 void flowRoutnie() {
-  if (showMenu && parking) return;
+  if (showMenu) return;
 
   if (systemState == SEARCH) {                            // если поиск рюмки
     bool noGlass = true;
@@ -347,13 +354,15 @@ void flowRoutnie() {
         DEBUGln("parked!");
       }
       else {                                              // если же в ручном режиме:
-        servoON();                                        // включаем серво и паркуемся
-        servo.attach();
-        servo.setTargetDeg(settingsList[parking_pos]);
+        if (!servo.attached()) {
+          servoON();                                        // включаем серво и паркуемся
+          servo.attach();
+          servo.setTargetDeg(settingsList[parking_pos]);
 #if(STATUS_LED)
-        LED = mHSV(11, 255, STATUS_LED); // orange
-        LEDchanged = true;
+          LED = mHSV(11, 255, STATUS_LED); // orange
+          LEDchanged = true;
 #endif
+        }
 
         if (servo.tick()) {                               // едем до упора
           servoOFF();                                     // выключили серво
@@ -442,7 +451,6 @@ void timeoutReset() {
   timeoutState = true;
   disp.setContrast(255);
   TIMEOUTtimer.reset();
-  TIMEOUTtimer.start();
   if (!keepPowerState) {
     for (byte i = 0; i < NUM_SHOTS; i++) {
       if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
@@ -453,7 +461,6 @@ void timeoutReset() {
   LED = mHSV(255, 0, STATUS_LED); // white
   LEDbreathingState = false;
 #endif
-  //if (settingsList[keep_power] && !showMenu)  KEEP_POWERtimer.reset();
   LEDchanged = true;
   //DEBUGln("timeout reset");
 }
@@ -474,10 +481,7 @@ void timeoutTick() {
     selectShot = -1;
     curSelected = -1;
     systemON = false;
-    if (settingsList[timeout_off]) {
-      POWEROFFtimer.reset();
-      POWEROFFtimer.start();
-    }
+    if (settingsList[timeout_off]) POWEROFFtimer.reset();
     if (volumeChanged) {
       volumeChanged = false;
       EEPROM.put(0, thisVolume);
@@ -485,7 +489,7 @@ void timeoutTick() {
   }
 
   if (settingsList[keep_power]) {
-    if (KEEP_POWERtimer.isReady() && (shotCount == 0) && ( (settingsList[keep_power] < settingsList[stby_time]) || !timeoutState || showMenu) && (curSelected == -1)) {
+    if (KEEP_POWERtimer.isReady() && (shotCount == 0) && ( (settingsList[keep_power] < settingsList[stby_time]) || showMenu) && (curSelected == -1)) {
       keepPowerState = 1;
       LEDchanged = true;
     }
@@ -506,7 +510,6 @@ void timeoutTick() {
         menuItem = 1;
         showMenu = false;
       }
-
     }
   }
 }
