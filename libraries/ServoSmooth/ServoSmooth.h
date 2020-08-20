@@ -65,7 +65,8 @@ public:
 	int getCurrentDeg();						// получение текущей позиции в градусах (0-макс. угол). Зависит от min и max
 	int getTarget();							// получение целевой позиции в мкс (500 - 2400)
 	int getTargetDeg();							// получение целевой позиции в градусах (0-макс. угол). Зависит от min и max
-	
+	bool attached();							// получение статуса о подключении
+
 	void setDirection(bool _dir);				// смена направления поворота
 	
 	Servo _servo;		
@@ -87,5 +88,6 @@ private:
 	boolean _servoState = true;
 	boolean _autoDetach = true;
 	byte _timeoutCounter = 0;	
-	bool _dir = 0;	
+	bool _dir = 0;
+	bool _attached = false;
 };
