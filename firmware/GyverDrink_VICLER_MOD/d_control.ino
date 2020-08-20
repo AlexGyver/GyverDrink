@@ -142,5 +142,11 @@ void btnTick() {
     dispNum(thisVolume);
     resetEEPROM();
     readEEPROM();
+    servoON();
+    servo.attach(SERVO_PIN, parking_pos);
+    delay(500);
+    servo.setCurrentDeg(parking_pos);
+    servoOFF();
+    servo.detach();
   }
 }

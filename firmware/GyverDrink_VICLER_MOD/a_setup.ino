@@ -1,3 +1,4 @@
+void dispNum(uint16_t num, bool mode = 0);
 void setup() {
 #if (DEBUG_UART == 1)
   Serial.begin(9600);
@@ -5,8 +6,25 @@ void setup() {
 #endif
 
   // епром
+  //EEPROM.write(1004, 0);
   readEEPROM();
-  
+
+#ifdef BATTERY_PIN
+  float get_battery_voltage();
+  float batCheck = 0;
+  for (byte i = 0; i < 20; i++) batCheck += get_battery_voltage() / 20;
+  DEBUG("Battery voltage: ");
+  DEBUG(batCheck);
+  DEBUGln("V");
+  while (get_battery_voltage() < BATTERY_LOW) {
+    disp.brightness(0);
+    disp.displayByte(0x39, 0x09, 0x09, 0x0F);
+    delay(500);
+    disp.displayByte(0x00, 0x00, 0x00, 0x00);
+    delay(500);
+  }
+#endif
+
   // тыкаем ленту
   strip.setBrightness(255);
   strip.clear();
@@ -26,9 +44,9 @@ void setup() {
   // настройка серво
   servoON();
   servo.setDirection(INVERSE_SERVO);
-  servo.attach(SERVO_PIN, PARKING_POS);
+  servo.attach(SERVO_PIN, parking_pos);
   delay(500);
-  servo.setCurrentDeg(PARKING_POS);
+  servo.setCurrentDeg(parking_pos);
   servo.setSpeed(15);
   servo.setAccel(0.2);
   servo.detach();
@@ -85,7 +103,7 @@ void setup() {
   DEBUG("- shots quantity: ");
   DEBUGln(NUM_SHOTS);
   DEBUG("- parking position: ");
-  DEBUGln(PARKING_POS);
+  DEBUGln(parking_pos);
   DEBUGln("- shot positions:");
   for (byte i = 0; i < NUM_SHOTS; i++) {
     DEBUG(i);
