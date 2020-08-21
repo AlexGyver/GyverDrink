@@ -372,7 +372,6 @@ void flowRoutnie() {
     }
     if (noGlass && !parking) {                            // если не нашли ни одной пустой рюмки и не припаркованны
       if ( (workMode == AutoMode) && settingsList[auto_parking] == 0) {                // если в авто режиме:
-        servoOFF();                                       // выключили серво
         systemON = false;                                 // выключили систему
         DEBUGln("SystemOFF");
         parking = true;                                   // уже на месте!
@@ -390,7 +389,6 @@ void flowRoutnie() {
 #endif
 
         if (servo.tick()) {                               // едем до упора
-          servoOFF();                                     // выключили серво
           systemON = false;                               // выключили систему
           DEBUGln("SystemOFF");
           parking = true;                                 // на месте!
@@ -414,7 +412,6 @@ void flowRoutnie() {
       DEBUG("actual position: ");
       DEBUG(servo.getCurrentDeg());
       DEBUGln("°");
-      servoOFF();                                         // отключаем сервопривод
 #if(STATUS_LED)
       LED = mHSV(255, 0, STATUS_LED); // white
       strip.show();
@@ -494,7 +491,6 @@ void timeoutTick() {
     DEBUGln("timeout");
     timeoutState = false;
     disp.setContrast(0);
-    servoOFF();
     if (settingsList[stby_light]) {
       for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, settingsList[stby_light] / 2);
     }
@@ -534,6 +530,12 @@ void timeoutTick() {
       }
     }
   }
+}
+
+// обработка движения серво
+void servoTick(){
+  if (servo.tick()) servoOFF();
+  else servoON();
 }
 
 void rainbowFlow(bool _state, uint8_t _shotNum) {
