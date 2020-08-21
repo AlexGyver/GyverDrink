@@ -61,7 +61,6 @@ void serviceRoutine(serviceModes mode) {
     }
     while (!servo.tick());
     servoOFF();
-    servo.detach();
     // сохраняем настройки таймера налива
     if (pumpTime > 0) {
       time50ml = pumpTime;
@@ -151,7 +150,6 @@ void serviceRoutine(serviceModes mode) {
     }
     while (!servo.tick());
     servoOFF();
-    servo.detach();
     // сохраняем значения углов в память
     EEPROM.update(1002, 47);
     for (byte i = 0; i < NUM_SHOTS; i++)  EEPROM.update(eeAddress._shotPos + i, shotPos[i]);
@@ -375,7 +373,6 @@ void flowRoutnie() {
     if (noGlass && !parking) {                            // если не нашли ни одной пустой рюмки и не припаркованны
       if ( (workMode == AutoMode) && settingsList[auto_parking] == 0) {                // если в авто режиме:
         servoOFF();                                       // выключили серво
-        servo.detach();
         systemON = false;                                 // выключили систему
         DEBUGln("SystemOFF");
         parking = true;                                   // уже на месте!
@@ -394,7 +391,6 @@ void flowRoutnie() {
 
         if (servo.tick()) {                               // едем до упора
           servoOFF();                                     // выключили серво
-          servo.detach();
           systemON = false;                               // выключили систему
           DEBUGln("SystemOFF");
           parking = true;                                 // на месте!
@@ -419,7 +415,6 @@ void flowRoutnie() {
       DEBUG(servo.getCurrentDeg());
       DEBUGln("°");
       servoOFF();                                         // отключаем сервопривод
-      servo.detach();
 #if(STATUS_LED)
       LED = mHSV(255, 0, STATUS_LED); // white
       strip.show();
@@ -500,7 +495,6 @@ void timeoutTick() {
     timeoutState = false;
     disp.setContrast(0);
     servoOFF();
-    servo.detach();
     if (settingsList[stby_light]) {
       for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, settingsList[stby_light] / 2);
     }
