@@ -29,7 +29,7 @@ void encTick() {
       displayMenu();
       return;
     }
-    if (curSelected) shotVolume[(byte)curSelected] = constrain(shotVolume[(byte)curSelected], 1, settingsList[max_volume]);
+    if (curSelected >= 0) shotVolume[(byte)curSelected] = constrain(shotVolume[(byte)curSelected], 1, settingsList[max_volume]);
     thisVolume = constrain(thisVolume, 1, settingsList[max_volume]);
     if (curSelected >= 0) {
       printVolume(shotVolume[curSelected]);

@@ -7,7 +7,7 @@ void setup() {
   // епром
   readEEPROM();
 
-// старт дисплея
+  // старт дисплея
 #if defined OLED_SH1106
   disp.begin(&SH1106_128x64, 0x3C);
 #elif defined OLED_SSD1306
@@ -15,7 +15,7 @@ void setup() {
 #endif
   disp.invertDisplay((bool)settingsList[invert_display]);
 
-// проверка напряжения аккумулятора перед началом работы
+  // проверка напряжения аккумулятора перед началом работы
 #ifdef BATTERY_PIN
   float batCheck = 0;
   for (byte i = 0; i < 20; i++) {
@@ -39,10 +39,10 @@ void setup() {
       showMenu = false;
       break;
     }
-}
+  }
 #endif
 
-if (settingsList[timeout_off]) {
+  if (settingsList[timeout_off]) {
     POWEROFFtimer.setInterval(settingsList[timeout_off] * 60000L);
     POWEROFFtimer.start();
   }

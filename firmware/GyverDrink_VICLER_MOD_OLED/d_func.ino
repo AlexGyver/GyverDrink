@@ -22,7 +22,6 @@ void serviceRoutine(serviceModes mode) {
             break;
           }
           servoON();
-          servo.attach();
           servo.setTargetDeg(shotPos[i]);
           curPumping = i;
           parking = false;
@@ -86,10 +85,8 @@ void serviceRoutine(serviceModes mode) {
     printStr("   Калибр. серво   \n", 0, 0);
     disp.setInvertMode(0);
     printVolume(servoPos);
-    for (byte i = 0; i < NUM_SHOTS; i++) {
+    for (byte i = 0; i < NUM_SHOTS; i++)
       strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
-    }
-    servo.attach();
     while (1) {
       enc.tick();
       static int currShot = -1;
@@ -105,27 +102,28 @@ void serviceRoutine(serviceModes mode) {
           servo.write(servoPos);
           servo.setCurrentDeg(servoPos);
           printVolume(shotPos[i]);
-        } else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
+        }
+        else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
           strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
           strip.show();
           shotStates[i] = NO_GLASS;
           if (currShot == i)  currShot = -1;
           shotCount--;
           if (shotCount == 0) { // убрали последнюю рюмку
-              servoPos = settingsList[parking_pos];
-              servo.write(servoPos);
-              servo.setCurrentDeg(servoPos);
-              printVolume(servoPos);
+            servoPos = settingsList[parking_pos];
+            servo.write(servoPos);
+            servo.setCurrentDeg(servoPos);
+            printVolume(servoPos);
           }
           else continue;  // если ещё есть поставленные рюмки -> ищем заново и попадаем в следующий блок
         }
         else if (shotStates[i] == EMPTY && currShot == -1) { // если стоит рюмка
-            currShot = i;
-            servoPos = shotPos[currShot];
-            servo.write(servoPos);
-            servo.setCurrentDeg(servoPos);
-            printVolume(servoPos);
-            continue;
+          currShot = i;
+          servoPos = shotPos[currShot];
+          servo.write(servoPos);
+          servo.setCurrentDeg(servoPos);
+          printVolume(servoPos);
+          continue;
         }
       }
       if (enc.isTurn()) {   // крутим серво от энкодера
@@ -355,7 +353,6 @@ void flowRoutnie() {
         DEBUGln(curPumping);
         if ( abs(shotPos[i] - servo.getCurrentDeg()) > 3) {        // включаем серво только если целевая позиция не совпадает с текущей
           servoON();                                      // вкл питание серво
-          servo.attach();
           servo.setTargetDeg(shotPos[curPumping]);        // задаём цель
           parking = false;
 #if(STATUS_LED)
@@ -387,15 +384,13 @@ void flowRoutnie() {
         DEBUGln("parked!");
       }
       else {                                              // если же в ручном режиме:
-        if (!servo.attached()) {
-          servoON();                                        // включаем серво и паркуемся
-          servo.attach();
-          servo.setTargetDeg(settingsList[parking_pos]);
+
+        servoON();                                        // включаем серво и паркуемся
+        servo.setTargetDeg(settingsList[parking_pos]);
 #if(STATUS_LED)
-          LED = mHSV(11, 255, STATUS_LED); // orange
-          LEDchanged = true;
+        LED = mHSV(11, 255, STATUS_LED); // orange
+        LEDchanged = true;
 #endif
-        }
 
         if (servo.tick()) {                               // едем до упора
           servoOFF();                                     // выключили серво
@@ -480,7 +475,7 @@ void LEDtick() {
 
 // сброс таймаута
 void timeoutReset() {
-  if (!timeoutState && !showMenu) displayMode(workMode);
+  if (!timeoutState && !showMenu && (curSelected < 0)) displayMode(workMode);
   timeoutState = true;
   disp.setContrast(255);
   TIMEOUTtimer.reset();
@@ -568,7 +563,6 @@ void prePump() {
         break;
       }
       servoON();
-      servo.attach();
       servo.setTargetDeg(shotPos[i]);
       curPumping = i;
       parking = false;
@@ -664,7 +658,7 @@ void keepPower() {
 #ifdef BATTERY_PIN
 float filter(float value) {
   static float k = 1.0, filteredValue = 4.0;
-  if(battery_voltage < (BATTERY_LOW)) k = 1.0;
+  if (battery_voltage < (BATTERY_LOW)) k = 1.0;
   else k = 0.1;
   filteredValue = (1.0 - k) * filteredValue + k * value;
   return filteredValue;
