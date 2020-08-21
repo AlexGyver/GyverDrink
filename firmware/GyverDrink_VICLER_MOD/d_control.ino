@@ -14,7 +14,7 @@ void encTick() {
       if (curSelected >= 0) shotVolume[curSelected] -= 1;
       else thisVolume -= 1;
     }
-    if (curSelected) shotVolume[(byte)curSelected] = constrain(shotVolume[(byte)curSelected], 1, MAX_VOLUME);
+    if (curSelected >= 0) shotVolume[(byte)curSelected] = constrain(shotVolume[(byte)curSelected], 1, MAX_VOLUME);
     thisVolume = constrain(thisVolume, 1, MAX_VOLUME);
 
     if (curSelected >= 0) {

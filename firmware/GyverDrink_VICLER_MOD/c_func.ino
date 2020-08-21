@@ -13,8 +13,6 @@ void serviceMode() {
     //             настройка углов под стопки и парковочной позиции
     //==============================================================================
     if (serviceState == SERVO) {
-      servoON();
-      servo.attach();
       int servoPos = parking_pos;
       dispNum(servoPos);
       while (1) {
@@ -32,9 +30,8 @@ void serviceMode() {
               currShot = i;
               shotCount++;
               servoPos = shotPos[currShot];
+              servo.setTargetDeg(servoPos);
               dispNum((i + 1) * 1000 + shotPos[i]);
-              servo.write(servoPos);
-              servo.setCurrentDeg(servoPos);
             }
             else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {  // убрали рюмку
               if (STBY_LIGHT > 0) strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
@@ -45,8 +42,7 @@ void serviceMode() {
               shotCount--;
               if (shotCount == 0) { // убрали последнюю рюмку
                 servoPos = parking_pos;
-                servo.write(servoPos);
-                servo.setCurrentDeg(servoPos);
+                servo.setTargetDeg(servoPos);
                 dispNum(servoPos);
               }
               else continue;  // если ещё есть поставленные рюмки -> ищем заново и попадаем в следующий блок
@@ -54,20 +50,23 @@ void serviceMode() {
             else if (shotStates[i] == EMPTY && currShot == -1) { // если стоит рюмка
               currShot = i;
               servoPos = shotPos[currShot];
+              servo.setTargetDeg(servoPos);
               dispNum((i + 1) * 1000 + shotPos[i]);
-              servo.write(servoPos);
-              servo.setCurrentDeg(servoPos);
               continue;
             }
           }
         }
 
+        if (servo.tick()) servoOFF();
+        else servoON();
+
         if (enc.isTurn()) {   // крутим серво от энкодера
           if (enc.isLeft()) servoPos += 1;
           if (enc.isRight())  servoPos -= 1;
           servoPos = constrain(servoPos, 0, 180);
-          servo.write(servoPos);
-          servo.setCurrentDeg(servoPos);
+          servoON();
+          servo.attach(SERVO_PIN, servoPos);
+          delay(15);
           if (shotCount == 0) parking_pos = servoPos;
           if (shotStates[currShot] == EMPTY) {
             shotPos[currShot] = servoPos;
@@ -121,10 +120,6 @@ void serviceMode() {
               shotCount++;
               servoON();
               servo.setTargetDeg(shotPos[i]);
-              while (!servo.tick());
-              servoOFF();
-              //servo.write(shotPos[i]);
-              //servo.setCurrentDeg(shotPos[i]);
             }
             else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
               if (STBY_LIGHT > 0) strip.setLED(i, mHSV(20, 255, STBY_LIGHT));
@@ -135,20 +130,12 @@ void serviceMode() {
               if (shotCount == 0) {
                 servoON();
                 servo.setTargetDeg(parking_pos);
-                while (!servo.tick());
-                servoOFF();
-                //servo.write(parking_pos);
-                //servo.setCurrentDeg(parking_pos);
               }
               else if (shotPos[i] == servo.getCurrentDeg()) {
                 for (byte i = 0; i < NUM_SHOTS; i++) {
                   if (shotStates[i] == EMPTY) {
                     servoON();
                     servo.setTargetDeg(shotPos[i]);
-                    while (!servo.tick());
-                    servoOFF();
-                    //servo.write(shotPos[i]);
-                    //servo.setCurrentDeg(shotPos[i]);
                     continue;
                   }
                 }
@@ -156,6 +143,9 @@ void serviceMode() {
             }
           }
         }
+
+        if (servo.tick()) servoOFF();
+        else servoON();
 
         if (btn.holded()) {
           servo.setTargetDeg(parking_pos);
@@ -384,16 +374,12 @@ void flowRoutine() {
         DEBUGln("parked!");
       }
       else {                                              // если же в ручном режиме:
-        if (!servo.attached()) {
-          servoON();                                        // включаем серво и паркуемся
-          servo.attach();
-          servo.setTargetDeg(parking_pos);
+        servoON();                                        // включаем серво и паркуемся
+        servo.setTargetDeg(parking_pos);
 #if(STATUS_LED)
-          LED = mHSV(20, 255, STATUS_LED); // orange
-          LEDchanged = true;
+        LED = mHSV(20, 255, STATUS_LED); // orange
+        LEDchanged = true;
 #endif
-        }
-
 
         if (servo.tick()) {                               // едем до упора
           servoOFF();                                     // выключили серво
@@ -474,7 +460,7 @@ void LEDtick() {
 // сброс таймаута
 void timeoutReset() {
   if (!timeoutState)  disp.brightness(7);
-  if (systemState != PUMPING) {
+  if ( (systemState != PUMPING)  && (curSelected < 0) ) {
     dispMode();
     dispNum(thisVolume);
   }
