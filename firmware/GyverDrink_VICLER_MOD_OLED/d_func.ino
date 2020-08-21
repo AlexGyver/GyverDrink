@@ -159,6 +159,7 @@ void serviceRoutine(serviceModes mode) {
   //==============================================================================
   //                     калибровка напряжения аккумулятора
   //==============================================================================
+  #ifdef BATTERY_PIN
   else if (mode == BATTERY) {
     disp.setInvertMode(1);
     disp.setFont(CenturyGothic10x16);
@@ -186,6 +187,7 @@ void serviceRoutine(serviceModes mode) {
       }
     }
   }
+  #endif
 }
 
 void settingsMenuHandler(uint8_t row) {

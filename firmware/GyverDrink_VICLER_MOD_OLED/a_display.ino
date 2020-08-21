@@ -54,7 +54,9 @@ const char* MenuPages[MENU_PAGES][13] = {
     "-----Калибровка-----",
     " Объ¿м",
     " Серво",
+#ifdef BATTERY_PIN
     " Аккумулятор",
+#endif
     " Назад"
   },
 
@@ -66,7 +68,11 @@ const char* MenuPages[MENU_PAGES][13] = {
   }
 };
 
+#ifdef BATTERY_PIN
 uint8_t menuItemsNum[MENU_PAGES] = { 5, 2, 12, 4, 3 };  // количество строк на каждой странице
+#else
+uint8_t menuItemsNum[MENU_PAGES] = { 5, 2, 12, 3, 3 };  // количество строк на каждой странице
+#endif
 
 void displayMode(workModes mode);
 void serviceRoutine(serviceModes mode);
