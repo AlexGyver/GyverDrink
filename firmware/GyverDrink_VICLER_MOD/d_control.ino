@@ -101,7 +101,6 @@ void btnTick() {
           break;
         }
         servoON();
-        servo.attach();
         servo.setTargetDeg(shotPos[i]);
         curPumping = i;
         parking = false;
@@ -147,6 +146,5 @@ void btnTick() {
     delay(500);
     servo.setCurrentDeg(parking_pos);
     servoOFF();
-    servo.detach();
   }
 }

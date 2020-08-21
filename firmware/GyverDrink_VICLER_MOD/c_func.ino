@@ -156,7 +156,6 @@ void serviceMode() {
           }
           while (!servo.tick());
           servoOFF();
-          servo.detach();
 #ifdef BATTERY_PIN
           serviceState = BATTERY;
 #else
@@ -343,7 +342,6 @@ void flowRoutine() {
         DEBUGln(curPumping);
         if ( abs(shotPos[i] - servo.getCurrentDeg()) > 3) {        // включаем серво только если целевая позиция не совпадает с текущей
           servoON();                                      // вкл питание серво
-          servo.attach();
           servo.setTargetDeg(shotPos[curPumping]);        // задаём цель
           parking = false;
 #if(STATUS_LED)
@@ -366,7 +364,6 @@ void flowRoutine() {
     if (noGlass && !parking) {                            // если не нашли ни одной пустой рюмки и не припаркованны
       if (workMode && AUTO_PARKING == 0) {                // если в авто режиме:
         servoOFF();                                       // выключили серво
-        servo.detach();
         systemON = false;                                 // выключили систему
         parking = true;                                   // уже на месте!
         LEDbreathingState = true;
@@ -382,8 +379,6 @@ void flowRoutine() {
 #endif
 
         if (servo.tick()) {                               // едем до упора
-          servoOFF();                                     // выключили серво
-          servo.detach();
           systemON = false;                               // выключили систему
           parking = true;                                 // на месте!
           LEDbreathingState = true;
@@ -402,8 +397,6 @@ void flowRoutine() {
       DEBUG("actual position: ");
       DEBUG(servo.getCurrentDeg());
       DEBUGln("°");
-      servoOFF();                                         // отключаем сервопривод
-      servo.detach();
 #if(STATUS_LED)
       LED = mHSV(255, 0, STATUS_LED); // white
       strip.show();
@@ -493,7 +486,6 @@ void timeoutTick() {
     disp.brightness(0);
     dispNum(thisVolume);
     servoOFF();
-    servo.detach();
 #if (STBY_LIGHT)
     for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, STBY_LIGHT / 2);
 #endif
@@ -530,6 +522,12 @@ void timeoutTick() {
     POWEROFFtimer.stop();
   }
 #endif
+}
+
+// обработка движения серво
+void servoTick(){
+  if (servo.tick()) servoOFF();
+  else servoON();
 }
 
 // поддержание питания повербанка коротким повышением потребления
@@ -697,6 +695,7 @@ void readEEPROM() {
     EEPROM.put(0, thisVolume);
   }
   else EEPROM.get(0, thisVolume);
+  thisVolume = min(thisVolume, MAX_VOLUME);
   for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
 
   // чтение значения таймера для 50мл

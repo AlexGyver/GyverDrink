@@ -50,7 +50,6 @@ void setup() {
   servo.setCurrentDeg(parking_pos);
   servo.setSpeed(15);
   servo.setAccel(0.2);
-  servo.detach();
   servoOFF();
   DEBUGln("servo init");
 
