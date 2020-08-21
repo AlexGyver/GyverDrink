@@ -98,8 +98,9 @@ void serviceRoutine(serviceModes mode) {
           currShot = i;
           shotCount++;
           servoPos = shotPos[currShot];
-          servo.write(servoPos);
-          servo.setCurrentDeg(servoPos);
+          //servo.write(servoPos);
+          //servo.setCurrentDeg(servoPos);
+          servo.setTargetDeg(servoPos);
           printVolume(shotPos[i]);
         }
         else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
@@ -110,8 +111,9 @@ void serviceRoutine(serviceModes mode) {
           shotCount--;
           if (shotCount == 0) { // убрали последнюю рюмку
             servoPos = settingsList[parking_pos];
-            servo.write(servoPos);
-            servo.setCurrentDeg(servoPos);
+            //servo.write(servoPos);
+            //servo.setCurrentDeg(servoPos);
+            servo.setTargetDeg(servoPos);
             printVolume(servoPos);
           }
           else continue;  // если ещё есть поставленные рюмки -> ищем заново и попадаем в следующий блок
@@ -119,19 +121,22 @@ void serviceRoutine(serviceModes mode) {
         else if (shotStates[i] == EMPTY && currShot == -1) { // если стоит рюмка
           currShot = i;
           servoPos = shotPos[currShot];
-          servo.write(servoPos);
-          servo.setCurrentDeg(servoPos);
+          //servo.write(servoPos);
+          //servo.setCurrentDeg(servoPos);
+          servo.setTargetDeg(servoPos);
           printVolume(servoPos);
           continue;
         }
       }
+      servoTick();
+      
       if (enc.isTurn()) {   // крутим серво от энкодера
         if (enc.isLeft()) servoPos += 1;
         if (enc.isRight())  servoPos -= 1;
         servoPos = constrain(servoPos, 0, 180);
         servoON();
-        servo.write(servoPos);
-        delay(10);
+        servo.attach(SERVO_PIN, servoPos);
+        delay(15);
         servo.setCurrentDeg(servoPos);
         if (shotCount == 0) settingsList[parking_pos] = servoPos;
         if (shotStates[currShot] == EMPTY) {

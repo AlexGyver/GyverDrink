@@ -102,10 +102,6 @@ void setup() {
     if (nextChar.isReady()) {
       static uint8_t index = 0;
       if (bootscreen[index] != '\0') disp.print(bootscreen[index++]);
-      else {
-        disp.setFont(SystemFont5x7);
-        printFloat(versionNum, 1, Right, 7);
-      }
     }
   }
   disp.clear();

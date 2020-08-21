@@ -1,5 +1,4 @@
-//GyverDrink VICLER_MOD_OLED//
-#define VERSION 1.7
+//GyverDrink VICLER_MOD_OLED v1.8
 //21.08.2020
 /*
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" на основе версии 1.5 by AlexGyver с OLED дисплеем и расширенным функционалом
@@ -82,8 +81,8 @@
 #define TIME_50ML     5000  // время заполнения 50 мл
 #define AUTO_PARKING  1     // парковка в авто режиме: 1 -> вкл, 0 -> выкл
 #define STBY_TIME     10    // таймаут режима ожидания в секундах
-#define STBY_LIGHT    0     // яркость подсветки в режиме ожидания. 255 -> максимум, 0 -> выкл
-#define RAINBOW_FLOW  0     // 1 -> динамическая подсветка налитых рюмок, 0 -> статическая
+#define STBY_LIGHT    15     // яркость подсветки в режиме ожидания. 255 -> максимум, 0 -> выкл
+#define RAINBOW_FLOW  1     // 1 -> динамическая подсветка налитых рюмок, 0 -> статическая
 
 #define BATTERY_CAL   1.0   // калибровка напряжения аккумулятора. 
 #define BATTERY_LOW   3.3   // минимальное напряжение аккумулятора
@@ -197,10 +196,10 @@ enum workModes {ManualMode, AutoMode, ComboMode};
 workModes workMode;
 uint16_t time50ml = 0;
 #define INIT_VOLUME 47
-uint16_t thisVolume = INIT_VOLUME;
-uint16_t shotVolume[NUM_SHOTS];
-byte initShotPos[] = {SHOT_POSITIONS};
-byte shotPos[] = {SHOT_POSITIONS};
+uint8_t thisVolume = INIT_VOLUME;
+uint8_t shotVolume[NUM_SHOTS];
+uint8_t initShotPos[] = {SHOT_POSITIONS};
+uint8_t shotPos[] = {SHOT_POSITIONS};
 float volumeTick = 15.0f * 50.0f / time50ml;
 float volumeCount = 0.0f;
 bool systemON = false;
@@ -214,7 +213,6 @@ bool keepPowerState = false;
 bool volumeChanged = false;
 bool invertState = 0;
 char bootscreen[] = {"Der Наливатор"};
-float versionNum = VERSION;
 
 enum {
   timeout_off = 0,
