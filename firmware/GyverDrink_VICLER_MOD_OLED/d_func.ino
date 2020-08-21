@@ -196,7 +196,7 @@ void settingsMenuHandler(uint8_t row) {
   disp.setInvertMode(1);
   disp.setFont(Callibri15);
   printStr(MenuPages[menuPage][menuItem], 0, row);
-  printStr("                      ");
+  printStr("                       ");
   printNum(settingsList[menuItem - 1], Right);
   while (1) {
     enc.tick();
@@ -212,6 +212,12 @@ void settingsMenuHandler(uint8_t row) {
       if (settingsList[timeout_off] > 15) settingsList[timeout_off] = 0;
       if (settingsList[parking_pos] > 180) settingsList[parking_pos] = 0;
 
+      if(parameter == parking_pos) {
+        servoON();
+        servo.attach(SERVO_PIN, settingsList[parking_pos]);
+        delay(15);
+      }
+
       if (settingsList[stby_time]) {
         TIMEOUTtimer.setInterval(settingsList[stby_time] * 1000L); // таймаут режима ожидания
         TIMEOUTtimer.reset();
@@ -223,7 +229,7 @@ void settingsMenuHandler(uint8_t row) {
       disp.setInvertMode(1);
       disp.setFont(Callibri15);
       printStr(MenuPages[menuPage][menuItem], 0, row);
-      printStr("                      ");
+      printStr("                       ");
       printNum(settingsList[parameter], Right);
 
       timeoutReset();
@@ -253,8 +259,8 @@ void settingsMenuHandler(uint8_t row) {
       EEPROM.update(eeAddress._invert_display, settingsList[invert_display]);
 
       servo.setDirection(settingsList[inverse_servo]);
-      servoON();
-      servo.attach(SERVO_PIN, settingsList[parking_pos]);
+//      servoON();
+//      servo.attach(SERVO_PIN, settingsList[parking_pos]);
       servoOFF();
       if (thisVolume > settingsList[max_volume]) thisVolume = settingsList[max_volume];
       for (byte i = 0; i < NUM_SHOTS; i++) {
