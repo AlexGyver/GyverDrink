@@ -108,10 +108,6 @@ void ServoSmooth::setDirection(bool dir) {
 	_dir = dir;
 }
 
-bool ServoSmooth::attached() {
-	return _servo.attached();
-}
-
 // ====== TICK ======
 boolean ServoSmooth::tickManual() {
 	if (_tickFlag) {
