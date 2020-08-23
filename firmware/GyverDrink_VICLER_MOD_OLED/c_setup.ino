@@ -11,7 +11,7 @@ void setup() {
 #if defined OLED_SH1106
   disp.begin(&SH1106_128x64, 0x3C);
 #elif defined OLED_SSD1306
-  oled.begin(&Adafruit128x64, 0x3C);
+  disp.begin(&Adafruit128x64, 0x3C);
 #endif
   disp.invertDisplay((bool)settingsList[invert_display]);
 
@@ -72,8 +72,8 @@ void setup() {
   servo.attach(SERVO_PIN, settingsList[parking_pos]);
   delay(500);
   servo.setCurrentDeg(settingsList[parking_pos]);
-  servo.setSpeed(15);
-  servo.setAccel(0.2);
+  servo.setSpeed(20);
+  servo.setAccel(0.1);
   servoOFF();
   DEBUGln("servo init");
 

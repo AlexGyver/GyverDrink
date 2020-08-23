@@ -98,12 +98,15 @@ void serviceRoutine(serviceModes mode) {
           currShot = i;
           shotCount++;
           servoPos = shotPos[currShot];
-          //servo.write(servoPos);
-          //servo.setCurrentDeg(servoPos);
+          printVolume(servoPos);
           servo.setTargetDeg(servoPos);
-          printVolume(shotPos[i]);
+          servoON();
+          servo.start();
+          while (!servo.tick());
+          servoOFF();
+          break;
         }
-        else if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
+        if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
           strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
           strip.show();
           shotStates[i] = NO_GLASS;
@@ -111,40 +114,41 @@ void serviceRoutine(serviceModes mode) {
           shotCount--;
           if (shotCount == 0) { // убрали последнюю рюмку
             servoPos = settingsList[parking_pos];
-            //servo.write(servoPos);
-            //servo.setCurrentDeg(servoPos);
-            servo.setTargetDeg(servoPos);
             printVolume(servoPos);
+            servo.setTargetDeg(servoPos);
+            servoON();
+            servo.start();
+            while (!servo.tick());
+            servoOFF();
+            break;
           }
           else continue;  // если ещё есть поставленные рюмки -> ищем заново и попадаем в следующий блок
         }
-        else if (shotStates[i] == EMPTY && currShot == -1) { // если стоит рюмка
+        if (shotStates[i] == EMPTY && currShot == -1) { // если стоит рюмка
           currShot = i;
           servoPos = shotPos[currShot];
-          //servo.write(servoPos);
-          //servo.setCurrentDeg(servoPos);
-          servo.setTargetDeg(servoPos);
           printVolume(servoPos);
-          continue;
+          servo.setTargetDeg(servoPos);
+          servoON();
+          servo.start();
+          while (!servo.tick());
+          servoOFF();
+          break;
         }
       }
-      servoTick();
-      
+
       if (enc.isTurn()) {   // крутим серво от энкодера
         if (enc.isLeft()) servoPos += 1;
         if (enc.isRight())  servoPos -= 1;
         servoPos = constrain(servoPos, 0, 180);
         servoON();
         servo.attach(SERVO_PIN, servoPos);
-        delay(15);
-        servo.setCurrentDeg(servoPos);
         if (shotCount == 0) settingsList[parking_pos] = servoPos;
         if (shotStates[currShot] == EMPTY) {
           shotPos[currShot] = servoPos;
           printVolume(shotPos[currShot]);
         }
         else printVolume(servoPos);
-        servoOFF();
       }
       if (btn.holded()) {
         timeoutReset();
@@ -164,7 +168,7 @@ void serviceRoutine(serviceModes mode) {
   //==============================================================================
   //                     калибровка напряжения аккумулятора
   //==============================================================================
-  #ifdef BATTERY_PIN
+#ifdef BATTERY_PIN
   else if (mode == BATTERY) {
     disp.setInvertMode(1);
     disp.setFont(CenturyGothic10x16);
@@ -192,7 +196,7 @@ void serviceRoutine(serviceModes mode) {
       }
     }
   }
-  #endif
+#endif
 }
 
 void settingsMenuHandler(uint8_t row) {
@@ -217,7 +221,7 @@ void settingsMenuHandler(uint8_t row) {
       if (settingsList[timeout_off] > 15) settingsList[timeout_off] = 0;
       if (settingsList[parking_pos] > 180) settingsList[parking_pos] = 0;
 
-      if(parameter == parking_pos) {
+      if (parameter == parking_pos) {
         servoON();
         servo.attach(SERVO_PIN, settingsList[parking_pos]);
         delay(15);
@@ -264,8 +268,8 @@ void settingsMenuHandler(uint8_t row) {
       EEPROM.update(eeAddress._invert_display, settingsList[invert_display]);
 
       servo.setDirection(settingsList[inverse_servo]);
-//      servoON();
-//      servo.attach(SERVO_PIN, settingsList[parking_pos]);
+      //      servoON();
+      //      servo.attach(SERVO_PIN, settingsList[parking_pos]);
       servoOFF();
       if (thisVolume > settingsList[max_volume]) thisVolume = settingsList[max_volume];
       for (byte i = 0; i < NUM_SHOTS; i++) {
@@ -546,7 +550,7 @@ void timeoutTick() {
 }
 
 // обработка движения серво
-void servoTick(){
+void servoTick() {
   if (servo.tick()) servoOFF();
   else servoON();
 }
@@ -566,19 +570,17 @@ void rainbowFlow(bool _state, uint8_t _shotNum) {
 
 void prePump() {
   for (byte i = 0; i < NUM_SHOTS; i++) {    // поиск наличия рюмки
-    if (!digitalRead(SW_pins[i])) {         // нашли рюмку
-      if (abs(servo.getCurrentDeg() - shotPos[i]) <= 3) {
-        curPumping = i;
-        break;
-      }
-      servoON();
-      servo.setTargetDeg(shotPos[i]);
+    if (!digitalRead(SW_pins[i])) {        // нашли рюмку
       curPumping = i;
+      if (abs(servo.getCurrentDeg() - shotPos[i]) <= 3) break;
+      servoON();
+      servo.start();
+      servo.setTargetDeg(shotPos[curPumping]);
       parking = false;
+      break;
     }
   }
   if (curPumping == -1) return; // нет рюмок -> нет прокачки, ищем заново ^
-  //if (!timeoutState) disp.brightness(7);
   DEBUG("pumping into shot ");
   DEBUGln(curPumping);
   while (!servo.tick()); // едем к рюмке
@@ -600,8 +602,6 @@ void prePump() {
   DEBUG("pumping stopped, volume: ");
   DEBUG(round(volumeCount));
   DEBUGln("ml");
-  delay(300);
-  timeoutReset();
 }
 
 #if(STATUS_LED)
