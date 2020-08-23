@@ -46,11 +46,13 @@ void ServoSmooth::detach() {
 void ServoSmooth::start() {
 	_servo.attach(_pin);	
 	_tickFlag = true;
+	_servoState = true;
 }
 
 void ServoSmooth::stop() {
 	_servo.detach();
 	_tickFlag = false;
+	_servoState = false;
 }
 
 // ====== SET ======
