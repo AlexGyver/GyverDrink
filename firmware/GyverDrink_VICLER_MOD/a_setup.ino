@@ -48,8 +48,8 @@ void setup() {
   servo.attach(SERVO_PIN, parking_pos);
   delay(500);
   servo.setCurrentDeg(parking_pos);
-  servo.setSpeed(15);
-  servo.setAccel(0.2);
+  servo.setSpeed(20);
+  servo.setAccel(0.1);
   servoOFF();
   DEBUGln("servo init");
 

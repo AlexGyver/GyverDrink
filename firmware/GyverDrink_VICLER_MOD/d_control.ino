@@ -93,44 +93,7 @@ void btnTick() {
   }
   if (encBtn.holding()) {
     if (workMode) return;
-
-    for (byte i = 0; i < NUM_SHOTS; i++) {    // поиск наличия рюмки
-      if (!digitalRead(SW_pins[i])) {         // нашли рюмку
-        if (abs(servo.getCurrentDeg() - shotPos[i]) <= 3) {
-          curPumping = i;
-          break;
-        }
-        servoON();
-        servo.setTargetDeg(shotPos[i]);
-        curPumping = i;
-        parking = false;
-      }
-    }
-    if (curPumping == -1) return; // нет рюмок -> нет прокачки, ищем заново ^
-    if (!timeoutState) disp.brightness(7);
-    DEBUG("pumping into shot ");
-    DEBUGln(curPumping);
-    while (!servo.tick()); // едем к рюмке
-    servoOFF();
-    delay(300); // небольшая задержка перед наливом
-
-    pumpON(); // включаем помпу
-    timerMinim timer20(20);
-    while (!digitalRead(SW_pins[curPumping]) && !digitalRead(ENC_SW)) // пока стоит рюмка и зажат энкодер, продолжаем наливать
-    {
-      if (timer20.isReady()) {
-        volumeCount += 20 * 50.0 / time50ml;
-        dispNum(round(volumeCount));
-        strip.setLED(curPumping, mWHEEL( (int)(volumeCount * 10 + MIN_COLOR) % 1530) );
-        strip.show();
-      }
-    }
-    pumpOFF();
-    DEBUG("pumping stopped, volume: ");
-    DEBUG(round(volumeCount));
-    DEBUGln("ml");
-    delay(300);
-    timeoutReset();
+    prePump();
   }
   if (btn.holdedFor(5)) {
     byte resetText[] = {_r, _E, _S, _E, _t};
