@@ -75,15 +75,12 @@
 #define BATTERY_LOW   3.3   // минимальное напряжение аккумулятора
 #define MAX_VOLUME    50    // ограничение максимального объёма
 #define INVERT_DISPLAY 0    // инверсия цветов дисплея
-
-//═══════════════════════════════════════════════════════════════════
-//                                     положение серво над центрами рюмок
-//                                       пины для датчиков наличия рюмок
-//═══════════════════════════════════════════════════════════════════
+                                  
+//╞═════════════════════╡Положения серво над центрами рюмок╞═════════════════════╡
 
 // номер рюмки                1   2   3   4    5    6
 //                            ^   ^   ^   ^    ^    ^
-#define SHOT_POSITIONS       30, 60, 90, 120, 150, 180
+#define SHOT_POSITIONS       30, 60, 90, 120, 150, 180  
 
 //╞══════════════════════════╡ПИНЫ Arduino Micro╞══════════════════════════╡
 
@@ -99,8 +96,7 @@
 #define ENC_CLK     8
 #define DISP_SDA    2
 #define DISP_SCK    3
-#define SENSOR_PINS_MICRO    14, 15, 18,  19,  20
-const byte SW_pins[] = {SENSOR_PINS_MICRO};
+const byte SW_pins[] = {14, 15, 18,  19,  20};
 
 //╞══════════════════════════╡ПИНЫ Arduino Nano╞══════════════════════════╡
 
@@ -116,8 +112,7 @@ const byte SW_pins[] = {SENSOR_PINS_MICRO};
 #define ENC_CLK     10
 #define DISP_SDA    A4
 #define DISP_SCK    A5
-#define SENSOR_PINS_NANO   A0, A1, A2,  A3,  11,  12
-const byte SW_pins[] = {SENSOR_PINS_NANO};
+const byte SW_pins[] = {A0, A1, A2,  A3,  11,  12};
 #endif
 
 //╞═════════════════════════════╡ЛИБЫ╞═════════════════════════════╡
