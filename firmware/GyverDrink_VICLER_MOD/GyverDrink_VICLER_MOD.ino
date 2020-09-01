@@ -38,22 +38,8 @@
       При однократном нажатии на энкодер подсвечивается место рюмки, объём которой изменяется вращением энкодера. При повторном нажатии подсвечивается следующая рюмка.
       Если же ни одна рюмка не подсвечивается белым, вращение энкодера изменяет объём для всех рюмок одновременно (как в обычном ручном режиме)
    ◉ при зажатии кнопки выбора режима более 5 секунд, происходит сброс настроек из памяти (TIME_50ML и SHOT_POSITIONS) до первоначальных, прописанных в этом файле
-*/
 
-/*
-  Скетч к проекту "Наливатор by AlexGyver"
-  - Страница проекта (схемы, описания): https://alexgyver.ru/GyverDrink/
-  - Исходники на GitHub: https://github.com/AlexGyver/GyverDrink/
-  Проблемы с загрузкой? Читай гайд для новичков: https://alexgyver.ru/arduino-first/
-  Нравится, как написан код? Поддержи автора! https://alexgyver.ru/support_alex/
-  Автор: AlexGyver, AlexGyver Technologies, 2019
-  https://www.youtube.com/c/alexgyvershow
-  https://github.com/AlexGyver
-  https://AlexGyver.ru/
-  alex@alexgyver.ru
-*/
-
-/* Поддержка автора
+   На чашечку кофе автору:
    http://paypal.me/vicler
 */
 
@@ -186,6 +172,7 @@ float battery_cal = 1.0;
 bool volumeChanged = false;
 bool keepPowerState = false;
 uint8_t parking_pos = PARKING_POS;
+bool servoReady = false;
 
 //╞═════════════════════════════╡MACROS╞═════════════════════════════╡
 
@@ -205,3 +192,16 @@ uint8_t parking_pos = PARKING_POS;
 #if (STATUS_LED)
 #define LED leds[NUM_SHOTS]
 #endif
+
+/*
+  Скетч к проекту "Наливатор by AlexGyver"
+  - Страница проекта (схемы, описания): https://alexgyver.ru/GyverDrink/
+  - Исходники на GitHub: https://github.com/AlexGyver/GyverDrink/
+  Проблемы с загрузкой? Читай гайд для новичков: https://alexgyver.ru/arduino-first/
+  Нравится, как написан код? Поддержи автора! https://alexgyver.ru/support_alex/
+  Автор: AlexGyver, AlexGyver Technologies, 2019
+  https://www.youtube.com/c/alexgyvershow
+  https://github.com/AlexGyver
+  https://AlexGyver.ru/
+  alex@alexgyver.ru
+*/

@@ -388,7 +388,7 @@ void flowRoutine() {
         LEDchanged = true;
 #endif
 
-        if (servo.tick()) {                               // едем до упора
+        if (servoReady) {                               // едем до упора
           systemON = false;                               // выключили систему
           parking = true;                                 // на месте!
           LEDbreathingState = true;
@@ -403,7 +403,7 @@ void flowRoutine() {
     }
 
   } else if (systemState == MOVING) {                     // движение к рюмке
-    if (servo.tick()) {                                   // если приехали
+    if (servoReady) {                                   // если приехали
       DEBUG("actual position: ");
       DEBUG(servo.getCurrentDeg());
       DEBUGln("°");
@@ -536,8 +536,14 @@ void timeoutTick() {
 
 // обработка движения серво
 void servoTick() {
-  if (servo.tick()) servoOFF();
-  else servoON();
+  if (servo.tick()) {
+    servoOFF();
+    servoReady = 1;
+  }
+  else {
+    servoON();
+    servoReady = 0;
+  }
 }
 
 // поддержание питания повербанка коротким повышением потребления
