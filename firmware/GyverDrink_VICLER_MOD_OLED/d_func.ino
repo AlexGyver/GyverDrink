@@ -3,9 +3,10 @@ void serviceRoutine(serviceModes mode) {
   //==============================================================================
   //                            калибровка объёма
   //==============================================================================
+  timerMinim timer100(100);
+  
   if (mode == VOLUME) {                      // калибровка объёма
     long pumpTime = 0;
-    timerMinim timer100(100);
     bool flag = false;
     disp.setInvertMode(1);
     printStr("  Калибр. объ¿ма  \n", 0, 0);
@@ -174,7 +175,7 @@ void serviceRoutine(serviceModes mode) {
     disp.setFont(CenturyGothic10x16);
     printStr("  Калибр. аккум-а  \n", 0, 0);
     disp.setInvertMode(0);
-    timerMinim timer100(100);
+    //timerMinim timer100(100);
     disp.setFont(lcdnums14x24);
     while (1) {
       enc.tick();
@@ -405,7 +406,7 @@ void flowRoutnie() {
         LEDchanged = true;
 #endif
 
-        if (servo.tick()) {                               // едем до упора
+        if (servoReady) {                               // едем до упора
           systemON = false;                               // выключили систему
           DEBUGln("SystemOFF");
           parking = true;                                 // на месте!
@@ -425,7 +426,7 @@ void flowRoutnie() {
 
   } else if (systemState == MOVING) {                     // движение к рюмке
 
-    if (servo.tick()) {                                   // если приехали
+    if (servoReady) {                                   // если приехали
       DEBUG("actual position: ");
       DEBUG(servo.getCurrentDeg());
       DEBUGln("°");
@@ -551,8 +552,14 @@ void timeoutTick() {
 
 // обработка движения серво
 void servoTick() {
-  if (servo.tick()) servoOFF();
-  else servoON();
+  if (servo.tick()) {
+    servoOFF();
+    servoReady = 1;
+  }
+  else {
+    servoON();
+    servoReady = 0;
+  }
 }
 
 void rainbowFlow(bool _state, uint8_t _shotNum) {

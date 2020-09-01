@@ -31,7 +31,8 @@ const char* MenuPages[MENU_PAGES][13] = {
   {
     "--------Режим--------",
     " Ручной",
-    " Автоматический"
+    " Автоматический",
+    ""
   },
 
   {
@@ -192,7 +193,7 @@ void displayMenu() {
       selectedRow = disp.row();
     }
     else disp.setInvertMode(0);
-
+    
     if (menuPage == SETTINGS_PAGE) {
       if (i < menuItemsNum[menuPage] - 1) disp.setFont(Callibri15);
       else disp.setFont(CenturyGothic10x16);
