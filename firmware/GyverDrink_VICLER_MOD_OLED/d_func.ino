@@ -4,7 +4,7 @@ void serviceRoutine(serviceModes mode) {
   //                            калибровка объёма
   //==============================================================================
   timerMinim timer100(100);
-  
+
   if (mode == VOLUME) {                      // калибровка объёма
     long pumpTime = 0;
     bool flag = false;
@@ -164,7 +164,7 @@ void serviceRoutine(serviceModes mode) {
     EEPROM.update(1002, 47);
     for (byte i = 0; i < NUM_SHOTS; i++)  EEPROM.update(eeAddress._shotPos + i, shotPos[i]);
     EEPROM.update(1006, 47);
-    EEPROM.put(eeAddress._parking_pos, PARKING_POS);
+    EEPROM.update(eeAddress._parking_pos, PARKING_POS);
   }
   //==============================================================================
   //                     калибровка напряжения аккумулятора
@@ -203,11 +203,18 @@ void serviceRoutine(serviceModes mode) {
 void settingsMenuHandler(uint8_t row) {
   bool bypass = false;
   uint8_t parameter = menuItem - 1;
-  disp.setInvertMode(1);
-  disp.setFont(Callibri15);
-  printStr(MenuPages[menuPage][menuItem], 0, row);
-  printStr("                       ");
-  printNum(settingsList[menuItem - 1], Right);
+  if (menuItem == menuItemsNum[menuPage] - 1) {
+    resetEEPROM();
+    readEEPROM();
+    bypass = true;
+  }
+  else {
+    disp.setInvertMode(1);
+    disp.setFont(Callibri15);
+    printStr(MenuPages[menuPage][menuItem], 0, row);
+    printStr("                       ");
+    printNum(settingsList[parameter], Right);
+  }
   while (1) {
     enc.tick();
 
@@ -220,13 +227,13 @@ void settingsMenuHandler(uint8_t row) {
       }
 
       if (settingsList[timeout_off] > 15) settingsList[timeout_off] = 0;
-      if (settingsList[parking_pos] > 180) settingsList[parking_pos] = 0;
+      if (settingsList[servo_speed] > 100) settingsList[servo_speed] = 0;
 
-      if (parameter == parking_pos) {
-        servoON();
-        servo.attach(SERVO_PIN, settingsList[parking_pos]);
-        delay(15);
-      }
+      //      if (parameter == parking_pos) {
+      //        servoON();
+      //        servo.attach(SERVO_PIN, settingsList[parking_pos]);
+      //        delay(15);
+      //      }
 
       if (settingsList[stby_time]) {
         TIMEOUTtimer.setInterval(settingsList[stby_time] * 1000L); // таймаут режима ожидания
@@ -250,16 +257,10 @@ void settingsMenuHandler(uint8_t row) {
       bypass = true;
     }
 
-    if (menuItem == menuItemsNum[menuPage] - 1) {
-      resetEEPROM();
-      readEEPROM();
-      bypass = true;
-    }
-
     if (encBtn.clicked() || bypass) {
       EEPROM.update(eeAddress._timeout_off, settingsList[timeout_off]);
       EEPROM.update(eeAddress._inverse_servo, settingsList[inverse_servo]);
-      EEPROM.update(eeAddress._parking_pos, settingsList[parking_pos]);
+      EEPROM.update(eeAddress._servo_speed, settingsList[servo_speed]);
       EEPROM.update(eeAddress._auto_parking, settingsList[auto_parking]);
       EEPROM.update(eeAddress._stby_time, settingsList[stby_time]);
       EEPROM.update(eeAddress._stby_light, settingsList[stby_light]);
@@ -268,9 +269,10 @@ void settingsMenuHandler(uint8_t row) {
       EEPROM.update(eeAddress._keep_power, settingsList[keep_power]);
       EEPROM.update(eeAddress._invert_display, settingsList[invert_display]);
 
+      servo.setSpeed(settingsList[servo_speed] * 2);
       servo.setDirection(settingsList[inverse_servo]);
-      //      servoON();
-      //      servo.attach(SERVO_PIN, settingsList[parking_pos]);
+      servoON();
+      servo.attach(SERVO_PIN, settingsList[parking_pos]);
       servoOFF();
       if (thisVolume > settingsList[max_volume]) thisVolume = settingsList[max_volume];
       for (byte i = 0; i < NUM_SHOTS; i++) {
@@ -456,8 +458,10 @@ void flowRoutnie() {
     if (FLOWtimer.isReady()) {                            // если налили (таймер)
       pumpOFF();                                          // помпа выкл
       shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
-      EEPROM.put(eeAddress._shots_overall, shots_overall += 1);
-      EEPROM.put(eeAddress._volume_overall, volume_overall += volumeCount);
+      shots_overall++;
+      volume_overall += volumeCount;
+      EEPROM.put(eeAddress._shots_overall, shots_overall);
+      EEPROM.put(eeAddress._volume_overall, volume_overall);
       curPumping = -1;                                    // снимаем выбор рюмки
       systemState = WAIT;                                 // режим работы - ждать
       WAITtimer.reset();
@@ -520,7 +524,7 @@ void timeoutTick() {
     if (settingsList[timeout_off]) POWEROFFtimer.reset();
     if (volumeChanged) {
       volumeChanged = false;
-      EEPROM.put(0, thisVolume);
+      EEPROM.write(0, thisVolume);
     }
   }
 
@@ -576,6 +580,7 @@ void rainbowFlow(bool _state, uint8_t _shotNum) {
 }
 
 void prePump() {
+  if (showMenu) return;
   for (byte i = 0; i < NUM_SHOTS; i++) {    // поиск наличия рюмки
     if (!digitalRead(SW_pins[i])) {        // нашли рюмку
       curPumping = i;
@@ -746,9 +751,9 @@ void readEEPROM() {
   // чтение последнего налитого объёма
   if (EEPROM.read(1000) != 47) {
     EEPROM.write(1000, 47);
-    EEPROM.put(eeAddress._thisVolume, thisVolume);
+    EEPROM.write(eeAddress._thisVolume, INIT_VOLUME);
   }
-  else EEPROM.get(eeAddress._thisVolume, thisVolume);
+  else thisVolume = EEPROM.read(eeAddress._thisVolume);
   for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
 
   // чтение значения таймера для 50мл
@@ -763,13 +768,13 @@ void readEEPROM() {
   if (EEPROM.read(1002) != 47) {
     EEPROM.write(1002, 47);
     for (byte i = 0; i < NUM_SHOTS; i++) {
-      EEPROM.update(eeAddress._shotPos + i, initShotPos[i]);
+      EEPROM.write(eeAddress._shotPos + i, initShotPos[i]);
       shotPos[i] = initShotPos[i];
     }
   }
   else {
     for (byte i = 0; i < NUM_SHOTS; i++)
-      EEPROM.get(eeAddress._shotPos + i, shotPos[i]);
+      shotPos[i] = EEPROM.read(eeAddress._shotPos + i);
   }
 
   // чтение калибровки аккумулятора
@@ -785,58 +790,58 @@ void readEEPROM() {
   // чтение значения таймаута
   if (EEPROM.read(1004) != 47) {
     EEPROM.write(1004, 47);
-    EEPROM.put(eeAddress._timeout_off, TIMEOUT_OFF);
+    EEPROM.write(eeAddress._timeout_off, TIMEOUT_OFF);
   }
-  else EEPROM.get(eeAddress._timeout_off, settingsList[timeout_off]);
+  else settingsList[timeout_off] = EEPROM.read(eeAddress._timeout_off);
 
   // чтение установки инверсии серво
   if (EEPROM.read(1005) != 47) {
     EEPROM.write(1005, 47);
-    EEPROM.put(eeAddress._inverse_servo, INVERSE_SERVO);
+    EEPROM.write(eeAddress._inverse_servo, INVERSE_SERVO);
   }
-  else EEPROM.get(eeAddress._inverse_servo, settingsList[inverse_servo]);
+  else settingsList[inverse_servo] = EEPROM.read(eeAddress._inverse_servo);
 
   // чтение парковочной позиции
   if (EEPROM.read(1006) != 47) {
     EEPROM.write(1006, 47);
-    EEPROM.put(eeAddress._parking_pos, PARKING_POS);
+    EEPROM.write(eeAddress._parking_pos, PARKING_POS);
   }
-  else EEPROM.get(eeAddress._parking_pos, settingsList[parking_pos]);
+  else settingsList[parking_pos] = EEPROM.read(eeAddress._parking_pos);
 
   // чтение установки автопарковки в авторежиме
   if (EEPROM.read(1007) != 47) {
     EEPROM.write(1007, 47);
-    EEPROM.put(eeAddress._auto_parking, AUTO_PARKING);
+    EEPROM.write(eeAddress._auto_parking, AUTO_PARKING);
   }
-  else EEPROM.get(eeAddress._auto_parking, settingsList[auto_parking]);
+  else settingsList[auto_parking] = EEPROM.read(eeAddress._auto_parking);
 
   // чтение таймаута режима ожидания
   if (EEPROM.read(1008) != 47) {
     EEPROM.write(1008, 47);
-    EEPROM.put(eeAddress._stby_time, STBY_TIME);
+    EEPROM.write(eeAddress._stby_time, STBY_TIME);
   }
-  else EEPROM.get(eeAddress._stby_time, settingsList[stby_time]);
+  else settingsList[stby_time] = EEPROM.read(eeAddress._stby_time);
 
   // чтение яркости подсветки в режиме ожидания
   if (EEPROM.read(1009) != 47) {
     EEPROM.write(1009, 47);
-    EEPROM.put(eeAddress._stby_light, STBY_LIGHT);
+    EEPROM.write(eeAddress._stby_light, STBY_LIGHT);
   }
-  else EEPROM.get(eeAddress._stby_light, settingsList[stby_light]);
+  else settingsList[stby_light] = EEPROM.read(eeAddress._stby_light);
 
   // чтение установки динамической подсветки
   if (EEPROM.read(1010) != 47) {
     EEPROM.write(1010, 47);
-    EEPROM.put(eeAddress._rainbow_flow, RAINBOW_FLOW);
+    EEPROM.write(eeAddress._rainbow_flow, RAINBOW_FLOW);
   }
-  else EEPROM.get(eeAddress._rainbow_flow, settingsList[rainbow_flow]);
+  else settingsList[rainbow_flow] = EEPROM.read(eeAddress._rainbow_flow);
 
   // чтение максимального объёма
   if (EEPROM.read(1011) != 47) {
     EEPROM.write(1011, 47);
-    EEPROM.put(eeAddress._max_volume, MAX_VOLUME);
+    EEPROM.write(eeAddress._max_volume, MAX_VOLUME);
   }
-  else EEPROM.get(eeAddress._max_volume, settingsList[max_volume]);
+  else settingsList[max_volume] = EEPROM.read(eeAddress._max_volume);
 
   // чтение статистики
   if (EEPROM.read(1012) != 47) {
@@ -854,20 +859,28 @@ void readEEPROM() {
   // функция пинания повербанка
   if (EEPROM.read(1014) != 47) {
     EEPROM.write(1014, 47);
-    EEPROM.put(eeAddress._keep_power, KEEP_POWER);
+    EEPROM.write(eeAddress._keep_power, KEEP_POWER);
   }
-  else EEPROM.get(eeAddress._keep_power, settingsList[keep_power]);
+  else settingsList[keep_power] = EEPROM.read(eeAddress._keep_power);
 
+  // инверсия дисплея
   if (EEPROM.read(1015) != 47) {
     EEPROM.write(1015, 47);
-    EEPROM.put(eeAddress._invert_display, INVERT_DISPLAY);
+    EEPROM.write(eeAddress._invert_display, INVERT_DISPLAY);
   }
-  else EEPROM.get(eeAddress._invert_display, settingsList[invert_display]);
+  else settingsList[invert_display] = EEPROM.read(eeAddress._invert_display);
+
+  //скорость сервопривода
+  if(EEPROM.read(1016) != 47){
+    EEPROM.write(1016, 47);
+    EEPROM.write(eeAddress._servo_speed, SERVO_SPEED);
+  }
+  else settingsList[servo_speed] = EEPROM.read(eeAddress._servo_speed);
 }
 
 void resetEEPROM() {
   EEPROM.update(1000, 47);
-  EEPROM.put(eeAddress._thisVolume, INIT_VOLUME);
+  EEPROM.update(eeAddress._thisVolume, INIT_VOLUME);
 
   // сброс калибровки времени на 50мл
   EEPROM.update(1001, 47);
@@ -886,41 +899,47 @@ void resetEEPROM() {
 
   // сброс значения таймаута
   EEPROM.update(1004, 47);
-  EEPROM.put(eeAddress._timeout_off, TIMEOUT_OFF);
+  EEPROM.update(eeAddress._timeout_off, TIMEOUT_OFF);
 
   // сброс инверсии серво
   EEPROM.update(1005, 47);
-  EEPROM.put(eeAddress._inverse_servo, INVERSE_SERVO);
+  EEPROM.update(eeAddress._inverse_servo, INVERSE_SERVO);
 
   // сброс парковочной позиции
   EEPROM.update(1006, 47);
-  EEPROM.put(eeAddress._parking_pos, PARKING_POS);
+  EEPROM.update(eeAddress._parking_pos, PARKING_POS);
 
   // сброс установки автопарковки в авторежиме
   EEPROM.update(1007, 47);
-  EEPROM.put(eeAddress._auto_parking, AUTO_PARKING);
+  EEPROM.update(eeAddress._auto_parking, AUTO_PARKING);
 
   // сброс таймаута режима ожидания
   EEPROM.update(1008, 47);
-  EEPROM.put(eeAddress._stby_time, STBY_TIME);
+  EEPROM.update(eeAddress._stby_time, STBY_TIME);
 
   // сброс яркости подсветки в режиме ожидания
   EEPROM.update(1009, 47);
-  EEPROM.put(eeAddress._stby_light, STBY_LIGHT);
+  EEPROM.update(eeAddress._stby_light, STBY_LIGHT);
 
   // сброс установки динамической подсветки
   EEPROM.update(1010, 47);
-  EEPROM.put(eeAddress._rainbow_flow, RAINBOW_FLOW);
+  EEPROM.update(eeAddress._rainbow_flow, RAINBOW_FLOW);
 
   // сброс максимального объёма
   EEPROM.update(1011, 47);
-  EEPROM.put(eeAddress._max_volume, MAX_VOLUME);
+  EEPROM.update(eeAddress._max_volume, MAX_VOLUME);
 
+  // сброс функции поддержания питания от повербанка
   EEPROM.update(1014, 47);
-  EEPROM.put(eeAddress._keep_power, KEEP_POWER);
+  EEPROM.update(eeAddress._keep_power, KEEP_POWER);
 
+  // сброс инвертирования дисплея
   EEPROM.update(1015, 47);
-  EEPROM.put(eeAddress._invert_display, INVERT_DISPLAY);
+  EEPROM.update(eeAddress._invert_display, INVERT_DISPLAY);
+
+  // сброс скорости сервопривода
+  EEPROM.update(1016, 47);
+  EEPROM.update(eeAddress._servo_speed, SERVO_SPEED);
 
   readEEPROM();
 }

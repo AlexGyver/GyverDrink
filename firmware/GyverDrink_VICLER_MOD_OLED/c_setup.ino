@@ -72,7 +72,7 @@ void setup() {
   servo.attach(SERVO_PIN, settingsList[parking_pos]);
   delay(500);
   servo.setCurrentDeg(settingsList[parking_pos]);
-  servo.setSpeed(SERVO_SPEED * 2);
+  servo.setSpeed(settingsList[servo_speed] * 2);
   servo.setAccel(SERVO_ACCEL / 100.0);
   servoOFF();
   DEBUGln("servo init");

@@ -1,9 +1,9 @@
-//GyverDrink VICLER_MOD_OLED v2.0
-//01.09.2020
+//GyverDrink VICLER_MOD_OLED v2.1
+//08.09.2020
 /*
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" на основе версии 1.5 by AlexGyver с OLED дисплеем и расширенным функционалом
   Исходники на GitHub: https://github.com/VICLER/GyverDrink
-  
+
    ⚠ рекомендуется установить библиотеку ServoSmooth из архива с прошивкой
    ◉  OLED дисплей на контроллере SSD1306 (0.96") или SH1106(1.3"). Дисплей подключается контактами SCK и SDA к пинам А5, А4 Arduino Nano
    ◉  возможность установить парковочную позицию PARKING_POS
@@ -48,39 +48,38 @@
    ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
 */
 
-//══════════════════════════════╣ НАСТРОЙКИ ⚒╠═══════════════════════════
+//╞══════════════════════════════╣ НАСТРОЙКИ ⚒╠══════════════════════════════════╡
 
 #define OLED_SH1106         // выбор контроллера дисплея. OLED_SH1106 для 1.3", OLED_SSD1306 для 0.96"
 #define NUM_SHOTS     5     // количество рюмок (оно же кол-во светодиодов и кнопок!)
 #define SWITCH_LEVEL  0     // кнопки 1 → высокий сигнал при замыкании, 0 → низкий
 #define STATUS_LED    0     // яркость статус-светодиода. 255 → максимум, 0 → не подключен
-#define BATTERY_LOW   3.3   // минимальное напряжение аккумулятора
 #define SERVO_SPEED   10    // скорость серво в процентах
 #define SERVO_ACCEL   10    // ускорение серво в процентах
+#define BATTERY_LOW   3.3   // минимальное напряжение аккумулятора
 //#define DEBUG_UART    0     // !отладка не работает из-за нехватки памяти!
 
-//═════════════════════════╣ Настройки, доступные в меню ╠══════════════════════
+//╞═════════════════════════╣ Настройки, доступные в меню ╠══════════════════════╡
 
 #define TIMEOUT_OFF   5     // таймаут на выключение дисплея и светодиодов в минутах. Если 0 → таймаут отключен
-#define KEEP_POWER    0     // интервал пинания повербанка в секундах. 0 → функция отключена
+#define KEEP_POWER    10    // интервал пинания повербанка в секундах. 0 → функция отключена
 #define INVERSE_SERVO 0     // инвертировать направление вращения серво
 #define PARKING_POS   0     // угол для домашней позиции
 #define TIME_50ML     5000  // время заполнения 50 мл
 #define AUTO_PARKING  1     // парковка в авто режиме: 1 → вкл, 0 → выкл
 #define STBY_TIME     10    // таймаут режима ожидания в секундах
-#define STBY_LIGHT    15    // яркость подсветки в режиме ожидания. 255 → максимум, 0 → выкл
+#define STBY_LIGHT    20    // яркость подсветки в режиме ожидания. 255 → максимум, 0 → выкл
 #define RAINBOW_FLOW  1     // 1 → динамическая подсветка налитых рюмок, 0 → статическая
 
 #define BATTERY_CAL   1.0   // калибровка напряжения аккумулятора
-#define BATTERY_LOW   3.3   // минимальное напряжение аккумулятора
 #define MAX_VOLUME    50    // ограничение максимального объёма
 #define INVERT_DISPLAY 0    // инверсия цветов дисплея
-                                  
+
 //╞═════════════════════╡Положения серво над центрами рюмок╞═════════════════════╡
 
 // номер рюмки                1   2   3   4    5    6
 //                            ^   ^   ^   ^    ^    ^
-#define SHOT_POSITIONS       30, 60, 90, 120, 150, 180  
+#define SHOT_POSITIONS       30, 60, 90, 120, 150, 180
 
 //╞══════════════════════════╡ПИНЫ Arduino Micro╞══════════════════════════╡
 
@@ -112,7 +111,7 @@ const byte SW_pins[] = {14, 15, 18,  19,  20};
 #define ENC_CLK     10
 #define DISP_SDA    A4
 #define DISP_SCK    A5
-const byte SW_pins[] = {A0, A1, A2,  A3,  11,  12};
+const byte SW_pins[] = {A0, A1, A2, A3, 11, 12};
 #endif
 
 //╞═════════════════════════════╡ЛИБЫ╞═════════════════════════════╡
@@ -191,26 +190,28 @@ bool servoReady = 0;
 enum {
   timeout_off = 0,
   inverse_servo,
-  parking_pos,
+  servo_speed,
   auto_parking,
   stby_time,
   stby_light,
   rainbow_flow,
   max_volume,
   keep_power,
-  invert_display
+  invert_display,
+  parking_pos
 };
 uint8_t settingsList[] = {
   TIMEOUT_OFF,
   INVERSE_SERVO,
-  PARKING_POS,
+  SERVO_SPEED,
   AUTO_PARKING,
   STBY_TIME,
   STBY_LIGHT,
   RAINBOW_FLOW,
   MAX_VOLUME,
   KEEP_POWER,
-  INVERT_DISPLAY
+  INVERT_DISPLAY,
+  PARKING_POS
 };
 
 struct EEPROMAddress {
@@ -230,6 +231,7 @@ struct EEPROMAddress {
   const uint16_t _volume_overall = _shots_overall + sizeof(shots_overall);
   const uint16_t _keep_power = _volume_overall + sizeof(volume_overall);
   const uint16_t _invert_display = _keep_power + sizeof(keep_power);
+  const uint16_t _servo_speed = _invert_display + sizeof(invert_display);
 } eeAddress;
 
 //╞═════════════════════════════╡MACROS╞═════════════════════════════╡

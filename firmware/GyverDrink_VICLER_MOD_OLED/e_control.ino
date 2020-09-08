@@ -56,8 +56,10 @@ void btnTick() {
       pumpOFF();                            // помпа выкл
       shotStates[curPumping] = READY;       // налитая рюмка, статус: готов
       curPumping = -1;                      // снимаем выбор рюмки
-      EEPROM.put(eeAddress._shots_overall, shots_overall += 1);
-      EEPROM.put(eeAddress._volume_overall, volume_overall += volumeCount);
+      shots_overall++;
+      volume_overall += volumeCount;
+      EEPROM.put(eeAddress._shots_overall, shots_overall);
+      EEPROM.put(eeAddress._volume_overall, volume_overall);
       systemState = WAIT;                   // режим работы - ждать
       WAITtimer.reset();
       DEBUGln("ABORT");

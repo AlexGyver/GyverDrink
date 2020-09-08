@@ -39,7 +39,7 @@ const char* MenuPages[MENU_PAGES][13] = {
     "------Настройки------",
     " timeout off",
     " inverse servo",
-    " parking pos",
+    " servo speed",
     " auto parking",
     " stby time",
     " stby light",
@@ -193,7 +193,7 @@ void displayMenu() {
       selectedRow = disp.row();
     }
     else disp.setInvertMode(0);
-    
+
     if (menuPage == SETTINGS_PAGE) {
       if (i < menuItemsNum[menuPage] - 1) disp.setFont(Callibri15);
       else disp.setFont(CenturyGothic10x16);
