@@ -8,6 +8,7 @@ void setup() {
 
   // епром
   readEEPROM();
+
 #ifdef BATTERY_PIN
   float get_battery_voltage();
   float batCheck = 0;
@@ -56,13 +57,16 @@ void setup() {
 
   /* - Стартовая анимация. Значение ANIMATION_FPS задаёт количество кадров в секунду (чем больше - тем быстрее анимация)
         Всего доступно 7 видов анимации. Выбирается в ANIMATION_NUM от 0 до 6.
+        Если #define ANIMATION_NUM 6 закомментированно, анимация будет меняться при каждом старте устройства
      - Радуга. Начальная яркость задаётся в RAINBOW_START_BRIGHTNESS ... (максимум 255). С этого значения яркость плавно убавляется до 0.
         Частота изменения цвета зависит от RAINBOW_FPS ... (чем больше значение - тем быстрее смена цвета)
      - Время, за которое пройдёт приветствие (пока светодиоды не погаснут) зависит от RAINBOW_FPS и RAINBOW_START_BRIGHTNESS.
         Время до полного угасания в мс = 1000 * RAINBOW_START_BRIGHTNESS / RAINBOW_FPS
   */
-#define ANIMATION_NUM 7
+  
+//#define ANIMATION_NUM 6
 #define ANIMATION_FPS 20
+
 #define RAINBOW_FPS 50
 #define RAINBOW_START_BRIGHTNESS 250
 
@@ -76,7 +80,13 @@ void setup() {
       startBrightness--;
       strip.show();
     }
-    if (nextFrame.isReady()) showAnimation(ANIMATION_NUM);
+    if (nextFrame.isReady()) {
+#ifdef ANIMATION_NUM
+      showAnimation(ANIMATION_NUM);
+#else
+      showAnimation(animCount);
+#endif
+    }
   }
   if (STBY_LIGHT > 0) {
     for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, STBY_LIGHT);

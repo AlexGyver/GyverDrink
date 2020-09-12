@@ -1,5 +1,3 @@
-// различные функции
-
 // сервисный режим
 void serviceMode() {
   if (!digitalRead(BTN_PIN)) {
@@ -227,51 +225,6 @@ void serviceMode() {
   }
 }
 
-// выводим режим
-void dispMode() {
-  if (workMode) {
-    if (thisVolume < 100) disp.displayByte(0, 64);
-    disp.displayByte(3, 64);
-  }
-  else {
-    if (thisVolume < 100) disp.displayByte(0, 0x00);
-    disp.displayByte(3, 0x00);
-  }
-}
-
-void dispNum(uint16_t num, bool mode) {
-  if (num < 100) {
-    if (!workMode) disp.displayByte(0, 0x00);
-    else disp.displayByte(0, 0x40);
-    if (num < 10) disp.displayByte(1, 0x00);
-    else disp.display(1, num / 10);
-    disp.display(2, num % 10);
-    if (!workMode) disp.displayByte(3, 0x00);
-    else disp.displayByte(3, 0x40);
-  }
-  else if (num < 1000) {
-    disp.display(0, num / 100);
-    disp.display(1, (num % 100) / 10);
-    disp.display(2, num % 10);
-    if (!workMode) disp.displayByte(3, 0x00);
-    else disp.displayByte(3, 0x40);
-  }
-  else if (mode == 1) {
-    disp.display(0, num / 1000);              // тысячные
-    disp.display(1, (num % 1000) / 100);     // сотые
-    disp.display(2, (num % 100) / 10);      // десятые
-    disp.display(3, num % 10);
-  }
-  else {
-    disp.display(0, num / 1000);                                            // тысячные
-    if ( (num % 1000) / 100 > 0 )  disp.display(1, (num % 1000) / 100);     // сотые
-    else disp.displayByte(1, 0x00);
-    if ( ((num % 100) / 10 > 0) || ((num % 1000) / 100 > 0) )  disp.display(2, (num % 100) / 10);         // десятые
-    else disp.displayByte(2, 0x00);
-    disp.display(3, num % 10);
-  }
-}
-
 // наливайка, опрос кнопок
 void flowTick() {
   if (FLOWdebounce.isReady()) {
@@ -446,18 +399,42 @@ void flowRoutine() {
   }
 }
 
-// отрисовка светодиодов по флагу (30мс)
-void LEDtick() {
-  if (LEDchanged && LEDtimer.isReady()) {
-    LEDchanged = false;
-#if(STATUS_LED)
-    ledBreathing(LEDbreathingState, NUM_SHOTS, timeoutState);
-#endif
-#if(KEEP_POWER)
-    keepPower();
-#endif
-    strip.show();
+// прокачка
+void prePump() {
+  for (byte i = 0; i < NUM_SHOTS; i++) {    // поиск наличия рюмки
+    if (!digitalRead(SW_pins[i])) {         // нашли рюмку
+      curPumping = i;
+      if (abs(servo.getCurrentDeg() - shotPos[i]) <= 3) break;
+      servoON();
+      servo.start();
+      servo.setTargetDeg(shotPos[curPumping]);
+      parking = false;
+      break;
+    }
   }
+  if (curPumping == -1) return; // нет рюмок -> нет прокачки, ищем заново ^
+  if (!timeoutState) disp.brightness(7);
+  DEBUG("pumping into shot ");
+  DEBUGln(curPumping);
+  while (!servo.tick()); // едем к рюмке
+  servoOFF();
+  delay(300); // небольшая задержка перед наливом
+
+  pumpON(); // включаем помпу
+  timerMinim timer20(20);
+  while (!digitalRead(SW_pins[curPumping]) && !digitalRead(ENC_SW)) // пока стоит рюмка и зажат энкодер, продолжаем наливать
+  {
+    if (timer20.isReady()) {
+      volumeCount += 20 * 50.0 / time50ml;
+      dispNum(round(volumeCount));
+      strip.setLED(curPumping, mWHEEL( (int)(volumeCount * 10 + MIN_COLOR) % 1530) );
+      strip.show();
+    }
+  }
+  pumpOFF();
+  DEBUG("pumping stopped, volume: ");
+  DEBUG(round(volumeCount));
+  DEBUGln("ml");
 }
 
 // сброс таймаута
@@ -509,7 +486,7 @@ void timeoutTick() {
 #endif
     if (volumeChanged) {
       volumeChanged = false;
-      EEPROM.put(0, thisVolume);
+      EEPROM.update(0, thisVolume);
     }
   }
 
@@ -545,6 +522,62 @@ void servoTick() {
     servoReady = 0;
   }
 }
+
+// отрисовка светодиодов по флагу (30мс)
+void LEDtick() {
+  if (LEDchanged && LEDtimer.isReady()) {
+    LEDchanged = false;
+#if(STATUS_LED)
+    ledBreathing(LEDbreathingState, NUM_SHOTS, timeoutState);
+#endif
+#if(KEEP_POWER)
+    keepPower();
+#endif
+    strip.show();
+  }
+}
+
+// динамическая подсветка светодиодов
+void rainbowFlow(bool _state, uint8_t _shotNum) {
+#if (RAINBOW_FLOW)
+  static float count[NUM_SHOTS] = {130};
+  if (!_state) {
+    count[_shotNum] = 130;
+    return;
+  }
+  leds[_shotNum] = mHSV((int)count[_shotNum], 255, 255);
+  count[_shotNum] += 0.5;
+  LEDchanged = true;
+#endif
+}
+
+// дыхание статус-светодиода
+#if(STATUS_LED)
+void ledBreathing(bool _state, uint8_t _shotNum, bool mode) {
+  static float _brightness = STATUS_LED;
+  static int8_t _dir = -1;
+  if (!_state) {
+    _brightness = STATUS_LED;
+    _dir = -1;
+    return;
+  }
+  _brightness += _dir * (STATUS_LED / 50.0);
+  if (_brightness < 0) {
+    _brightness = 0;
+    _dir = 1;
+  }
+  else if (_brightness > STATUS_LED) {
+    _brightness = STATUS_LED;
+    _dir = -1;
+  }
+  if (mode) LED = mHSV(130, 255, _brightness);
+  else {
+    LED = mHSV(255, 0, _brightness);
+  }
+
+  LEDchanged = true;
+}
+#endif
 
 // поддержание питания повербанка коротким повышением потребления
 #if(KEEP_POWER)
@@ -582,85 +615,7 @@ void keepPower() {
 }
 #endif
 
-// динамическая подсветка светодиодов
-void rainbowFlow(bool _state, uint8_t _shotNum) {
-#if (RAINBOW_FLOW)
-  static float count[NUM_SHOTS] = {130};
-  if (!_state) {
-    count[_shotNum] = 130;
-    return;
-  }
-  leds[_shotNum] = mHSV((int)count[_shotNum], 255, 255);
-  count[_shotNum] += 0.5;
-  LEDchanged = true;
-#endif
-}
-
-void prePump() {
-  for (byte i = 0; i < NUM_SHOTS; i++) {    // поиск наличия рюмки
-    if (!digitalRead(SW_pins[i])) {         // нашли рюмку
-      curPumping = i;
-      if (abs(servo.getCurrentDeg() - shotPos[i]) <= 3) break;
-      servoON();
-      servo.start();
-      servo.setTargetDeg(shotPos[curPumping]);
-      parking = false;
-      break;
-    }
-  }
-  if (curPumping == -1) return; // нет рюмок -> нет прокачки, ищем заново ^
-  if (!timeoutState) disp.brightness(7);
-  DEBUG("pumping into shot ");
-  DEBUGln(curPumping);
-  while (!servo.tick()); // едем к рюмке
-  servoOFF();
-  delay(300); // небольшая задержка перед наливом
-
-  pumpON(); // включаем помпу
-  timerMinim timer20(20);
-  while (!digitalRead(SW_pins[curPumping]) && !digitalRead(ENC_SW)) // пока стоит рюмка и зажат энкодер, продолжаем наливать
-  {
-    if (timer20.isReady()) {
-      volumeCount += 20 * 50.0 / time50ml;
-      dispNum(round(volumeCount));
-      strip.setLED(curPumping, mWHEEL( (int)(volumeCount * 10 + MIN_COLOR) % 1530) );
-      strip.show();
-    }
-  }
-  pumpOFF();
-  DEBUG("pumping stopped, volume: ");
-  DEBUG(round(volumeCount));
-  DEBUGln("ml");
-}
-
-// дыхание статус-светодиода
-#if(STATUS_LED)
-void ledBreathing(bool _state, uint8_t _shotNum, bool mode) {
-  static float _brightness = STATUS_LED;
-  static int8_t _dir = -1;
-  if (!_state) {
-    _brightness = STATUS_LED;
-    _dir = -1;
-    return;
-  }
-  _brightness += _dir * (STATUS_LED / 50.0);
-  if (_brightness < 0) {
-    _brightness = 0;
-    _dir = 1;
-  }
-  else if (_brightness > STATUS_LED) {
-    _brightness = STATUS_LED;
-    _dir = -1;
-  }
-  if (mode) LED = mHSV(130, 255, _brightness);
-  else {
-    LED = mHSV(255, 0, _brightness);
-  }
-
-  LEDchanged = true;
-}
-#endif
-
+// battery management
 #ifdef BATTERY_PIN
 float filter(float value) {
   static float k = 1.0, filteredValue = 4.0;
@@ -701,109 +656,4 @@ bool battery_watchdog() {
   }
   return batOk;
 }
-
 #endif
-
-// анимация TM1637
-void showAnimation(byte mode) {
-  static byte i = 0;
-  if (mode == 0) {
-    if (i >= 20) i = 0;
-    disp.displayByte(AnimationData_0[i++]);
-  }
-  else if (mode == 1) {
-    if (i >= 12) i = 0;
-    disp.displayByte(AnimationData_1[i++]);
-  }
-  else if (mode == 2) {
-    if (i >= 12) i = 0;
-    disp.displayByte(AnimationData_2[i++]);
-  }
-  else if (mode == 3) {
-    if (i >= 60) i = 0;
-    disp.displayByte(AnimationData_3[i++]);
-  }
-  else if (mode == 4) {
-    if (i >= 2) i = 0;
-    disp.displayByte(AnimationData_4[i++]);
-  }
-  else if (mode == 5) {
-    if (i >= 6) i = 0;
-    disp.displayByte(AnimationData_5[i++]);
-  }
-  else if (mode == 6) {
-    if (i >= 8) i = 0;
-    disp.displayByte(AnimationData_6[i++]);
-  }
-  else if (mode == 7) {
-    if (i >= 12) i = 0;
-    disp.displayByte(AnimationData_7[i++]);
-  }
-}
-
-void readEEPROM() {
-  // чтение последнего налитого объёма
-  if (EEPROM.read(1000) != 47) {
-    EEPROM.write(1000, 47);
-    EEPROM.put(0, thisVolume);
-  }
-  else EEPROM.get(0, thisVolume);
-  thisVolume = min(thisVolume, MAX_VOLUME);
-  for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
-
-  // чтение значения таймера для 50мл
-  if (EEPROM.read(1001) != 47) {
-    EEPROM.write(1001, 47);
-    EEPROM.put(2, TIME_50ML);
-  }
-  else EEPROM.get(2, time50ml);
-  volumeTick = 15.0f * 50.0f / time50ml;
-
-  // чтение позиций серво над рюмками
-  if (EEPROM.read(1002) != 47) {
-    EEPROM.write(1002, 47);
-    for (byte i = 0; i < NUM_SHOTS; i++) {
-      EEPROM.write(6 + i, initShotPos[i]);
-      shotPos[i] = initShotPos[i];
-    }
-  }
-  else {
-    for (byte i = 0; i < NUM_SHOTS; i++)
-      EEPROM.get(6 + i, shotPos[i]);
-  }
-
-  //чтение домашней позиции
-  if (EEPROM.read(1003) != 47) {
-    EEPROM.write(1003, 47);
-    EEPROM.update(13, parking_pos);
-  }
-  else EEPROM.get(13, parking_pos);
-
-  //чтение калибровки аккумулятора
-  if (EEPROM.read(1004) != 47) {
-    EEPROM.write(1004, 47);
-    EEPROM.put(14, 1.0);
-  }
-  else EEPROM.get(14, battery_cal);
-}
-
-void resetEEPROM() {
-  // сброс калибровки времени на 50мл
-  EEPROM.update(1001, 47);
-  EEPROM.put(2, TIME_50ML);
-
-  // сброс позиций серво над рюмками
-  EEPROM.update(1002, 47);
-  for (byte i = 0; i < NUM_SHOTS; i++) {
-    EEPROM.update(6 + i, initShotPos[i]);
-    shotPos[i] = initShotPos[i];
-  }
-
-  // сброс домашней позиции
-  EEPROM.update(1003, 47);
-  EEPROM.update(13, PARKING_POS);
-
-  // сброс калибровки аккумулятора
-  EEPROM.update(1004, 47);
-  EEPROM.put(14, 1.0);
-}
