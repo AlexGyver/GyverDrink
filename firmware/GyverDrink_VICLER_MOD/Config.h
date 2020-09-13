@@ -1,9 +1,9 @@
 
-//═══════════════════════════════╣ НАСТРОЙКИ ⚒╠════════════════════════════╡
+//═══════════════════════════════╣ НАСТРОЙКИ ⚒ ╠════════════════════════════╡
 
 #define NUM_SHOTS     5     // количество рюмок (оно же кол-во светодиодов и кнопок!)
 #define TIMEOUT_OFF   5     // таймаут на выключение дисплея и светодиодов в минутах. Если 0 → таймаут отключен
-#define KEEP_POWER    0     // интервал пинания повербанка в секундах. 0 → функция отключена
+#define KEEP_POWER    10    // интервал пинания повербанка в секундах. 0 → функция отключена
 #define SWITCH_LEVEL  0     // кнопки 1 → высокий сигнал при замыкании, 0 → низкий
 #define INVERSE_SERVO 0     // инвертировать направление вращения серво
 #define SERVO_SPEED   10    // скорость серво в процентах
@@ -23,25 +23,9 @@
 // номер рюмки          1   2   3    4    5    6
 #define SHOT_POSITIONS  30, 60, 90, 120, 150, 180
 
-//╞══════════════════════════╡ПИНЫ Arduino Micro╞══════════════════════════╡
-
-#if defined(ARDUINO_AVR_MICRO)
-#define PUMP_POWER  4
-#define SERVO_POWER 16
-//#define BATTERY_PIN A3
-#define SERVO_PIN   6
-#define LED_PIN     5
-#define BTN_PIN     10
-#define ENC_SW      9
-#define ENC_DT      7
-#define ENC_CLK     8
-#define DISP_DIO    2
-#define DISP_CLK    3
-const byte SW_pins[] = {14, 15, 18, 19, 20};
-
 //╞══════════════════════════╡ПИНЫ Arduino Nano╞══════════════════════════╡
 
-#elif defined(ARDUINO_AVR_NANO)
+#if defined(ARDUINO_AVR_NANO)
 #define PUMP_POWER  3
 #define SERVO_POWER 4
 //#define BATTERY_PIN A7
@@ -54,4 +38,20 @@ const byte SW_pins[] = {14, 15, 18, 19, 20};
 #define DISP_DIO    11
 #define DISP_CLK    12
 const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};
+
+//╞══════════════════════════╡ПИНЫ Arduino Micro╞═════════════════════════╡
+
+#elif defined(ARDUINO_AVR_MICRO)
+#define PUMP_POWER  4
+#define SERVO_POWER 16
+//#define BATTERY_PIN A3
+#define SERVO_PIN   6
+#define LED_PIN     5
+#define BTN_PIN     10
+#define ENC_SW      9
+#define ENC_DT      7
+#define ENC_CLK     8
+#define DISP_DIO    2
+#define DISP_CLK    3
+const byte SW_pins[] = {14, 15, 18, 19, 20};
 #endif

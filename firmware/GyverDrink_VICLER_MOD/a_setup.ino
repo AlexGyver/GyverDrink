@@ -63,8 +63,8 @@ void setup() {
      - Время, за которое пройдёт приветствие (пока светодиоды не погаснут) зависит от RAINBOW_FPS и RAINBOW_START_BRIGHTNESS.
         Время до полного угасания в мс = 1000 * RAINBOW_START_BRIGHTNESS / RAINBOW_FPS
   */
-  
-//#define ANIMATION_NUM 6
+
+  //#define ANIMATION_NUM 6
 #define ANIMATION_FPS 20
 
 #define RAINBOW_FPS 50
