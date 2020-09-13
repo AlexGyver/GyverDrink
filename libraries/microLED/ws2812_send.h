@@ -44,7 +44,7 @@
 #endif
 
 
-void WS2812B_sendData (PTR_TYPE data, int16_t datlen, uint8_t maskhi, uint8_t *port, uint8_t *portreg, uint8_t bright) {
+void WS2812B_sendData (PTR_TYPE data, int16_t datlen, uint8_t maskhi, uint8_t *port, uint8_t bright) {
 	uint8_t ctr,masklo;
 	uint8_t loopData[3];
 	uint8_t *data_ptr = loopData;	
@@ -72,7 +72,7 @@ void WS2812B_sendData (PTR_TYPE data, int16_t datlen, uint8_t maskhi, uint8_t *p
 		loopData[ORDER1] = (((*data & 0b0000011111100000) >> 3) * bright) >> 8;
 		loopData[ORDER2] = (((*data & 0b0000000000011111) << 3) * bright) >> 8;
 		
-		*data++;
+		//*data++;
 		datlen -= 2;
 #elif (COLOR_DEBTH == 3)
 		// 32 бит		

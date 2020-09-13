@@ -41,7 +41,7 @@
 
 
 #ifndef COLOR_DEBTH
-#define COLOR_DEBTH 3	// по умолчанию 24 бита
+#define COLOR_DEBTH 2	// по умолчанию 16 бита
 #endif
 
 #ifdef REPLACE_FASTLED
@@ -55,7 +55,7 @@ typedef uint8_t LEDdata;
 #elif (COLOR_DEBTH == 2)
 typedef uint16_t LEDdata;
 #elif (COLOR_DEBTH == 3)
-typedef struct LEDdata {
+struct LEDdata {
 	byte r, g, b;
 	// default values are UNINITIALIZED
 	inline LEDdata() __attribute__((always_inline))
@@ -427,7 +427,7 @@ byte microLED::correctBright() {
 // ====================== ВЫВОД ======================
 void microLED::show() {
 	*ws2812_port_reg |= pinMask; // Enable DDR
-	WS2812B_sendData((PTR_TYPE)LEDbuffer, (int16_t)COLOR_DEBTH * _numLEDs, pinMask, (uint8_t*) ws2812_port, (uint8_t*) ws2812_port_reg, correctBright());
+	WS2812B_sendData((PTR_TYPE)LEDbuffer, (int16_t)COLOR_DEBTH * _numLEDs, pinMask, (uint8_t*) ws2812_port, correctBright());
 }
 
 // ================== COLOR UTILITY ===================
@@ -465,7 +465,7 @@ LEDdata mHSV(byte h, byte s, byte v) {
 	return mRGB(r, g, b);
 #else
 	// обычный HSV
-	float r, g, b;
+	float r = 0, g = 0, b = 0;
 	
 	float H = (float)h / 255;
 	float S = (float)s / 255;
@@ -494,7 +494,7 @@ LEDdata mHEX(uint32_t color) {
 }
 
 LEDdata mWHEEL(int color) {
-	byte _r, _g, _b;
+	byte _r = 0, _g = 0, _b = 0;
 	if (color <= 255) {           // красный макс, зелёный растёт
 		_r = 255;
 		_g = color;
