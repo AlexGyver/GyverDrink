@@ -4,8 +4,8 @@
    AlexGyver Technologies http://alexgyver.ru/
 */
 
-#define CLK 2
-#define DIO 3
+#define CLK 12
+#define DIO 11
 
 #include "GyverTM1637.h"
 GyverTM1637 disp(CLK, DIO);
@@ -21,15 +21,15 @@ void setup() {
 }
 
 void loop() {
-  runningText();
-  scrolls();
-  scrollClock();
-  twists();
+//  runningText();
+//  scrolls();
+//  scrollClock();
+//  twists();
   twistClock();
-  ints();
-  bytes();
-  fadeBlink();
-  normClock();
+//  ints();
+//  bytes();
+//  fadeBlink();
+//  normClock();
 }
 
 void twists() {

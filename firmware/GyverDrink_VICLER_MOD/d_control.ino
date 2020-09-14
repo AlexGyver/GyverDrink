@@ -50,6 +50,8 @@ void btnTick() {
 
   if (btn.holded()) {
     workMode = !workMode;
+    if (workMode) disp.scrollByte(64, 0, 0, 64, 50);
+    else  disp.scrollByte(0, 0, 0, 0, 50);
     timeoutReset();
     if (!workMode && curPumping >= 0) {
       DEBUG("abort fill for shot: ");

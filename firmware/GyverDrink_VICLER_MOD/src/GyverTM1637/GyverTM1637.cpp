@@ -19,8 +19,7 @@ uint8_t digToHEX(uint8_t digit) {
 
 int GyverTM1637::writeByte(int8_t wr_data)
 {
-	uint8_t i, count1;
-	for (i = 0; i < 8; i++) //sent 8bit data
+	for (byte i = 0; i < 8; i++) //sent 8bit data
 	{
 		digitalWrite(Clkpin, LOW);
 		if (wr_data & 0x01)digitalWrite(Datapin, HIGH); //LSB first
@@ -221,7 +220,6 @@ void GyverTM1637::displayClockTwist(uint8_t hrs, uint8_t mins, int delayms) {
 void GyverTM1637::displayInt(int value) {
 	if (value > 9999 || value < -999) return;
 	boolean negative = false;
-	boolean neg_flag = false;
 	byte digits[4];
 	if (value < 0) negative = true;	
 	value = abs(value);	
@@ -437,7 +435,7 @@ void GyverTM1637::twistByte(uint8_t bit0, uint8_t bit1, uint8_t bit2, uint8_t bi
 }
 
 void GyverTM1637::twistByte(uint8_t DispData[], int delayms) {
-	byte step;
+	byte step = 0;
 	byte stepArray[4];
 	boolean changeByte[4] = {0, 0, 0, 0};
 	
@@ -459,7 +457,7 @@ void GyverTM1637::twistByte(uint8_t DispData[], int delayms) {
 	//for (byte r = 0; r < 1; r++) {
 	for (byte i = 0; i < 6; i++) {
 		step = 0b11000000;
-		step = ~(step | (1 << i) | (1 << i + 1));	// бегает дырка
+		step = ~(step | (1 << i) | (1 << (i + 1)));	// бегает дырка
 		for (byte k = 0; k < 4; k++) {	
 			if (changeByte[k]) stepArray[k] = step;
 		}
@@ -510,7 +508,7 @@ void GyverTM1637::twistByte(uint8_t BitAddr, uint8_t DispData, int delayms) {
 	//for (byte r = 0; r < 1; r++) {
 	for (byte i = 0; i < 6; i++) {
 		step = 0b1000000;
-		step = ~(step | (1 << i) | (1 << i + 1));	// бегает дырка
+		step = ~(step | (1 << i) | (1 << (i + 1)));	// бегает дырка
 
 		displayByte(BitAddr, step);			
 		delay(delayms);
