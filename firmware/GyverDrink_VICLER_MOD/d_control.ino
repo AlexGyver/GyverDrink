@@ -50,6 +50,7 @@ void btnTick() {
 
   if (btn.holded()) {
     workMode = !workMode;
+    EEPROM.update(20, workMode);
     if (workMode) disp.scrollByte(64, 0, 0, 64, 50);
     else  disp.scrollByte(0, 0, 0, 0, 50);
     timeoutReset();

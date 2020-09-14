@@ -91,10 +91,8 @@ void serviceMode() {
         }
       }
       // сохраняем значения углов в память
-      EEPROM.update(1002, 47);
       for (byte i = 0; i < NUM_SHOTS; i++)  EEPROM.update(6 + i, shotPos[i]);
       // сохраняем значение домашней позиции
-      EEPROM.update(1003, 47);
       EEPROM.update(13, parking_pos);
     }
     //==============================================================================
@@ -176,7 +174,6 @@ void serviceMode() {
       if (pumpTime > 0) {
         time50ml = pumpTime;
         volumeTick = 15.0f * 50.0f / time50ml;
-        EEPROM.update(1001, 47);
         EEPROM.put(2, pumpTime);
       }
     }
@@ -203,7 +200,6 @@ void serviceMode() {
         }
       }
       // сохраняем калибровку аккумулятора
-      EEPROM.update(1004, 47);
       EEPROM.put(14, battery_cal);
     }
 #endif
@@ -626,7 +622,7 @@ float filter(float value) {
 }
 
 float get_battery_voltage() {
-  battery_voltage = filter(analogRead(BATTERY_PIN) * (4.5 * battery_cal) / 1023.f);
+  battery_voltage = filter(analogRead(BATTERY_PIN) * (4.7 * battery_cal) / 1023.f);
   DEBUG("battery: ");
   DEBUG(battery_voltage);
   DEBUGln("V");
