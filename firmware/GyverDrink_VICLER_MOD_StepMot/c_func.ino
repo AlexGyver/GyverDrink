@@ -99,49 +99,6 @@ void serviceMode() {
   }
 }
 
-// выводим режим
-void dispMode() {
-  if (workMode) {
-    if (thisVolume < 100) disp.displayByte(0, 64);
-    disp.displayByte(3, 64);
-  }
-  else {
-    if (thisVolume < 100) disp.displayByte(0, 0x00);
-    disp.displayByte(3, 0x00);
-  }
-}
-
-void dispNum(uint16_t num) {
-  //  static int lastNum = -1;
-  //  if (num == lastNum) return;
-  //  lastNum = num;
-
-  if (num < 100) {
-    if (!workMode) disp.displayByte(0, 0x00);
-    else disp.displayByte(0, 0x40);
-    if (num < 10) disp.displayByte(1, 0x00);
-    else disp.display(1, num / 10);
-    disp.display(2, num % 10);
-    if (!workMode) disp.displayByte(3, 0x00);
-    else disp.displayByte(3, 0x40);
-  }
-  else if (num < 1000) {
-    disp.display(0, num / 100);
-    disp.display(1, (num % 100) / 10);
-    disp.display(2, num % 10);
-    if (!workMode) disp.displayByte(3, 0x00);
-    else disp.displayByte(3, 0x40);
-  }
-  else {
-    disp.display(0, num / 1000);                                            // тысячные
-    if ( (num % 1000) / 100 > 0 )  disp.display(1, (num % 1000) / 100);     // сотые
-    else disp.displayByte(1, 0x00);
-    if ( ((num % 100) / 10 > 0) || ((num % 1000) / 100 > 0) )  disp.display(2, (num % 100) / 10);         // десятые
-    else disp.displayByte(2, 0x00);
-    disp.display(3, num % 10);
-  }
-}
-
 // наливайка, опрос кнопок
 void flowTick() {
   if (FLOWdebounce.isReady()) {
@@ -456,43 +413,4 @@ void rainbowFlow(bool _state, uint8_t _shotNum) {
   count[_shotNum] += 1;
   LEDchanged = true;
 #endif
-}
-
-void showAnimation(byte mode, uint8_t period) {
-  static timerMinim timer(period);
-  if (!timer.isReady()) return;
-
-  static byte i = 0;
-  if (mode == 0) {
-    if (i >= 20) i = 0;
-    disp.displayByte(AnimationData_0[i++]);
-  }
-  else if (mode == 1) {
-    if (i >= 12) i = 0;
-    disp.displayByte(AnimationData_1[i++]);
-  }
-  else if (mode == 2) {
-    if (i >= 12) i = 0;
-    disp.displayByte(AnimationData_2[i++]);
-  }
-  else if (mode == 3) {
-    if (i >= 60) i = 0;
-    disp.displayByte(AnimationData_3[i++]);
-  }
-  else if (mode == 4) {
-    if (i >= 2) i = 0;
-    disp.displayByte(AnimationData_4[i++]);
-  }
-  else if (mode == 5) {
-    if (i >= 6) i = 0;
-    disp.displayByte(AnimationData_5[i++]);
-  }
-  else if (mode == 6) {
-    if (i >= 8) i = 0;
-    disp.displayByte(AnimationData_6[i++]);
-  }
-  else if (mode == 7) {
-    if (i >= 12) i = 0;
-    disp.displayByte(AnimationData_7[i++]);
-  }
 }

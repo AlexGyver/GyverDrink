@@ -61,7 +61,9 @@ void btnTick() {
       systemON = true;
     }
     if (workMode) DEBUGln("automatic mode");
-    else DEBUGln("manual mode");
+    else {
+      DEBUGln("manual mode");
+    }
   }
   if (encBtn.clicked()) {
     timeoutReset();
