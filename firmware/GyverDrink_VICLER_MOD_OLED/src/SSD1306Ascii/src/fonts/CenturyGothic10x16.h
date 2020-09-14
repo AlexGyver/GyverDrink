@@ -36,9 +36,6 @@
  *                  // bit field of all characters
  */
 
-#include <inttypes.h>
-#include <avr/pgmspace.h>
-
 #ifndef _CenturyGothic10x16_H
 #define _CenturyGothic10x16_H
 
@@ -46,8 +43,8 @@
 #define CenturyGothic10x16_HEIGHT 16
 
 GLCDFONTDECL(CenturyGothic10x16) = {
-    //0x29, 0x16, // size
-    0x05, 0x84, // size
+    0x29, 0x16, // size
+    //0x05, 0x84, // size
     0x0A,       // width
     0x10,       // height
     0x20,       // first char

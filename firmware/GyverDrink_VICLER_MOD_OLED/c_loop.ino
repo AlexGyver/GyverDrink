@@ -1,4 +1,3 @@
-// луп
 
 void loop() {
 #ifdef BATTERY_PIN

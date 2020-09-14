@@ -1,5 +1,5 @@
-//GyverDrink VICLER_MOD_OLED v2.1.1
-//13.09.2020
+//GyverDrink VICLER_MOD_OLED v2.1.2
+//14.09.2020
 /*
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с OLED дисплеем и расширенным функционалом
 
@@ -60,6 +60,8 @@
 #include <EEPROM.h>
 
 //╞═════════════════════════════╡DATA╞═════════════════════════════╡
+
+#define EEPROM_KEY 22
 
 #if (STATUS_LED)
 #define statusLed 1

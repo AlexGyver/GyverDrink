@@ -1,4 +1,3 @@
-// кнопки-крутилки
 
 void encTick() {
   enc.tick();

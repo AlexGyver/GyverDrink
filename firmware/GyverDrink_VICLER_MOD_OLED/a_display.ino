@@ -1,3 +1,4 @@
+
 enum text_position {
   Append = -4,
   Left,
@@ -164,12 +165,12 @@ void displayMenu() {
         disp.clear();
       }
       else if (menuItem == 1) {
-        EEPROM.update(1012, 47);
+        EEPROM.update(1012, EEPROM_KEY);
         EEPROM.put(eeAddress._shots_overall, 0);
         readEEPROM();
       }
       else if (menuItem == 2) {
-        EEPROM.update(1013, 47);
+        EEPROM.update(1013, EEPROM_KEY);
         EEPROM.put(eeAddress._volume_overall, 0);
         readEEPROM();
       }

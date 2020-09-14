@@ -40,7 +40,7 @@
  *
  * If INCLUDE_SCROLLING is nonzero, the scroll feature will included.
  */
-#define INCLUDE_SCROLLING 1
+#define INCLUDE_SCROLLING 0
 
 /** Initial scroll mode, SCROLL_MODE_OFF,
     SCROLL_MODE_AUTO, or SCROLL_MODE_APP. */
@@ -97,6 +97,7 @@ inline void oledReset(uint8_t rst) {
  * @struct TickerState
  * @brief ticker status
  */
+
 struct TickerState {
   const char* queue[TICKER_QUEUE_DIM];  ///< Queue of text pointers.
   uint8_t nQueue = 0;  ///< Count of pointers in queue.
@@ -113,6 +114,7 @@ struct TickerState {
   /// @return Count of used queue slots.
   uint8_t queueUsed() {return nQueue;}
 };
+
 //------------------------------------------------------------------------------
 /**
  * @class SSD1306Ascii
