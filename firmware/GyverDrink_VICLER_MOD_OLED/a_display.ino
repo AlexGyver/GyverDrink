@@ -135,6 +135,7 @@ void displayMenu() {
       menuPage = MENU_PAGE;
       disp.clear();
       displayMode(workMode);
+      EEPROM.update(eeAddress._mode, workMode);
       return;
     }
     else if (menuPage == SETTINGS_PAGE) {
@@ -165,12 +166,10 @@ void displayMenu() {
         disp.clear();
       }
       else if (menuItem == 1) {
-        EEPROM.update(1012, EEPROM_KEY);
         EEPROM.put(eeAddress._shots_overall, 0);
         readEEPROM();
       }
       else if (menuItem == 2) {
-        EEPROM.update(1013, EEPROM_KEY);
         EEPROM.put(eeAddress._volume_overall, 0);
         readEEPROM();
       }

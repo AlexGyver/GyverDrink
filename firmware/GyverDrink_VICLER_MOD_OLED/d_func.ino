@@ -66,7 +66,6 @@ void serviceRoutine(serviceModes mode) {
     if (pumpTime > 0) {
       time50ml = pumpTime;
       volumeTick = 15.0f * 50.0f / time50ml;
-      EEPROM.update(1001, 47);
       EEPROM.put(eeAddress._time50ml, pumpTime);
     }
   }
@@ -161,10 +160,8 @@ void serviceRoutine(serviceModes mode) {
     while (!servo.tick());
     servoOFF();
     // сохраняем значения углов в память
-    EEPROM.update(1002, 47);
     for (byte i = 0; i < NUM_SHOTS; i++)  EEPROM.update(eeAddress._shotPos + i, shotPos[i]);
-    EEPROM.update(1006, 47);
-    EEPROM.update(eeAddress._parking_pos, PARKING_POS);
+    EEPROM.update(eeAddress._parking_pos, settingsList[parking_pos]);
   }
   //==============================================================================
   //                     калибровка напряжения аккумулятора
@@ -189,7 +186,6 @@ void serviceRoutine(serviceModes mode) {
       }
 
       if (btn.holded()) {
-        EEPROM.update(1003, 47);
         EEPROM.put(eeAddress._battery_cal, battery_cal);
         timeoutReset();
         disp.clear();
@@ -524,7 +520,7 @@ void timeoutTick() {
     if (settingsList[timeout_off]) POWEROFFtimer.reset();
     if (volumeChanged) {
       volumeChanged = false;
-      EEPROM.write(0, thisVolume);
+      EEPROM.update(0, thisVolume);
     }
   }
 
@@ -685,7 +681,7 @@ float filter(float value) {
   return filteredValue;
 }
 float get_battery_voltage() {
-  battery_voltage = filter(analogRead(BATTERY_PIN) * (4.5 * battery_cal) / 1023.f);
+  battery_voltage = filter(analogRead(BATTERY_PIN) * (4.7 * battery_cal) / 1023.f);
   DEBUGln(battery_voltage);
   return battery_voltage;
 }

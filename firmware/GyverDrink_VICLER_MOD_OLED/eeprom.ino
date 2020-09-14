@@ -1,3 +1,4 @@
+#define EEPROM_KEY 22
 
 void readEEPROM() {
   // чтение последнего налитого объёма
@@ -122,12 +123,19 @@ void readEEPROM() {
   }
   else settingsList[invert_display] = EEPROM.read(eeAddress._invert_display);
 
-  //скорость сервопривода
+  // скорость сервопривода
   if (EEPROM.read(1016) != EEPROM_KEY) {
     EEPROM.write(1016, EEPROM_KEY);
     EEPROM.write(eeAddress._servo_speed, SERVO_SPEED);
   }
   else settingsList[servo_speed] = EEPROM.read(eeAddress._servo_speed);
+
+  // режим
+  if(EEPROM.read(1017) != EEPROM_KEY){
+    EEPROM.write(1017, EEPROM_KEY);
+    EEPROM.write(eeAddress._mode, ManualMode);
+  }
+  else workMode = (workModes)EEPROM.read(eeAddress._mode);
 }
 
 void resetEEPROM() {
@@ -192,6 +200,10 @@ void resetEEPROM() {
   // сброс скорости сервопривода
   EEPROM.update(1016, EEPROM_KEY);
   EEPROM.update(eeAddress._servo_speed, SERVO_SPEED);
+
+  // сброс режима
+  EEPROM.update(1017, EEPROM_KEY);
+  EEPROM.update(eeAddress._mode, ManualMode);
 
   readEEPROM();
 }

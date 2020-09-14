@@ -1,5 +1,5 @@
-//GyverDrink VICLER_MOD_OLED v2.1.2
-//14.09.2020
+//GyverDrink VICLER_MOD_OLED v2.2
+//15.09.2020
 /*
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с OLED дисплеем и расширенным функционалом
 
@@ -61,8 +61,6 @@
 
 //╞═════════════════════════════╡DATA╞═════════════════════════════╡
 
-#define EEPROM_KEY 22
-
 #if (STATUS_LED)
 #define statusLed 1
 #else
@@ -99,7 +97,7 @@ enum {NO_GLASS, EMPTY, IN_PROCESS, READY} shotStates[NUM_SHOTS];
 enum {SEARCH, MOVING, WAIT, PUMPING} systemState;
 enum serviceModes {VOLUME = 1, SERVO, BATTERY};
 serviceModes serviceMode;
-enum workModes {ManualMode, AutoMode, ComboMode};
+enum workModes {ManualMode, AutoMode};
 workModes workMode;
 uint16_t time50ml = 0;
 #define INIT_VOLUME 47
@@ -168,6 +166,7 @@ struct EEPROMAddress {
   const uint16_t _keep_power = _volume_overall + sizeof(volume_overall);
   const uint16_t _invert_display = _keep_power + sizeof(keep_power);
   const uint16_t _servo_speed = _invert_display + sizeof(invert_display);
+  const uint16_t _mode = _servo_speed + sizeof(servo_speed);
 } eeAddress;
 
 //╞═════════════════════════════╡MACROS╞═════════════════════════════╡
