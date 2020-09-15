@@ -89,10 +89,15 @@ void setup() {
 #endif
     }
   }
+  
   if (STBY_LIGHT > 0) {
-    for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, STBY_LIGHT);
-    strip.show();
+    for(byte i = 0; i < STBY_LIGHT; i++){
+      for (byte j = 0; j < NUM_SHOTS; j++)  leds[j] = mHSV(20, 255, i);
+      strip.show();
+      delay(10);
+    }
   }
+  
 #if (STATUS_LED)
   LED = mHSV(255, 0, STATUS_LED); // white
   strip.show();
