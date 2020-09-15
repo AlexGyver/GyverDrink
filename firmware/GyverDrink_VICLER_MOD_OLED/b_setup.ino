@@ -107,9 +107,13 @@ void setup() {
   }
   disp.clear();
   if (settingsList[stby_light] > 0) {
-    for (byte i = 0; i < NUM_SHOTS; i++)  leds[i] = mHSV(20, 255, settingsList[stby_light]);
-    strip.show();
+    for(byte i = 0; i < settingsList[stby_light]; i++){
+      for (byte j = 0; j < NUM_SHOTS; j++)  leds[j] = mHSV(20, 255, i);
+      strip.show();
+      delay(10);
+    }
   }
+  
 #if (STATUS_LED)
   LED = mHSV(255, 0, STATUS_LED); // white
   strip.show();
