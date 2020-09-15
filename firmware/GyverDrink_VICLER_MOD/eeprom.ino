@@ -1,3 +1,4 @@
+
 #define EEPROM_KEY 11
 
 void readEEPROM() {
@@ -38,12 +39,14 @@ void readEEPROM() {
   }
   else parking_pos = EEPROM.read(13);
 
+#ifdef BATTERY_PIN
   // чтение калибровки аккумулятора
   if (EEPROM.read(1004) != EEPROM_KEY) {
     EEPROM.write(1004, EEPROM_KEY);
     EEPROM.put(14, 1.0);
   }
   else EEPROM.get(14, battery_cal);
+#endif
 
   // чтение текущей анимации
   if (EEPROM.read(1005) != EEPROM_KEY) {
@@ -57,11 +60,11 @@ void readEEPROM() {
   }
 
   // режим
-  if(EEPROM.read(1006) != EEPROM_KEY){
+  if (EEPROM.read(1006) != EEPROM_KEY) {
     EEPROM.write(1006, EEPROM_KEY);
-    EEPROM.write(20, 0);
+    EEPROM.write(19, 0);
   }
-  else workMode = EEPROM.read(20);
+  else workMode = EEPROM.read(19);
 }
 
 void resetEEPROM() {
@@ -80,11 +83,13 @@ void resetEEPROM() {
   EEPROM.update(1003, EEPROM_KEY);
   EEPROM.update(13, PARKING_POS);
 
+#ifdef BATTERY_PIN
   // сброс калибровки аккумулятора
   EEPROM.update(1004, EEPROM_KEY);
   EEPROM.put(14, 1.0);
+#endif
 
   // сброс режима
   EEPROM.update(1006, EEPROM_KEY);
-  EEPROM.update(20, 0);
+  EEPROM.update(19, 0);
 }

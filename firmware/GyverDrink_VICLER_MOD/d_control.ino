@@ -1,4 +1,3 @@
-// кнопки-крутилки
 
 void encTick() {
   enc.tick();
@@ -50,7 +49,6 @@ void btnTick() {
 
   if (btn.holded()) {
     workMode = !workMode;
-    EEPROM.update(20, workMode);
     if (workMode) disp.scrollByte(64, 0, 0, 64, 50);
     else  disp.scrollByte(0, 0, 0, 0, 50);
     timeoutReset();
@@ -102,11 +100,10 @@ void btnTick() {
     byte resetText[] = {_r, _E, _S, _E, _t};
     disp.runningString(resetText, sizeof(resetText), 150);
     while (!digitalRead(BTN_PIN));
-    workMode = !workMode;
-    dispMode();
-    dispNum(thisVolume);
     resetEEPROM();
     readEEPROM();
+    dispMode();
+    dispNum(thisVolume);
     servoON();
     servo.attach(SERVO_PIN, parking_pos);
     delay(500);

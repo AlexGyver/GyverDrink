@@ -1,3 +1,4 @@
+
 // сервисный режим
 void serviceMode() {
   if (!digitalRead(BTN_PIN)) {
@@ -484,6 +485,7 @@ void timeoutTick() {
       volumeChanged = false;
       EEPROM.update(0, thisVolume);
     }
+    EEPROM.update(19, workMode);
   }
 
 #if(KEEP_POWER)
@@ -524,7 +526,7 @@ void LEDtick() {
   if (LEDchanged && LEDtimer.isReady()) {
     LEDchanged = false;
 #if(STATUS_LED)
-    ledBreathing(LEDbreathingState, NUM_SHOTS, timeoutState);
+    ledBreathing(LEDbreathingState, timeoutState);
 #endif
 #if(KEEP_POWER)
     keepPower();
@@ -549,7 +551,7 @@ void rainbowFlow(bool _state, uint8_t _shotNum) {
 
 // дыхание статус-светодиода
 #if(STATUS_LED)
-void ledBreathing(bool _state, uint8_t _shotNum, bool mode) {
+void ledBreathing(bool _state, bool mode) {
   static float _brightness = STATUS_LED;
   static int8_t _dir = -1;
   if (!_state) {
@@ -620,7 +622,6 @@ float filter(float value) {
   filteredValue = (1.0 - k) * filteredValue + k * value;
   return filteredValue;
 }
-
 float get_battery_voltage() {
   battery_voltage = filter(analogRead(BATTERY_PIN) * (4.7 * battery_cal) / 1023.f);
   DEBUG("battery: ");
@@ -628,7 +629,6 @@ float get_battery_voltage() {
   DEBUGln("V");
   return battery_voltage;
 }
-
 bool battery_watchdog() {
   static uint32_t lastMillis = 0;
   static bool batOk, lastOkStatus = 1;
