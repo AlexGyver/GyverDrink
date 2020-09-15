@@ -30,13 +30,14 @@ void readEEPROM() {
       shotPos[i] = EEPROM.read(eeAddress._shotPos + i);
   }
 
+#ifdef BATTERY_PIN
   // чтение калибровки аккумулятора
   if (EEPROM.read(1003) != EEPROM_KEY) {
     EEPROM.write(1003, EEPROM_KEY);
     EEPROM.put(eeAddress._battery_cal, BATTERY_CAL);
   }
   else EEPROM.get(eeAddress._battery_cal, battery_cal);
-
+#endif
   //==========================================================
   //                    чтение настроек
   //==========================================================
@@ -153,9 +154,11 @@ void resetEEPROM() {
     shotPos[i] = initShotPos[i];
   }
 
+#ifdef BATTERY_PIN
   //сброс калибровки аккумулятора
   EEPROM.update(1003, EEPROM_KEY);
   EEPROM.put(eeAddress._battery_cal, BATTERY_CAL);
+#endif
 
   // сброс значения таймаута
   EEPROM.update(1004, EEPROM_KEY);

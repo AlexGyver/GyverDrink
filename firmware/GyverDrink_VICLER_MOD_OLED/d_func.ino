@@ -471,16 +471,42 @@ void flowRoutnie() {
   }
 }
 
-// отрисовка светодиодов по флагу (50мс)
-void LEDtick() {
-  if (LEDchanged && LEDtimer.isReady()) {
-    LEDchanged = false;
-#if(STATUS_LED)
-    ledBreathing(LEDbreathingState, timeoutState);
-#endif
-    if (settingsList[keep_power]) keepPower();
-    strip.show();
+// прокачка
+void prePump() {
+  if (showMenu) return;
+  for (byte i = 0; i < NUM_SHOTS; i++) {    // поиск наличия рюмки
+    if (!digitalRead(SW_pins[i])) {        // нашли рюмку
+      curPumping = i;
+      if (abs(servo.getCurrentDeg() - shotPos[i]) <= 3) break;
+      servoON();
+      servo.start();
+      servo.setTargetDeg(shotPos[curPumping]);
+      parking = false;
+      break;
+    }
   }
+  if (curPumping == -1) return; // нет рюмок -> нет прокачки, ищем заново ^
+  DEBUG("pumping into shot ");
+  DEBUGln(curPumping);
+  while (!servo.tick()); // едем к рюмке
+  servoOFF();
+  delay(300); // небольшая задержка перед наливом
+
+  pumpON(); // включаем помпу
+  timerMinim timer20(20);
+  while (!digitalRead(SW_pins[curPumping]) && !digitalRead(ENC_SW)) // пока стоит рюмка и зажат энкодер, продолжаем наливать
+  {
+    if (timer20.isReady()) {
+      volumeCount += 20 * 50.0 / time50ml;
+      printVolume(round(volumeCount));
+      strip.setLED(curPumping, mWHEEL( (int)(volumeCount * 10 + MIN_COLOR) % 1530) );
+      strip.show();
+    }
+  }
+  pumpOFF();
+  DEBUG("pumping stopped, volume: ");
+  DEBUG(round(volumeCount));
+  DEBUGln("ml");
 }
 
 // сброс таймаута
@@ -562,6 +588,18 @@ void servoTick() {
   }
 }
 
+// отрисовка светодиодов по флагу (50мс)
+void LEDtick() {
+  if (LEDchanged && LEDtimer.isReady()) {
+    LEDchanged = false;
+#if(STATUS_LED)
+    ledBreathing(LEDbreathingState, timeoutState);
+#endif
+    if (settingsList[keep_power]) keepPower();
+    strip.show();
+  }
+}
+
 void rainbowFlow(bool _state, uint8_t _shotNum) {
   if (settingsList[rainbow_flow]) {
     static float count[NUM_SHOTS] = {130};
@@ -573,43 +611,6 @@ void rainbowFlow(bool _state, uint8_t _shotNum) {
     count[_shotNum] += 0.5;
     LEDchanged = true;
   }
-}
-
-void prePump() {
-  if (showMenu) return;
-  for (byte i = 0; i < NUM_SHOTS; i++) {    // поиск наличия рюмки
-    if (!digitalRead(SW_pins[i])) {        // нашли рюмку
-      curPumping = i;
-      if (abs(servo.getCurrentDeg() - shotPos[i]) <= 3) break;
-      servoON();
-      servo.start();
-      servo.setTargetDeg(shotPos[curPumping]);
-      parking = false;
-      break;
-    }
-  }
-  if (curPumping == -1) return; // нет рюмок -> нет прокачки, ищем заново ^
-  DEBUG("pumping into shot ");
-  DEBUGln(curPumping);
-  while (!servo.tick()); // едем к рюмке
-  servoOFF();
-  delay(300); // небольшая задержка перед наливом
-
-  pumpON(); // включаем помпу
-  timerMinim timer20(20);
-  while (!digitalRead(SW_pins[curPumping]) && !digitalRead(ENC_SW)) // пока стоит рюмка и зажат энкодер, продолжаем наливать
-  {
-    if (timer20.isReady()) {
-      volumeCount += 20 * 50.0 / time50ml;
-      printVolume(round(volumeCount));
-      strip.setLED(curPumping, mWHEEL( (int)(volumeCount * 10 + MIN_COLOR) % 1530) );
-      strip.show();
-    }
-  }
-  pumpOFF();
-  DEBUG("pumping stopped, volume: ");
-  DEBUG(round(volumeCount));
-  DEBUGln("ml");
 }
 
 #if(STATUS_LED)
@@ -685,7 +686,6 @@ float get_battery_voltage() {
   DEBUGln(battery_voltage);
   return battery_voltage;
 }
-
 uint8_t get_battery_percent() {
   static uint8_t percent = 0;
   if (battery_voltage >= 4.00) percent = 5;
@@ -696,7 +696,6 @@ uint8_t get_battery_percent() {
   else percent = 0;
   return percent;
 }
-
 bool battery_watchdog() {
   static uint32_t lastMillis = 0;
   static bool batOk, lastOkStatus = 1;
@@ -718,7 +717,6 @@ bool battery_watchdog() {
   if (POWEROFFtimer.isOn() || timeoutState) displayBattery(batOk);
   return batOk;
 }
-
 void displayBattery(bool batOk) {
   if ( batOk && showMenu ) return;
 

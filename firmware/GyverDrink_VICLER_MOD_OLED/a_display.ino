@@ -6,7 +6,7 @@ enum text_position {
   Right
 };
 
-enum MenuPageName { // страницы меню
+enum MenuPageName { // типы страниц меню
   MENU_PAGE = 0,
   MODE_PAGE,
   SETTINGS_PAGE,

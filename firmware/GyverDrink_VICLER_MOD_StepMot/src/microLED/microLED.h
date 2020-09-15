@@ -319,7 +319,7 @@ void microLED::fadePix(int x, int y, byte val) {
 
 // ====================== МАТРИЦА ======================
 uint16_t microLED::getPixNumber(int x, int y) {
-	int thisX, thisY;
+	int thisX = 0, thisY = 0;
 	switch(_matrixConfig) {
 	case 0:
 		thisX = x;
