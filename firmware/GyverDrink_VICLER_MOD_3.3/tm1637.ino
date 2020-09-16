@@ -239,7 +239,7 @@ void dispNum(uint16_t num, bool mode) {
     if(num < 10)                                  
       disp.displayByte(workMode * 0x40, 0, digToHEX(num % 10), workMode * 0x40);  // число меньше 10 - второйиндикатор пуст
     else if((num / 10) != (lastNum / 10))             
-      disp.scrollByte(workMode * 0x40, digToHEX(num / 10), digToHEX(num % 10), workMode * 0x40, 40);  // десятки изменились - прокрутка
+      disp.scrollByte(workMode * 0x40, digToHEX(num / 10), digToHEX(num % 10), workMode * 0x40, 30);  // десятки изменились - прокрутка
     else 
       disp.displayByte(workMode * 0x40, digToHEX(num / 10), digToHEX(num % 10), workMode * 0x40);     // иначе статичное изменение
   }
