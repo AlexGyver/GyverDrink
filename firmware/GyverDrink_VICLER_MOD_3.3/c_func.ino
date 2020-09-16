@@ -436,7 +436,14 @@ void prePump() {
 
 // сброс таймаута
 void timeoutReset() {
-  if (!timeoutState)  disp.brightness(7);
+  if (!timeoutState)  {
+    disp.brightness(7);
+    if (!volumeChanged) {
+      disp.displayByte(0x00, 0x00, 0x00, 0x00);
+      if (workMode) disp.scrollByte(64, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64, 50);
+      else  disp.scrollByte(0, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 0, 50);
+    }
+  }
   if ( (systemState != PUMPING)  && (curSelected < 0) ) {
     dispMode();
     dispNum(thisVolume);

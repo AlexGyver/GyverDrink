@@ -149,10 +149,43 @@ uint8_t AnimationData_6[12][4] {
   {0x00, 0x40, 0x00, 0x00},       // -
   {0x40, 0x00, 0x00, 0x00}        //-
 };
+uint8_t AnimationData_7[23][4] {
+  { 48,   0,   0,   0},
+  {121,   0,   0,   0},
+  {127,   0,   0,   0},
+  
+  {127,  48,   0,   0},
+  {127, 121,   0,   0},
+  {127, 127,   0,   0},
+  
+  {127, 127,  48,   0},
+  {127, 127, 121,   0},
+  {127, 127, 127,   0},
+  
+  {127, 127, 127,  48},
+  {127, 127, 127, 121},
+  {127, 127, 127, 127},
+
+  { 79, 127, 127, 127},
+  {  6, 127, 127, 127},
+  {  0, 127, 127, 127},
+
+  {  0,  79, 127, 127},
+  {  0,   6, 127, 127},
+  {  0,   0, 127, 127},
+
+  {  0,   0,  79, 127},
+  {  0,   0,   6, 127},
+  {  0,   0,   0, 127},
+
+  {  0,   0,   0,  79},
+  {  0,   0,   0,   6},
+};
 
 // анимация TM1637
 void showAnimation(byte mode) {
   static byte i = 0;
+  static int8_t dir = 1;
   if (mode == 0) {
     if (i >= 20) i = 0;
     disp.displayByte(AnimationData_0[i++]);
@@ -181,6 +214,11 @@ void showAnimation(byte mode) {
     if (i >= 12) i = 0;
     disp.displayByte(AnimationData_6[i++]);
   }
+  else if (mode == 7) {
+    if (i == 22) dir = -1;
+    else if(i == 0) dir = 1;
+    disp.displayByte(AnimationData_7[i += dir]);
+  }
 }
 
 // выводим режим
@@ -196,14 +234,14 @@ void dispMode() {
 }
 
 void dispNum(uint16_t num, bool mode) {
-  if (num < 100) {
-    if (!workMode) disp.displayByte(0, 0x00);
-    else disp.displayByte(0, 0x40);
-    if (num < 10) disp.displayByte(1, 0x00);
-    else disp.display(1, num / 10);
-    disp.display(2, num % 10);
-    if (!workMode) disp.displayByte(3, 0x00);
-    else disp.displayByte(3, 0x40);
+  static uint16_t lastNum = num;
+  if (num < 100) {                                // число меньше 100
+    if(num < 10)                                  
+      disp.displayByte(workMode * 0x40, 0, digToHEX(num % 10), workMode * 0x40);  // число меньше 10 - второйиндикатор пуст
+    else if((num / 10) != (lastNum / 10))             
+      disp.scrollByte(workMode * 0x40, digToHEX(num / 10), digToHEX(num % 10), workMode * 0x40, 40);  // десятки изменились - прокрутка
+    else 
+      disp.displayByte(workMode * 0x40, digToHEX(num / 10), digToHEX(num % 10), workMode * 0x40);     // иначе статичное изменение
   }
   else if (num < 1000) {
     disp.display(0, num / 100);
@@ -226,4 +264,6 @@ void dispNum(uint16_t num, bool mode) {
     else disp.displayByte(2, 0x00);
     disp.display(3, num % 10);
   }
+
+  lastNum = num;
 }

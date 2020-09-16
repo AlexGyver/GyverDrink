@@ -51,11 +51,11 @@ void readEEPROM() {
   // чтение текущей анимации
   if (EEPROM.read(1005) != EEPROM_KEY) {
     EEPROM.write(1005, EEPROM_KEY);
-    EEPROM.write(18, 7);
+    EEPROM.write(18, 8);
   }
   else {
     animCount = EEPROM.read(18);
-    if (animCount > 6) animCount = 0;
+    if (animCount > 7) animCount = 0;
     EEPROM.update(18, animCount + 1);
   }
 

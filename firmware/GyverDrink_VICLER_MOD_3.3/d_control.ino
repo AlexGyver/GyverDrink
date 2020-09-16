@@ -3,8 +3,8 @@ void encTick() {
   enc.tick();
   if (systemState == PUMPING) return;
   if (enc.isTurn()) {
-    timeoutReset();
     volumeChanged = true;
+    timeoutReset();
     if (enc.isLeft()) {
       if (curSelected >= 0) shotVolume[curSelected] += 1;
       else thisVolume += 1;
@@ -49,8 +49,8 @@ void btnTick() {
 
   if (btn.holded()) {
     workMode = !workMode;
-    if (workMode) disp.scrollByte(64, 0, 0, 64, 50);
-    else  disp.scrollByte(0, 0, 0, 0, 50);
+    if (workMode) disp.scrollByte(64, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64, 50);
+    else  disp.scrollByte(0, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 0, 50);
     timeoutReset();
     if (!workMode && curPumping >= 0) {
       DEBUG("abort fill for shot: ");
