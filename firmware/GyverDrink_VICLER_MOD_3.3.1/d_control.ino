@@ -102,7 +102,6 @@ void btnTick() {
     while (!digitalRead(BTN_PIN));
     resetEEPROM();
     readEEPROM();
-    dispMode();
     dispNum(thisVolume);
     servoON();
     servo.attach(SERVO_PIN, parking_pos);

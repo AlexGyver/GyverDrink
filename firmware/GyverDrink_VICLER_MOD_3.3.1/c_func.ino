@@ -7,11 +7,15 @@ void serviceMode() {
     while (!digitalRead(BTN_PIN));  // ждём отпускания
     DEBUGln("service Mode");
     timerMinim timer100(100);
+    bool workModeTemp = workMode;
+    workMode = 1;
 
     //==============================================================================
     //             настройка углов под стопки и парковочной позиции
     //==============================================================================
     if (serviceState == SERVO) {
+      disp.scrollByte(_dash, _1, _dash, _empty, 150);
+      delay(1000);
       int servoPos = parking_pos;
       dispNum(servoPos);
       while (1) {
@@ -95,12 +99,15 @@ void serviceMode() {
       for (byte i = 0; i < NUM_SHOTS; i++)  EEPROM.update(6 + i, shotPos[i]);
       // сохраняем значение домашней позиции
       EEPROM.update(13, parking_pos);
+      workMode = workModeTemp;
     }
     //==============================================================================
     //                            калибровка объёма
     //==============================================================================
     if (serviceState == VOLUME) {
       while (!digitalRead(BTN_PIN));  // ждём отпускания
+      disp.scrollByte(_dash, _2, _dash, _empty, 150);
+      delay(1000);
       long pumpTime = 0;
       bool flag = false;
       disp.displayInt(pumpTime);
@@ -184,6 +191,8 @@ void serviceMode() {
 #ifdef BATTERY_PIN
     if (serviceState == BATTERY) {
       while (!digitalRead(BTN_PIN));  // ждём отпускания
+      disp.scrollByte(_dash, _1, _dash, _empty, 150);
+      delay(1000);
       dispNum(get_battery_voltage() * 1000, 1);
       while (1) {
         enc.tick();
@@ -195,7 +204,7 @@ void serviceMode() {
           battery_cal = constrain(battery_cal, 0, 3.0);
         }
         if (btn.holded()) {
-          disp.displayByte(0x00, 0x00, 0x00, 0x00);
+          disp.scrollByte(0x00, 0x00, 0x00, 0x00);
           serviceState = SERVO;
           break;
         }
@@ -444,10 +453,7 @@ void timeoutReset() {
       else  disp.scrollByte(0, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 0, 50);
     }
   }
-  if ( (systemState != PUMPING)  && (curSelected < 0) ) {
-    dispMode();
-    dispNum(thisVolume);
-  }
+  if ( (systemState != PUMPING)  && (curSelected < 0) ) dispNum(thisVolume);
   timeoutState = true;
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();

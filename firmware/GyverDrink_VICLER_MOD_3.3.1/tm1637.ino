@@ -221,40 +221,23 @@ void showAnimation(byte mode) {
   }
 }
 
-// выводим режим
-void dispMode() {
-  if (workMode) {
-    if (thisVolume < 100) disp.displayByte(0, 64);
-    disp.displayByte(3, 64);
-  }
-  else {
-    if (thisVolume < 100) disp.displayByte(0, 0x00);
-    disp.displayByte(3, 0x00);
-  }
-}
-
 void dispNum(uint16_t num, bool mode) {
-  static uint16_t lastNum = num;
   if (num < 100) {                                // число меньше 100
     if(num < 10)                                  
-      disp.displayByte(workMode * 0x40, 0, digToHEX(num % 10), workMode * 0x40);  // число меньше 10 - второйиндикатор пуст
-    else if((num / 10) != (lastNum / 10))             
-      disp.scrollByte(workMode * 0x40, digToHEX(num / 10), digToHEX(num % 10), workMode * 0x40, 30);  // десятки изменились - прокрутка
-    else 
-      disp.displayByte(workMode * 0x40, digToHEX(num / 10), digToHEX(num % 10), workMode * 0x40);     // иначе статичное изменение
+      disp.displayByte(workMode * _dash, 0, digToHEX(num % 10), workMode * _dash);  // число меньше 10 - второй индикатор пуст
+//    else if(num%10 == 0)           
+//      disp.scrollByte(workMode * _dash, digToHEX(num / 10), digToHEX(num % 10), workMode * _dash, 30);  // десятки изменились - прокрутка
+    else
+      disp.displayByte(workMode * _dash, digToHEX(num / 10), digToHEX(num % 10), workMode * _dash);     // иначе статичное изменение
   }
-  else if (num < 1000) {
-    disp.display(0, num / 100);
-    disp.display(1, (num % 100) / 10);
-    disp.display(2, num % 10);
-    if (!workMode) disp.displayByte(3, 0x00);
-    else disp.displayByte(3, 0x40);
+  else if (num < 1000) { // число >= 100 и < 1000
+    disp.displayByte(digToHEX(num / 100), digToHEX((num % 100) / 10), digToHEX(num % 10), workMode * _dash);
   }
   else if (mode == 1) {
     disp.display(0, num / 1000);              // тысячные
     disp.display(1, (num % 1000) / 100);     // сотые
     disp.display(2, (num % 100) / 10);      // десятые
-    disp.display(3, num % 10);
+    disp.display(3, num % 10);             // единицы 
   }
   else {
     disp.display(0, num / 1000);                                            // тысячные
@@ -264,6 +247,4 @@ void dispNum(uint16_t num, bool mode) {
     else disp.displayByte(2, 0x00);
     disp.display(3, num % 10);
   }
-
-  lastNum = num;
 }
