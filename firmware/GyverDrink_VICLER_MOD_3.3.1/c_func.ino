@@ -14,7 +14,7 @@ void serviceMode() {
     //             настройка углов под стопки и парковочной позиции
     //==============================================================================
     if (serviceState == SERVO) {
-      disp.scrollByte(_dash, _1, _dash, _empty, 150);
+      disp.scrollByte(_dash, _1, _dash, _empty, 50);
       delay(1000);
       int servoPos = parking_pos;
       dispNum(servoPos);
@@ -106,7 +106,7 @@ void serviceMode() {
     //==============================================================================
     if (serviceState == VOLUME) {
       while (!digitalRead(BTN_PIN));  // ждём отпускания
-      disp.scrollByte(_dash, _2, _dash, _empty, 150);
+      disp.scrollByte(_dash, _2, _dash, _empty, 50);
       delay(1000);
       long pumpTime = 0;
       bool flag = false;
@@ -191,7 +191,7 @@ void serviceMode() {
 #ifdef BATTERY_PIN
     if (serviceState == BATTERY) {
       while (!digitalRead(BTN_PIN));  // ждём отпускания
-      disp.scrollByte(_dash, _1, _dash, _empty, 150);
+      disp.scrollByte(_dash, _1, _dash, _empty, 50);
       delay(1000);
       dispNum(get_battery_voltage() * 1000, 1);
       while (1) {
