@@ -59,12 +59,14 @@ void readEEPROM() {
     EEPROM.update(18, animCount + 1);
   }
 
+#if(SAVE_MODE == 1)
   // режим
   if (EEPROM.read(1006) != EEPROM_KEY) {
     EEPROM.write(1006, EEPROM_KEY);
     EEPROM.write(19, 0);
   }
   else workMode = EEPROM.read(19);
+#endif
 }
 
 void resetEEPROM() {
@@ -89,7 +91,9 @@ void resetEEPROM() {
   EEPROM.put(14, 1.0);
 #endif
 
+#if(SAVE_MODE == 1)
   // сброс режима
   EEPROM.update(1006, EEPROM_KEY);
   EEPROM.update(19, 0);
+#endif
 }

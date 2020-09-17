@@ -225,8 +225,8 @@ void dispNum(uint16_t num, bool mode) {
   if (num < 100) {                                // число меньше 100
     if(num < 10)                                  
       disp.displayByte(workMode * _dash, 0, digToHEX(num % 10), workMode * _dash);  // число меньше 10 - второй индикатор пуст
-//    else if(num%10 == 0)           
-//      disp.scrollByte(workMode * _dash, digToHEX(num / 10), digToHEX(num % 10), workMode * _dash, 30);  // десятки изменились - прокрутка
+//    else if(num%10 == 0 && systemState != PUMPING)           
+//      disp.scrollByte(workMode * _dash, digToHEX(num / 10), digToHEX(num % 10), workMode * _dash, 20);  // десятки изменились - прокрутка
     else
       disp.displayByte(workMode * _dash, digToHEX(num / 10), digToHEX(num % 10), workMode * _dash);     // иначе статичное изменение
   }
