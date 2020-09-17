@@ -131,12 +131,14 @@ void readEEPROM() {
   }
   else settingsList[servo_speed] = EEPROM.read(eeAddress._servo_speed);
 
+#if(SAVE_MODE == 1)
   // режим
-  if(EEPROM.read(1017) != EEPROM_KEY){
+  if (EEPROM.read(1017) != EEPROM_KEY) {
     EEPROM.write(1017, EEPROM_KEY);
     EEPROM.write(eeAddress._mode, ManualMode);
   }
   else workMode = (workModes)EEPROM.read(eeAddress._mode);
+#endif
 }
 
 void resetEEPROM() {
@@ -204,9 +206,11 @@ void resetEEPROM() {
   EEPROM.update(1016, EEPROM_KEY);
   EEPROM.update(eeAddress._servo_speed, SERVO_SPEED);
 
+#if(SAVE_MODE == 1)
   // сброс режима
   EEPROM.update(1017, EEPROM_KEY);
   EEPROM.update(eeAddress._mode, ManualMode);
+#endif
 
   readEEPROM();
 }

@@ -1,5 +1,5 @@
-//GyverDrink VICLER_MOD_OLED v2.3.1
-//15.09.2020
+//GyverDrink VICLER_MOD_OLED v2.3.2
+//17.09.2020
 /*
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с OLED дисплеем и расширенным функционалом
 

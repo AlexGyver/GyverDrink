@@ -135,7 +135,9 @@ void displayMenu() {
       menuPage = MENU_PAGE;
       disp.clear();
       displayMode(workMode);
+#if (SAVE_MODE == 1)
       EEPROM.update(eeAddress._mode, workMode);
+#endif
       return;
     }
     else if (menuPage == SETTINGS_PAGE) {
