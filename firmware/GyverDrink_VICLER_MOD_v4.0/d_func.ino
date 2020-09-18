@@ -6,7 +6,6 @@ void serviceRoutine(serviceStates mode) {
   disp.runningString(serviceText, sizeof(serviceText), 150);
   while (!digitalRead(BTN_PIN));  // ждём отпускания
   byte workModeTemp = workMode;
-  workMode = AutoMode;
 #endif
 
   //==============================================================================
@@ -15,6 +14,7 @@ void serviceRoutine(serviceStates mode) {
   timerMinim timer100(100);
 
   if (mode == SERVO) {         // калибровка углов серво
+    workMode = AutoMode;
     for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
     strip.show();
 #ifdef TM1637

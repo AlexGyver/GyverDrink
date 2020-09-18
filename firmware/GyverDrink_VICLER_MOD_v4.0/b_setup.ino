@@ -42,14 +42,9 @@ void setup() {
     disp.clear();
     delay(500);
 #endif
-
     if (btn.holded()) {
       disp.clear();
-#ifdef TM1637
-      serviceRoutine(serviceState);
-#else
       serviceRoutine(BATTERY);
-#endif
       break;
     }
   }
