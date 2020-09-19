@@ -1,7 +1,7 @@
 #ifdef TM1637
-#define EEPROM_KEY (11 + VERSION) 
+#define EEPROM_KEY (11 + VERSION * 10) 
 #else
-#define EEPROM_KEY (22 + VERSION)
+#define EEPROM_KEY (22 + VERSION * 10)
 #endif
 
 void readEEPROM() {
