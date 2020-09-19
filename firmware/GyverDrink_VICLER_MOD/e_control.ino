@@ -28,18 +28,10 @@ void encTick() {
     if (curSelected >= 0) shotVolume[(byte)curSelected] = constrain(shotVolume[(byte)curSelected], 1, settingsList[max_volume]);
     thisVolume = constrain(thisVolume, 1, settingsList[max_volume]);
     timeoutReset();
-    if (curSelected >= 0) {
-      printVolume(shotVolume[curSelected]);
-      DEBUG("shot ");
-      DEBUG(curSelected);
-      DEBUG(" volume: ");
-      DEBUGln(shotVolume[curSelected]);
-    }
+    if (curSelected >= 0) printNum(shotVolume[curSelected]);
     else {
-      printVolume(thisVolume);
+      printNum(thisVolume);
       for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
-      DEBUG("main volume: ");
-      DEBUGln(thisVolume);
     }
   }
 }
@@ -47,7 +39,6 @@ void encTick() {
 void btnTick() {
   if (btn.clicked()) {                      // клик!
     timeoutReset();                         // таймаут сброшен
-    DEBUGln("Button pressed");
 
     if (systemState == PUMPING) {
       pumpOFF();                            // помпа выкл
@@ -61,7 +52,6 @@ void btnTick() {
 #endif
       systemState = WAIT;                   // режим работы - ждать
       WAITtimer.reset();
-      DEBUGln("ABORT");
     }
     if (workMode == ManualMode) systemON = true;         // система активирована
   }
@@ -70,6 +60,7 @@ void btnTick() {
     if (systemState == PUMPING) return;
 
 #ifdef TM1637
+    workMode = (workModes)!workMode;
     if (workMode == AutoMode) disp.scrollByte(64, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64, 50);
     else  disp.scrollByte(0, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 0, 50);
 #else
@@ -82,25 +73,13 @@ void btnTick() {
     else {
       disp.clear();
       displayMode(workMode);
-      printVolume(thisVolume);
+      printNum(thisVolume);
       menuItem = 0;
       menuPage = MENU_PAGE;
     }
 #endif
 
     timeoutReset();
-
-    //#ifndef TM1637
-    //    if (showMenu) {
-    //      showMenu = false;
-    //      disp.clear();
-    //      displayMode(workMode);
-    //      printVolume(thisVolume);
-    //      menuItem = 0;
-    //      menuPage = MENU_PAGE;
-    //    }
-    //    displayMode(workMode);
-    //#endif
   }
   if (encBtn.clicked()) {
     timeoutReset();
@@ -114,21 +93,14 @@ void btnTick() {
       selectShot++;
       if (selectShot == NUM_SHOTS)  selectShot = -1;
       curSelected = selectShot;
-      if (curSelected >= 0) {
-        DEBUG("shot selected: ");
-        DEBUGln(curSelected);
-      }
-      else {
-        DEBUGln("no shots selected");
-      }
 
       for (byte i = 0; i < NUM_SHOTS; i++) {
         if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
         else if (shotStates[i] == EMPTY) strip.setLED(i, mCOLOR(ORANGE));
         else strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
       }
-      if (curSelected >= 0) printVolume(shotVolume[curSelected]);
-      else printVolume(thisVolume);
+      if (curSelected >= 0) printNum(shotVolume[curSelected]);
+      else printNum(thisVolume);
       LEDchanged = true;
 #ifndef TM1637
     }
@@ -146,7 +118,7 @@ void btnTick() {
     while (!digitalRead(BTN_PIN));
     resetEEPROM();
     readEEPROM();
-    printVolume(thisVolume);
+    printNum(thisVolume);
     servoON();
     servo.attach(SERVO_PIN, parking_pos);
     delay(500);

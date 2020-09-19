@@ -118,7 +118,7 @@ uint8_t AnimationData_3[60][4] {
   {0x18, 0x08, 0x00, 0x00},        //
   {0x38, 0x00, 0x00, 0x00}         //
 };
-uint8_t AnimationData_4[6][4] {
+uint8_t AnimationData_4[6][4]  {
   {0x63, 0x00, 0x00, 0x5c},        //
   {0x00, 0x63, 0x5c, 0x00},        //
   {0x00, 0x5c, 0x63, 0x00},        //
@@ -126,7 +126,7 @@ uint8_t AnimationData_4[6][4] {
   {0x00, 0x5c, 0x63, 0x00},        //
   {0x00, 0x63, 0x5c, 0x00}         //
 };
-uint8_t AnimationData_5[8][4] {
+uint8_t AnimationData_5[8][4]  {
   {0x63, 0x00, 0x00, 0x00},        //
   {0x00, 0x63, 0x00, 0x00},        //
   {0x00, 0x00, 0x63, 0x00},        //
@@ -185,7 +185,7 @@ uint8_t AnimationData_7[23][4] {
 
 // анимация TM1637
 void showAnimation(byte mode) {
-  static byte i = 0;
+  static uint8_t i = 0;
   static int8_t dir = 1;
   if (mode == 0) {
     if (i >= 20) i = 0;
@@ -222,19 +222,17 @@ void showAnimation(byte mode) {
   }
 }
 
-void printVolume(uint16_t num, bool mode) {
+void printNum(uint16_t num, int8_t mode) {
   if (num < 100) {                                // число меньше 100
     if (num < 10)
       disp.displayByte(workMode * _dash, 0, digToHEX(num % 10), workMode * _dash);  // число меньше 10 - второй индикатор пуст
-    //    else if(num%10 == 0 && systemState != PUMPING)
-    //      disp.scrollByte(workMode * _dash, digToHEX(num / 10), digToHEX(num % 10), workMode * _dash, 20);  // десятки изменились - прокрутка
     else
       disp.displayByte(workMode * _dash, digToHEX(num / 10), digToHEX(num % 10), workMode * _dash);     // иначе статичное изменение
   }
   else if (num < 1000) { // число >= 100 и < 1000
     disp.displayByte(digToHEX(num / 100), digToHEX((num % 100) / 10), digToHEX(num % 10), workMode * _dash);
   }
-  else if (mode == 1) {
+  else if (mode == 0) {
     disp.display(0, num / 1000);              // тысячные
     disp.display(1, (num % 1000) / 100);     // сотые
     disp.display(2, (num % 100) / 10);      // десятые

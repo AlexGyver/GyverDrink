@@ -1,5 +1,5 @@
 //GyverDrink VICLER_MOD
-#define VERSION 4.1
+#define VERSION 4.2
 //19.09.2020
 /*
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
@@ -226,14 +226,6 @@ struct EEPROMAddress {
 #define servoOFF() digitalWrite(SERVO_POWER, 0)
 #define pumpON()   digitalWrite(PUMP_POWER, 1)
 #define pumpOFF()  digitalWrite(PUMP_POWER, 0)
-
-#if (DEBUG_UART == 1)
-#define DEBUG(x)   Serial.print(x)
-#define DEBUGln(x) Serial.println(x)
-#else
-#define DEBUG(x)
-#define DEBUGln(x)
-#endif
 
 #if (STATUS_LED)
 #define LED leds[NUM_SHOTS]

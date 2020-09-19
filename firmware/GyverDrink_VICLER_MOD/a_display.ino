@@ -2,17 +2,10 @@ void serviceRoutine(serviceStates mode);
 
 #ifdef TM1637
 GyverTM1637 disp(DISP_CLK, DISP_DIO);
-void printVolume(uint16_t num, bool mode = 0);
+void printNum(uint16_t num, int8_t mode = 0);
 #else
 
 SSD1306AsciiAvrI2c disp;
-
-enum text_position {
-  Append = -4,
-  Left,
-  Center,
-  Right
-};
 
 enum MenuPageName { // типы страниц меню
   MENU_PAGE = 0,
@@ -25,6 +18,12 @@ enum MenuPageName { // типы страниц меню
 #define MENU_PAGES  5 // количество страниц
 MenuPageName menuPage = MENU_PAGE; // актуальная страница
 bool selectItem = 0;
+
+#ifdef BATTERY_PIN
+uint8_t menuItemsNum[MENU_PAGES] = { 5, 2, 12, 4, 3 };  // количество строк на каждой странице
+#else
+uint8_t menuItemsNum[MENU_PAGES] = { 5, 2, 12, 3, 3 };  // количество строк на каждой странице
+#endif
 
 const char* MenuPages[MENU_PAGES][13] = {
   {
@@ -45,16 +44,16 @@ const char* MenuPages[MENU_PAGES][13] = {
 
   {
     "------Настройки------",
-    " timeout off",
-    " inverse servo",
-    " servo speed",
-    " auto parking",
-    " stby time",
-    " stby light",
-    " rainbow flow",
-    " max volume",
-    " keep power",
-    " invert display",
+    "timeout off",
+    "inverse servo",
+    "servo speed",
+    "auto parking",
+    "stby time",
+    "stby light",
+    "rainbow flow",
+    "max volume",
+    "keep power",
+    "invert display",
     " Сброс",
     " Назад"
   },
@@ -77,15 +76,14 @@ const char* MenuPages[MENU_PAGES][13] = {
   }
 };
 
-#ifdef BATTERY_PIN
-uint8_t menuItemsNum[MENU_PAGES] = { 5, 2, 12, 4, 3 };  // количество строк на каждой странице
-#else
-uint8_t menuItemsNum[MENU_PAGES] = { 5, 2, 12, 3, 3 };  // количество строк на каждой странице
-#endif
+enum text_position {
+  Append = -4,
+  Left,
+  Center,
+  Right
+};
 
-void displayMode(workModes mode);
-
-void printStr(const char str[], int8_t x = Append, int8_t y = Append, uint16_t _delay = 0) {
+void printStr(const char str[], int8_t x = Append, int8_t y = Append) {
   if (x == Append) disp.setCol(disp.col());
   else if (x == Left)   disp.setCol(0);
   else if (x == Center) disp.setCol((128 - disp.strWidth(str)) / 2);
@@ -98,20 +96,44 @@ void printStr(const char str[], int8_t x = Append, int8_t y = Append, uint16_t _
   while (1) {
     if (*str == '\0') break;
     disp.print(*str++);
-    if (_delay) delay(_delay);
   }
 }
 
-void printNum(uint16_t num, int8_t x = -4, int8_t y = -4) {
+void printInt(uint16_t num, int8_t x = Append, int8_t y = Append) {
   char cstr[10];
   itoa(num, cstr, 10);
   printStr(cstr, x, y);
 }
 
-void printFloat(float num, uint8_t decimals, int8_t x = -4, int8_t y = -4) {
+void printFloat(float num, uint8_t decimals, int8_t x = Append, int8_t y = Append) {
   char cstr[10];
   dtostrf(num, 4, decimals, cstr);
+
+  disp.setFont(MonoNum22x32);
   printStr(cstr, x, y);
+}
+
+void printNum(uint16_t volume, int8_t postfix = 0) {
+  static uint16_t lastVol = 0;
+  disp.setFont(MonoNum22x32);
+
+  if (volume <= 999 && lastVol >= 1000) printStr("    ", Center, 3);
+  if (volume <= 99 && lastVol >= 100) printStr("   ", Center, 3);
+  if (volume <= 9 && lastVol >= 10)  printStr("    ", Center, 3);
+  lastVol = volume;
+
+  printInt(volume, Center, 3);
+  if (postfix == 0) printStr("%");
+  else if (postfix == 1) printStr("*");
+}
+
+void displayMode(workModes mode);
+void displayMode(workModes mode) {
+  disp.setFont(CenturyGothic10x16);
+  if (mode == ManualMode)     printStr(" Ручной режим", Left, 0);
+  else if (mode == AutoMode)  printStr(" Авто режим    ", Left, 0);
+
+  printNum(thisVolume);
 }
 
 void displayMenu() {
@@ -203,21 +225,21 @@ void displayMenu() {
     else disp.setInvertMode(0);
 
     if (menuPage == SETTINGS_PAGE) {
-      if (i < menuItemsNum[menuPage] - 1) disp.setFont(Callibri15);
+      if (i < menuItemsNum[menuPage] - 1) disp.setFont(ZevvPeep8x16);
       else disp.setFont(CenturyGothic10x16);
       printStr(MenuPages[menuPage][i]);
       disp.setFont(CenturyGothic10x16);
       printStr("                  ");
-      if (i < menuItemsNum[menuPage] - 1) printNum(settingsList[i - 1], Right);
+      if (i < menuItemsNum[menuPage] - 1) printInt(settingsList[i - 1], Right);
       printStr("\n");
     }
     else if (menuPage == STATISTICS_PAGE) {
       disp.setFont(CenturyGothic10x16);
       printStr(MenuPages[menuPage][i]);
       printStr("                  ");
-      disp.setFont(Callibri15);
-      if (i == 1) printNum(shots_overall, Right);
-      if (i == 2) printNum(volume_overall, Right);
+      disp.setFont(ZevvPeep8x16);
+      if (i == 1) printInt(shots_overall, Right);
+      if (i == 2) printInt(volume_overall, Right);
       printStr("\n");
     }
     else {
@@ -226,27 +248,6 @@ void displayMenu() {
     }
   }
   disp.setInvertMode(0);
-}
-
-void printVolume(uint16_t volume, int8_t x = -2) {
-  static uint16_t lastVol = 0;
-  disp.setFont(MonoNum22x32);
-
-  if (volume <= 999 && lastVol >= 1000) printStr("    ", x, 3);
-  if (volume <= 99 && lastVol >= 100) printStr("   ", x, 3);
-  if (volume <= 9 && lastVol >= 10)  printStr("  ", x, 3);
-  lastVol = volume;
-
-  printNum(volume, x, 3);
-}
-
-void displayMode(workModes mode) {
-  disp.setFont(CenturyGothic10x16);
-  if (mode == ManualMode)     printStr(" Ручной режим", Left, 0);
-  else if (mode == AutoMode)  printStr(" Авто режим    ", Left, 0);
-  //else if (mode == ComboMode) printStr(" Комбо режим    ", Left, 0);
-
-  printVolume(thisVolume);
 }
 
 #endif

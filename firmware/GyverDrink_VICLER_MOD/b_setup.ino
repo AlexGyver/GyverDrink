@@ -1,10 +1,5 @@
 
 void setup() {
-#if (DEBUG_UART == 1)
-  Serial.begin(9600);
-  DEBUGln("start");
-#endif
-
   // старт дисплея
 #ifdef TM1637
   disp.clear();
@@ -25,9 +20,6 @@ void setup() {
     batCheck += get_battery_voltage() / 20;
     delay(1);
   }
-  DEBUG("Battery voltage: ");
-  DEBUG(batCheck);
-  DEBUGln("V");
   while (get_battery_voltage() < BATTERY_LOW) {
 #ifdef TM1637
     disp.brightness(0);
@@ -37,7 +29,7 @@ void setup() {
     delay(500);
 #else
     disp.setFont(Battery19x9);
-    printNum(get_battery_percent(), Right, 0);
+    printInt(get_battery_percent(), Right, 0);
     delay(500);
     disp.clear();
     delay(500);
@@ -62,7 +54,6 @@ void setup() {
   // тыкаем ленту
   strip.setBrightness(255);
   strip.clear();
-  DEBUGln("strip init");
 
   // настройка пинов
   pinMode(PUMP_POWER, 1);
@@ -82,10 +73,9 @@ void setup() {
   servo.setSpeed(settingsList[servo_speed]);
   servo.setAccel(SERVO_ACCEL / 100.0);
   servoOFF();
-  DEBUGln("servo init");
 
   /* - Стартовая анимация. Значение ANIMATION_FPS задаёт количество кадров в секунду (чем больше - тем быстрее анимация)
-        Всего доступно 7 видов анимации. Выбирается в ANIMATION_NUM от 0 до 6.
+        Всего доступно 8 видов анимации. Выбирается в ANIMATION_NUM от 0 до 7.
         Если #define ANIMATION_NUM 6 закомментированно, анимация будет меняться при каждом старте устройства
      - Радуга. Начальная яркость задаётся в RAINBOW_START_BRIGHTNESS ... (максимум 255). С этого значения яркость плавно убавляется до 0.
         Частота изменения цвета зависит от RAINBOW_FPS ... (чем больше значение - тем быстрее смена цвета)
