@@ -52,8 +52,8 @@ void serviceRoutine(serviceStates mode) {
 #endif
           DEBUGln(shotPos[currShot]);
           servo.setTargetDeg(servoPos);
-          servoON();
           servo.start();
+          servoON();
           while (!servo.tick());
           servoOFF();
           break;
@@ -68,8 +68,8 @@ void serviceRoutine(serviceStates mode) {
             servoPos = parking_pos;
             printVolume(servoPos);
             servo.setTargetDeg(servoPos);
-            servoON();
             servo.start();
+            servoON();
             while (!servo.tick());
             servoOFF();
             break;
@@ -85,8 +85,8 @@ void serviceRoutine(serviceStates mode) {
           printVolume(servoPos);
 #endif
           servo.setTargetDeg(servoPos);
-          servoON();
           servo.start();
+          servoON();
           while (!servo.tick());
           servoOFF();
           break;
@@ -119,6 +119,8 @@ void serviceRoutine(serviceStates mode) {
 #else
         timeoutReset();
         servo.setTargetDeg(parking_pos);
+        servo.start();
+        servoON();
         disp.clear();
         for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
         strip.show();
@@ -183,8 +185,9 @@ void serviceRoutine(serviceStates mode) {
           strip.setLED(i, mHSV(255, 0, 50));
           strip.show();
           curPumping = i;
-          servoON();
           servo.setTargetDeg(shotPos[i]);
+          servo.start();
+          servoON();
         }
       }
       if (digitalRead(SW_pins[curPumping]) && (curPumping > -1)) {
@@ -216,6 +219,8 @@ void serviceRoutine(serviceStates mode) {
 #endif
         curPumping = -1;
         servo.setTargetDeg(parking_pos);
+        servo.start();
+        servoON();
         for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
         strip.show();
         break;
@@ -344,7 +349,7 @@ void settingsMenuHandler(uint8_t row) {
       EEPROM.update(eeAddress._keep_power, settingsList[keep_power]);
       EEPROM.update(eeAddress._invert_display, settingsList[invert_display]);
 
-      servo.setSpeed(settingsList[servo_speed] * 2);
+      servo.setSpeed(settingsList[servo_speed]);
       servo.setDirection(settingsList[inverse_servo]);
       servoON();
       servo.attach(SERVO_PIN, parking_pos);
@@ -449,8 +454,9 @@ void flowRoutnie() {
         DEBUG("found glass: ");
         DEBUGln(curPumping);
         if ( abs(shotPos[i] - servo.getCurrentDeg()) > 3) {        // включаем серво только если целевая позиция не совпадает с текущей
-          servoON();                                      // вкл питание серво
           servo.setTargetDeg(shotPos[curPumping]);        // задаём цель
+          servo.start();
+          servoON();                                      // вкл питание серво
           parking = false;
 #if(STATUS_LED)
           LED = mHSV(11, 255, STATUS_LED); // orange
@@ -480,20 +486,22 @@ void flowRoutnie() {
       }
       else {                                              // если же в ручном режиме:
 
-        servoON();                                        // включаем серво и паркуемся
-        servo.setTargetDeg(parking_pos);
+        if (abs(servo.getTargetDeg() - parking_pos) > 3) {
+          servo.setTargetDeg(parking_pos);
+          servo.start();
+          servoON();                                        // включаем серво и паркуемся
 #if(STATUS_LED)
-        LED = mHSV(11, 255, STATUS_LED); // orange
-        LEDchanged = true;
+          LED = mHSV(11, 255, STATUS_LED); // orange
+          strip.show();
 #endif
-
-        if (servoReady) {                               // едем до упора
+        }
+        if (servo.tick()) {                               // едем до упора
+          DEBUGln("parked!");
           systemON = false;                               // выключили систему
           DEBUGln("SystemOFF");
           parking = true;                                 // на месте!
           LEDbreathingState = true;
           LEDchanged = true;
-          DEBUGln("parked!");
         }
       }
       if (!showMenu) printVolume(thisVolume);
@@ -563,9 +571,9 @@ void prePump() {
     if (!digitalRead(SW_pins[i])) {        // нашли рюмку
       curPumping = i;
       if (abs(servo.getCurrentDeg() - shotPos[i]) <= 3) break;
-      servoON();
-      servo.start();
       servo.setTargetDeg(shotPos[curPumping]);
+      servo.start();
+      servoON();
       parking = false;
       break;
     }
@@ -740,9 +748,9 @@ void ledBreathing(bool _state, bool mode) {
     _brightness = STATUS_LED;
     _dir = -1;
   }
-  if (mode) LED = mHSV(130, 255, _brightness);
+  if (mode) LED = mHSV(130, 255, _brightness); // бирюзовый
   else {
-    LED = mHSV(255, 0, _brightness);
+    LED = mHSV(255, 0, _brightness);  // белый
   }
 
   LEDchanged = true;

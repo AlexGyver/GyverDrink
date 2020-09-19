@@ -59,7 +59,6 @@ void setup() {
     KEEP_POWERtimer.start();
   }
 
-
   // тыкаем ленту
   strip.setBrightness(255);
   strip.clear();
@@ -80,7 +79,7 @@ void setup() {
   servo.attach(SERVO_PIN, parking_pos);
   delay(500);
   servo.setCurrentDeg(parking_pos);
-  servo.setSpeed(settingsList[servo_speed] * 2);
+  servo.setSpeed(settingsList[servo_speed]);
   servo.setAccel(SERVO_ACCEL / 100.0);
   servoOFF();
   DEBUGln("servo init");
@@ -160,5 +159,4 @@ void setup() {
 
   timeoutReset();   // сброс таймаута
   TIMEOUTtimer.start();
-  //displayMode(workMode);
 }

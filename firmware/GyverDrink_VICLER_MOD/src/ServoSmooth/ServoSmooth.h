@@ -29,7 +29,7 @@
 	2019 by AlexGyver
 */
 
-#define SS_SERVO_PERIOD 10		// период работы tick(), мс
+#define SS_SERVO_PERIOD 20		// период работы tick(), мс
 #define SS_DEADZONE 5			// мёртвая зона
 #define NORMAL 0
 #define REVERSE 1
@@ -76,7 +76,7 @@ private:
 	int _servoCurrentPos = 0;
 	int _servoTargetPos = 0;
 	float _newPos = 0;
-	int _min = 500;
+	int _min = 544;
 	int _max = 2400;
 	uint32_t _prevServoTime = 0;		
 	int8_t _pin;

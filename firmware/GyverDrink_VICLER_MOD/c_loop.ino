@@ -9,5 +9,4 @@ void loop() {
   LEDtick();
   timeoutTick();
   servoTick();
-
 }

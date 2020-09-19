@@ -69,34 +69,38 @@ void btnTick() {
   if (btn.holded()) {
     if (systemState == PUMPING) return;
 
-    if (workMode == ManualMode) workMode = AutoMode;
-    else if (workMode == AutoMode) workMode = ManualMode;
-
 #ifdef TM1637
     if (workMode == AutoMode) disp.scrollByte(64, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64, 50);
     else  disp.scrollByte(0, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 0, 50);
-#endif
-
+#else
+    showMenu = !showMenu;
     timeoutReset();
-
-#ifndef TM1637
     if (showMenu) {
-      showMenu = false;
+      disp.clear();
+      displayMenu();
+    }
+    else {
       disp.clear();
       displayMode(workMode);
       printVolume(thisVolume);
       menuItem = 0;
       menuPage = MENU_PAGE;
     }
-    displayMode(workMode);
 #endif
 
-    if (workMode == AutoMode) {
-      DEBUGln("automatic mode");
-    }
-    else {
-      DEBUGln("manual mode");
-    }
+    timeoutReset();
+
+    //#ifndef TM1637
+    //    if (showMenu) {
+    //      showMenu = false;
+    //      disp.clear();
+    //      displayMode(workMode);
+    //      printVolume(thisVolume);
+    //      menuItem = 0;
+    //      menuPage = MENU_PAGE;
+    //    }
+    //    displayMode(workMode);
+    //#endif
   }
   if (encBtn.clicked()) {
     timeoutReset();
@@ -136,7 +140,7 @@ void btnTick() {
   }
 #ifdef TM1637
   if (btn.holdedFor(5)) {
-    if(systemState == PUMPING) return;
+    if (systemState == PUMPING) return;
     byte resetText[] = {_r, _E, _S, _E, _t};
     disp.runningString(resetText, sizeof(resetText), 150);
     while (!digitalRead(BTN_PIN));
@@ -148,23 +152,6 @@ void btnTick() {
     delay(500);
     servo.setCurrentDeg(parking_pos);
     servoOFF();
-  }
-#else
-  if (btn.holdedFor(1)) { // вход в меню нажатием 1сек
-    if(systemState == PUMPING) return;
-    showMenu = !showMenu;
-    timeoutReset();
-    if (showMenu) {
-      disp.clear();
-      displayMenu();
-    }
-    else {
-      disp.clear();
-      displayMode(workMode);
-      printVolume(thisVolume);
-      menuItem = 0;
-      menuPage = MENU_PAGE;
-    }
   }
 #endif
 }
