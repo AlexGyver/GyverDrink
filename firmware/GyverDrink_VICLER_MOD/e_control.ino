@@ -45,7 +45,7 @@ void encTick() {
 
 // активация/остановка налива
 void btnTick() {
-  if (btn.clicked()) { // клик!
+  if (btn.pressed()) { // клик!
     timeoutReset(); // таймаут сброшен
 
     if (systemState == PUMPING) {
