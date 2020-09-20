@@ -270,7 +270,7 @@ void serviceRoutine(serviceStates mode) {
 }
 
 #ifndef TM1637
-void settingsMenuHandler(uint8_t row) {
+void settingsMenuHandler(uint8_t selectedItem) {
   bool bypass = false;
   uint8_t parameter = menuItem - 1;
   if (menuItem == menuItemsNum[menuPage] - 1) { // сброс настроек
@@ -280,7 +280,7 @@ void settingsMenuHandler(uint8_t row) {
   else {
     disp.setInvertMode(1);
     disp.setFont(ZevvPeep8x16);
-    printStr(MenuPages[menuPage][menuItem], 0, row);
+    printStr(MenuPages[menuPage][menuItem], 0, selectedItem);
     printStr("                       ");
     printInt(settingsList[parameter], Right);
   }
@@ -308,7 +308,7 @@ void settingsMenuHandler(uint8_t row) {
 
       disp.setInvertMode(1);
       disp.setFont(ZevvPeep8x16);
-      printStr(MenuPages[menuPage][menuItem], 0, row);
+      printStr(MenuPages[menuPage][menuItem], 0, selectedItem);
       printStr("                       ");
       printInt(settingsList[parameter], Right);
 
@@ -320,7 +320,7 @@ void settingsMenuHandler(uint8_t row) {
       bypass = true;
     }
 
-    if (encBtn.clicked() || bypass) {
+    if (encBtn.pressed() || bypass) {
       EEPROM.update(eeAddress._timeout_off, settingsList[timeout_off]);
       EEPROM.update(eeAddress._inverse_servo, settingsList[inverse_servo]);
       EEPROM.update(eeAddress._servo_speed, settingsList[servo_speed]);
@@ -622,7 +622,7 @@ void timeoutTick() {
       if (settingsList[invert_display]) disp.invertDisplay(false);
       disp.clear();
       if (showMenu) {
-        menuPage = MENU_PAGE;
+        menuPage = MAIN_MENU_PAGE;
         menuItem = 1;
         showMenu = false;
       }

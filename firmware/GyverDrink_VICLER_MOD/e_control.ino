@@ -11,6 +11,7 @@ void encTick() {
         volumeChanged = true;
       }
     }
+
     if (enc.isRight()) {
       if (showMenu) menuItem--;
       else {
@@ -19,98 +20,125 @@ void encTick() {
         volumeChanged = true;
       }
     }
+
 #ifndef TM1637
     if (showMenu) {
       displayMenu();
+      timeoutReset();
       return;
     }
 #endif
-    if (curSelected >= 0) shotVolume[(byte)curSelected] = constrain(shotVolume[(byte)curSelected], 1, settingsList[max_volume]);
-    thisVolume = constrain(thisVolume, 1, settingsList[max_volume]);
-    timeoutReset();
-    if (curSelected >= 0) printNum(shotVolume[curSelected]);
+
+    if (curSelected >= 0) {
+      shotVolume[(byte)curSelected] = constrain(shotVolume[(byte)curSelected], 1, settingsList[max_volume]);
+      printNum(shotVolume[curSelected]);
+    }
     else {
+      thisVolume = constrain(thisVolume, 1, settingsList[max_volume]);
       printNum(thisVolume);
       for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
     }
+
+    timeoutReset();
   }
 }
 
+// активация/остановка налива
 void btnTick() {
-  if (btn.clicked()) {                      // клик!
-    timeoutReset();                         // таймаут сброшен
+  if (btn.clicked()) { // клик!
+    timeoutReset(); // таймаут сброшен
 
     if (systemState == PUMPING) {
-      pumpOFF();                            // помпа выкл
-      shotStates[curPumping] = READY;       // налитая рюмка, статус: готов
-      curPumping = -1;                      // снимаем выбор рюмки
+      pumpOFF();                      // помпа выкл
+      shotStates[curPumping] = READY; // налитая рюмка, статус: готов
+      curPumping = -1;                // снимаем выбор рюмки
 #ifndef TM1637
       shots_overall++;
       volume_overall += volumeCount;
       EEPROM.put(eeAddress._shots_overall, shots_overall);
       EEPROM.put(eeAddress._volume_overall, volume_overall);
 #endif
-      systemState = WAIT;                   // режим работы - ждать
+      systemState = WAIT; // режим работы - ждать
       WAITtimer.reset();
     }
-    if (workMode == ManualMode) systemON = true;         // система активирована
+    if (workMode == ManualMode && !showMenu) systemON = true; // система активирована
   }
 
+  // смена режима/вход в меню
   if (btn.holded()) {
     if (systemState == PUMPING) return;
-
 #ifdef TM1637
     workMode = (workModes)!workMode;
-    if (workMode == AutoMode) disp.scrollByte(64, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64, 50);
-    else  disp.scrollByte(0, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 0, 50);
+    disp.scrollByte(64 * workMode, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64 * workMode, 50);
 #else
-    showMenu = !showMenu;
-    timeoutReset();
-    if (showMenu) {
+    //showMenu = !showMenu;
+    if (!showMenu) {
+      showMenu = 1;
       disp.clear();
       displayMenu();
     }
-    else {
+    else if (menuPage == MAIN_MENU_PAGE) {
+      showMenu = 0;
       disp.clear();
+      menuItem = 0;
       displayMode(workMode);
       printNum(thisVolume);
-      menuItem = 0;
-      menuPage = MENU_PAGE;
-    }
-#endif
-
-    timeoutReset();
-  }
-  if (encBtn.clicked()) {
-    timeoutReset();
-#ifndef TM1637
-    if (showMenu) {
-      selectItem = 1;
-      displayMenu();
     }
     else {
-#endif
-      selectShot++;
-      if (selectShot == NUM_SHOTS)  selectShot = -1;
-      curSelected = selectShot;
-
-      for (byte i = 0; i < NUM_SHOTS; i++) {
-        if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
-        else if (shotStates[i] == EMPTY) strip.setLED(i, mCOLOR(ORANGE));
-        else strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
-      }
-      if (curSelected >= 0) printNum(shotVolume[curSelected]);
-      else printNum(thisVolume);
-      LEDchanged = true;
-#ifndef TM1637
+      menuPage = MAIN_MENU_PAGE;
+      disp.clear();
+      displayMenu();
     }
 #endif
+    timeoutReset();
   }
+
+  // промывка
   if (encBtn.holding()) {
     if (workMode == AutoMode) return;
     prePump();
   }
+
+  // выбор рюмки
+  if (encBtn.pressed()) {
+#ifndef TM1637
+    if (showMenu) {
+      selectItem = 1;
+      displayMenu();
+      return;
+    }
+#endif
+
+    if (shotCount < 2) return;
+
+    for (int8_t i = selectShot + 1; i <= NUM_SHOTS; i++) {
+      if (i == NUM_SHOTS) {
+        selectShot = -1;
+        break;
+      }
+      else if (shotStates[(byte)i] == EMPTY) {
+        selectShot = i;
+        break;
+      }
+    }
+
+    curSelected = selectShot;
+
+    for (byte i = 0; i < NUM_SHOTS; i++) {
+      if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
+      else if (shotStates[i] == EMPTY)  strip.setLED(i, mCOLOR(ORANGE));
+      else  strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
+    }
+    LEDchanged = true;
+
+    if (curSelected >= 0) printNum(shotVolume[curSelected]);
+    else  printNum(thisVolume);
+
+    timeoutReset();
+  }
+
 #ifdef TM1637
+  // сброс настроек
   if (btn.holdedFor(5)) {
     if (systemState == PUMPING) return;
     byte resetText[] = {_r, _E, _S, _E, _t};

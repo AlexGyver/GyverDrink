@@ -1,6 +1,6 @@
 //GyverDrink VICLER_MOD
-#define VERSION 4.2
-//19.09.2020
+#define VERSION 4.3
+//20.09.2020
 /*
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
 
@@ -21,6 +21,7 @@
         Авто режим(по краям дисплея отображенны штрихи): разлив начинается автоматически сразу после установки рюмки.
 
    ⚫ Возможность настроить объём для каждой рюмки отдельно:
+        Функция активна только если количество поставленных рюмок > 1
         При однократном нажатии на энкодер подсвечивается место рюмки, объём которой изменяется вращением энкодера. При повторном нажатии подсвечивается следующая рюмка.
         Если же ни одна рюмка не подсвечивается белым, вращение энкодера изменяет объём для всех рюмок одновременно (как в обычном ручном режиме).
 
@@ -43,18 +44,21 @@
   =====================================
   Сервис режим.
    ⚫ Вход в сервис режим осуществляется удержанием основной кнопки выбора режима во время стартовой анимации до появления на дисплее надписи "SerViCE". После отпускания кнопки на дисплее появится номер этапа калибровки:
+
       -1-   На этом этапе производится настройка положений сервопривода над рюмками.
           1. Уберите все рюмки. На дисплее отобразится положение парковочной позиции в градусах. При этом поп краям дисплея будут отображенны штрихи (при градусе > 99, штрих только с правой стороны).
           2. Вращением энкодера измените положение парковочной позиции
           3. Поставьте рюмку. На дисплее отобразится номер рюмки и позиция в градусах. Вращением энкодера подстройте положение точно над рюмкой. Уберите рюмку.
           4. Повторите пункт 3. для всех остальных рюмок.
           5. После настройки позиций для всех рюмок зажмите и удерживайте основную кнопку изменения режима пока на дисплее не появится номер следующего этапа калибровки.
+
       -2-   На этом этапе производится калибровка таймера для налития 50мл.
           1. Поставьте рюмку в любое положение. Кран встанет над этой рюмкой.
           2. Нажатием на кнопку энкодера включится помпа. Удерживайте до тех пор, пока не польётся жидкость.
           3. Снимите рюмку и поставьте пустую в любое положение.
           4. Удерживайте кнопку энкодера, пока не нальётся ровно 50мл.
           5. Снимите рюмку. Зажмите и удерживайте основную кнопку изменения режима. Если мониторинг АКБ активен, на дисплее отобразится следующий номер этапа калибровки. В обратном случае калибровка оконченна.
+
       -3-   На этом этапе производится калибровка напряжения аккумулятора.
           1. На дисплее отобразится напряжение аккумулятора в [mV].
           3. Вращением энкодера подстройте отображаемое напряжение до измеренного вольтметром.
@@ -66,7 +70,7 @@
   Особенности версии на OLED дисплее
   =====================================
 
-   ⚫ Наличие полноценного, графического меню. Вход в меню зажатием основной кнопки более полусекунды. Выход либо выбором соответствующего пункта, либо так же зажатием основной кнопки более полусекунды.
+   ⚫ Наличие полноценного, графического меню. Вход в меню зажатием основной кнопки более секунды. Выход либо выбором соответствующего пункта, либо так же зажатием основной кнопки более секунды.
 
    ⚫ Калибровка объёма за единицу времени, калибровка углов сервопривода для рюмок и калибровка напряжения аккумулятора осуществляется в меню. В меню калибровки можно так же попасть зажав основную кнопку во время стартовой анимации.
 
@@ -110,10 +114,10 @@
 #else
 #define statusLed 0
 #endif
-LEDdata leds[NUM_SHOTS + statusLed];  // буфер ленты типа LEDdata (размер зависит от COLOR_DEBTH)
+LEDdata leds[NUM_SHOTS + statusLed];                  // буфер ленты типа LEDdata (размер зависит от COLOR_DEBTH)
 microLED strip(leds, NUM_SHOTS + statusLed, LED_PIN); // объект лента
 ServoSmooth servo;
-encMinim enc(ENC_CLK, ENC_DT, ENC_SW, 1, 1);  // пин clk, пин dt, пин sw, направление (0/1), тип (0/1)
+encMinim enc(ENC_CLK, ENC_DT, ENC_SW, 1, 1); // пин clk, пин dt, пин sw, направление (0/1), тип (0/1)
 
 buttonMinim btn(BTN_PIN);
 buttonMinim encBtn(ENC_SW);
@@ -125,9 +129,9 @@ timerMinim TIMEOUTtimer(STBY_TIME * 1000L); // таймаут режима ож�
 timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
 timerMinim KEEP_POWERtimer(KEEP_POWER * 1000L);
 
-#define MIN_COLOR 48                          // ORANGE mWHEEL
-#define MAX_COLOR 765                         // AQUA mWHEEL
-#define COLOR_SCALE (MAX_COLOR - MIN_COLOR)   // фактор для плавного изменения цвета во время налива
+#define MIN_COLOR 48                        // ORANGE mWHEEL
+#define MAX_COLOR 765                       // AQUA mWHEEL
+#define COLOR_SCALE (MAX_COLOR - MIN_COLOR) // фактор для плавного изменения цвета во время налива
 
 #define INIT_VOLUME 47
 bool LEDchanged = false;
@@ -136,10 +140,10 @@ int8_t curPumping = -1;
 int8_t curSelected = -1;
 int8_t selectShot = -1;
 uint8_t shotCount = 0;
-enum {NO_GLASS, EMPTY, IN_PROCESS, READY} shotStates[NUM_SHOTS];
-enum {SEARCH, MOVING, WAIT, PUMPING} systemState;
-enum serviceStates {SERVO, VOLUME, BATTERY} serviceState;
-enum workModes {ManualMode, AutoMode} workMode;
+enum { NO_GLASS, EMPTY, IN_PROCESS, READY } shotStates[NUM_SHOTS];
+enum { SEARCH, MOVING, WAIT, PUMPING } systemState;
+enum serviceStates { SERVO, VOLUME, BATTERY } serviceState;
+enum workModes { ManualMode, AutoMode } workMode;
 uint16_t time50ml = TIME_50ML;
 uint8_t thisVolume = INIT_VOLUME;
 uint8_t shotVolume[NUM_SHOTS];
@@ -159,7 +163,6 @@ bool volumeChanged = false;
 bool servoReady = 0;
 uint8_t animCount = 7;
 uint8_t parking_pos = PARKING_POS;
-
 bool showMenu = 0;
 uint8_t menuItem = 0;
 
@@ -169,7 +172,8 @@ char bootscreen[] = {BOOTSCREEN};
 #endif
 
 // названия параметров в меню настроек OLED
-enum {
+enum
+{
   timeout_off = 0,
   inverse_servo,
   servo_speed,
@@ -196,36 +200,37 @@ uint8_t settingsList[] = {
 };
 
 // расчёт адрессных ячеек для сохранения параметров
-struct EEPROMAddress {
-  const byte _thisVolume      = 0;
-  const byte _time50ml        = _thisVolume + sizeof(thisVolume);
-  const byte _shotPos         = _time50ml + sizeof(time50ml);
-  const byte _parking_pos     = _shotPos + sizeof(byte) * NUM_SHOTS;
-  const byte _workMode        = _parking_pos + sizeof(parking_pos);
-  const byte _battery_cal     = _workMode + sizeof(byte);
-  const byte _animCount       = _battery_cal + sizeof(battery_cal);
+struct EEPROMAddress
+{
+  const byte _thisVolume = 0;
+  const byte _time50ml = _thisVolume + sizeof(thisVolume);
+  const byte _shotPos = _time50ml + sizeof(time50ml);
+  const byte _parking_pos = _shotPos + sizeof(byte) * NUM_SHOTS;
+  const byte _workMode = _parking_pos + sizeof(parking_pos);
+  const byte _battery_cal = _workMode + sizeof(byte);
+  const byte _animCount = _battery_cal + sizeof(battery_cal);
 #ifndef TM1637
-  const byte _timeout_off     = _animCount + sizeof(animCount);
-  const byte _stby_time       = _timeout_off + sizeof(settingsList[timeout_off]);
-  const byte _keep_power      = _stby_time + sizeof(settingsList[stby_time]);
-  const byte _inverse_servo   = _keep_power + sizeof(keep_power);
-  const byte _servo_speed     = _inverse_servo + sizeof(settingsList[inverse_servo]);
-  const byte _auto_parking    = _servo_speed + sizeof(servo_speed);
-  const byte _max_volume      = _auto_parking + sizeof(settingsList[auto_parking]);
-  const byte _stby_light      = _max_volume + sizeof(settingsList[max_volume]);
-  const byte _rainbow_flow    = _stby_light + sizeof(settingsList[stby_light]);
-  const byte _shots_overall   = _rainbow_flow + sizeof(settingsList[rainbow_flow]);
-  const byte _volume_overall  = _shots_overall + sizeof(shots_overall);
-  const byte _invert_display  = _volume_overall + sizeof(volume_overall);
+  const byte _timeout_off = _animCount + sizeof(animCount);
+  const byte _stby_time = _timeout_off + sizeof(settingsList[timeout_off]);
+  const byte _keep_power = _stby_time + sizeof(settingsList[stby_time]);
+  const byte _inverse_servo = _keep_power + sizeof(keep_power);
+  const byte _servo_speed = _inverse_servo + sizeof(settingsList[inverse_servo]);
+  const byte _auto_parking = _servo_speed + sizeof(servo_speed);
+  const byte _max_volume = _auto_parking + sizeof(settingsList[auto_parking]);
+  const byte _stby_light = _max_volume + sizeof(settingsList[max_volume]);
+  const byte _rainbow_flow = _stby_light + sizeof(settingsList[stby_light]);
+  const byte _shots_overall = _rainbow_flow + sizeof(settingsList[rainbow_flow]);
+  const byte _volume_overall = _shots_overall + sizeof(shots_overall);
+  const byte _invert_display = _volume_overall + sizeof(volume_overall);
 #endif
 } eeAddress;
 
 //╞═════════════════════════════╡MACROS╞═════════════════════════════╡
 
-#define servoON()  digitalWrite(SERVO_POWER, 1)
+#define servoON() digitalWrite(SERVO_POWER, 1)
 #define servoOFF() digitalWrite(SERVO_POWER, 0)
-#define pumpON()   digitalWrite(PUMP_POWER, 1)
-#define pumpOFF()  digitalWrite(PUMP_POWER, 0)
+#define pumpON() digitalWrite(PUMP_POWER, 1)
+#define pumpOFF() digitalWrite(PUMP_POWER, 0)
 
 #if (STATUS_LED)
 #define LED leds[NUM_SHOTS]

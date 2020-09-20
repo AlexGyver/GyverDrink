@@ -1,11 +1,11 @@
 #ifdef TM1637
-#define EEPROM_KEY (11 + VERSION * 10) 
+#define EEPROM_KEY (11 + VERSION * 10)
 #else
 #define EEPROM_KEY (22 + VERSION * 10)
 #endif
 
+// чтение последнего налитого объёма
 void readEEPROM() {
-  // чтение последнего налитого объёма
   if (EEPROM.read(100) != EEPROM_KEY) {
     EEPROM.write(100, EEPROM_KEY);
     EEPROM.write(eeAddress._thisVolume, INIT_VOLUME);

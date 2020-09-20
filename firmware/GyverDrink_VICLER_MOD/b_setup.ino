@@ -1,5 +1,6 @@
 
 void setup() {
+  //Serial.begin(115200);
   // старт дисплея
 #ifdef TM1637
   disp.clear();
