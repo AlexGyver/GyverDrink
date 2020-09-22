@@ -179,11 +179,10 @@ void resetEEPROM() {
   EEPROM.update(103, EEPROM_KEY);
   EEPROM.update(eeAddress._parking_pos, PARKING_POS);
 
-#if(SAVE_MODE == 1)
   // сброс режима
   EEPROM.update(104, EEPROM_KEY);
   EEPROM.update(eeAddress._workMode, ManualMode);
-#endif
+  workMode = ManualMode;
 
 #ifdef BATTERY_PIN
   //сброс калибровки аккумулятора

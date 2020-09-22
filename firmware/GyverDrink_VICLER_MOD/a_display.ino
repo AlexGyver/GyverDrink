@@ -2,6 +2,7 @@ void serviceRoutine(serviceStates mode);
 
 #ifdef TM1637
 GyverTM1637 disp(DISP_CLK, DISP_DIO);
+enum { ml = 1, deg };
 void printNum(uint16_t num, int8_t mode = 0);
 #else
 
@@ -20,9 +21,9 @@ MenuPageName menuPage = MAIN_MENU_PAGE; // актуальная страница
 bool selectItem = 0;
 
 #ifdef BATTERY_PIN
-uint8_t menuItemsNum[MENU_PAGES] = {5, 12, 4, 3}; // количество строк на каждой странице
+uint8_t menuItemsNum[MENU_PAGES] = {4, 11, 3, 2}; // количество строк на каждой странице
 #else
-uint8_t menuItemsNum[MENU_PAGES] = {5, 12, 3, 3}; // количество строк на каждой странице
+uint8_t menuItemsNum[MENU_PAGES] = {4, 11, 2, 2}; // количество строк на каждой странице
 #endif
 
 const char *MenuPages[MENU_PAGES][13] = {
@@ -30,8 +31,7 @@ const char *MenuPages[MENU_PAGES][13] = {
     "",
     " Настройки",
     " Калибровка",
-    " Статистика",
-    " Выход"
+    " Статистика"
   },
 
   { "------Настройки------",
@@ -45,36 +45,34 @@ const char *MenuPages[MENU_PAGES][13] = {
     "max volume",
     "keep power",
     "invert display",
-    " Сброс",
-    " Назад"
+    " Сброс"
   },
 
   { "-----Калибровка-----",
     " Серво",
     " Объ¿м",
 #ifdef BATTERY_PIN
-    " Аккумулятор",
+    " Аккумулятор"
+#else
+    ""
 #endif
-    " Назад"
   },
 
   { "------Статистика------",
     " Кол-во рюмок",
     " Объ¿м",
-    " Назад"
+    ""
   }
 };
 
-enum text_position
-{
+enum text_position {
   Append = -4,
   Left,
   Center,
   Right
 };
 
-void printStr(const char str[], int8_t x = Append, int8_t y = Append)
-{
+void printStr(const char str[], int8_t x = Append, int8_t y = Append) {
   if (x == Append)  disp.setCol(disp.col());
   else if (x == Left) disp.setCol(0);
   else if (x == Center) disp.setCol((128 - disp.strWidth(str)) / 2);
@@ -91,63 +89,67 @@ void printStr(const char str[], int8_t x = Append, int8_t y = Append)
   }
 }
 
-void printInt(uint16_t num, int8_t x = Append, int8_t y = Append)
-{
+void printInt(uint16_t num, int8_t x = Append, int8_t y = Append) {
   char cstr[10];
   itoa(num, cstr, 10);
   printStr(cstr, x, y);
 }
 
-void printFloat(float num, uint8_t decimals, int8_t x = Append, int8_t y = Append)
-{
+void printFloat(float num, uint8_t decimals, int8_t x = Append, int8_t y = Append) {
   char cstr[10];
   dtostrf(num, 4, decimals, cstr);
 
-  disp.setFont(MonoNum22x32);
+  disp.setFont(MonoNum30x40);
   printStr(cstr, x, y);
 }
 
-void printNum(uint16_t volume, int8_t postfix = 0)
-{
-  static uint16_t lastVol = 0;
-  disp.setFont(MonoNum22x32);
+enum { ml = 1, deg };
 
-  if (volume <= 999 && lastVol >= 1000) printStr("    ", Center, 3);
-  if (volume <= 99 && lastVol >= 100) printStr("   ", Center, 3);
-  if (volume <= 9 && lastVol >= 10) printStr("    ", Center, 3);
+void printNum(uint16_t volume, int8_t postfix = 0) {
+  static uint16_t lastVol = 0;
+  
+  byte shiftY = 0;
+  disp.setFont(MonoNum30x40);
+
+  if(postfix == 1) shiftY = 1;
+
+  if (volume <= 999 && lastVol >= 1000) printStr("////", Center, 3 - shiftY); // "/" = space
+  if (volume <= 99 && lastVol >= 100)   printStr("////", Left, 3 - shiftY);
+  if (volume <= 9 && lastVol >= 10)     printStr("////", Center, 3 - shiftY);
+  if (volume >= 100 && lastVol <= 99)   printStr("/", Right, 3 - shiftY);
   lastVol = volume;
 
-  printInt(volume, Center, 3);
-  if (postfix == 0) printStr("%"); // "ml"
-  else if (postfix == 1)  printStr("*"); // "°"
+  if(postfix == 1 && volume > 99) printInt(volume, Left, 3 - shiftY);
+  else printInt(volume, Center, 3 - shiftY);
+  
+  if (postfix == 1) printStr("-"); // "ml"
+  else if (postfix == 2)  printStr(","); // "°"
 }
 
 void displayMode(workModes mode);
-void displayMode(workModes mode)
-{
-  disp.setFont(CenturyGothic10x16);
-  if (mode == ManualMode) printStr(" Ручной режим", Left, 0);
-  else if (mode == AutoMode)  printStr(" Авто режим    ", Left, 0);
+void displayMode(workModes mode) {
+  //disp.setFont(CenturyGothic10x16);
+  disp.setFont(Mode213x28);
+  printInt(mode, 0, 0); // выводим иконку режима
 
-  printNum(thisVolume);
+  printNum(thisVolume, ml);
 }
 
-void displayMenu()
-{
-  static uint8_t firstItem = 1, selectedItem = 1;
+void displayMenu() {
+  static uint8_t firstItem = 1, selectedItem = 0;
 
-  if (selectItem)
-  {
+  if (selectItem) {
     if (menuPage == MAIN_MENU_PAGE) { // выбор елемента на главной странице Меню
-      if (menuItem == menuItemsNum[menuPage]) { // нажали на "Выход"
-        menuItem = 1;
-        selectItem = 0;
-        showMenu = false;
-        disp.clear();
-        displayMode(workMode);
-        return;
-      }
-      else if (menuItem == 1) { // нажали на режим
+      //      if (menuItem == menuItemsNum[menuPage]) { // нажали на "Выход"
+      //        menuItem = 1;
+      //        selectItem = 0;
+      //        showMenu = false;
+      //        disp.clear();
+      //        displayMode(workMode);
+      //        return;
+      //      }
+      //      else if (menuItem == 1) { // нажали на режим
+      if (menuItem == 1) { // нажали на режим
         workMode = (workModes)!workMode;
         selectItem = 0;
         showMenu = false;
@@ -165,31 +167,33 @@ void displayMenu()
       }
     }
     else if (menuPage == SETTINGS_PAGE) {
-      if (menuItem == menuItemsNum[menuPage]) { // нажали "Назад"
-        menuItem = 2;
-        menuPage = MAIN_MENU_PAGE;
-        disp.clear();
-      }
-      else settingsMenuHandler(selectedItem);
+      //      if (menuItem == menuItemsNum[menuPage]) { // нажали "Назад"
+      //        menuItem = 2;
+      //        menuPage = MAIN_MENU_PAGE;
+      //        disp.clear();
+      //      }
+      //      else settingsMenuHandler(selectedItem);
+      settingsMenuHandler(selectedItem);
     }
     else if (menuPage == CALIBRATION_PAGE)  {
-      if (menuItem == menuItemsNum[menuPage]) { // нажали "Назад"
-        menuItem = 3;
-        menuPage = MAIN_MENU_PAGE;
-        disp.clear();
-      }
-      else  {
-        disp.clear();
-        serviceRoutine((serviceStates)(menuItem - 1));
-      }
+      //      if (menuItem == menuItemsNum[menuPage]) { // нажали "Назад"
+      //        menuItem = 3;
+      //        menuPage = MAIN_MENU_PAGE;
+      //        disp.clear();
+      //      }
+      //      else  {
+      disp.clear();
+      serviceRoutine((serviceStates)(menuItem - 1));
+      //      }
     }
     else if (menuPage == STATISTICS_PAGE) {
-      if (menuItem == menuItemsNum[menuPage]) { // нажали "Назад"
-        menuItem = 4;
-        menuPage = MAIN_MENU_PAGE;
-        disp.clear();
-      }
-      else if (menuItem == 1) {
+      //      if (menuItem == menuItemsNum[menuPage]) { // нажали "Назад"
+      //        menuItem = 4;
+      //        menuPage = MAIN_MENU_PAGE;
+      //        disp.clear();
+      //      }
+      //      else if (menuItem == 1) {
+      if (menuItem == 1) {
         EEPROM.put(eeAddress._shots_overall, 0);
         readEEPROM();
       }
@@ -224,19 +228,19 @@ void displayMenu()
     }
 
     if (menuPage == SETTINGS_PAGE)  {
-      if (currItem < menuItemsNum[menuPage] - 1)  disp.setFont(ZevvPeep8x16);
-      else  disp.setFont(CenturyGothic10x16);
+//      if (currItem < menuItemsNum[menuPage]) disp.setFont(ZevvPeep8x16);
+//      else  disp.setFont(CenturyGothic10x16);
       printStr(MenuPages[menuPage][currItem]);
-      disp.setFont(CenturyGothic10x16);
+//      disp.setFont(CenturyGothic10x16);
       printStr("                  ");
-      if (currItem < menuItemsNum[menuPage] - 1)  printInt(settingsList[currItem - 1], Right);
+      if (currItem < menuItemsNum[menuPage])  printInt(settingsList[currItem - 1], Right);
       printStr("\n");
     }
     else if (menuPage == STATISTICS_PAGE) {
-      disp.setFont(CenturyGothic10x16);
+//      disp.setFont(CenturyGothic10x16);
       printStr(MenuPages[menuPage][currItem]);
       printStr("                  ");
-      disp.setFont(ZevvPeep8x16);
+//      disp.setFont(ZevvPeep8x16);
       if (currItem == 1)  printInt(shots_overall, Right);
       if (currItem == 2)  printInt(volume_overall, Right);
       printStr("\n");

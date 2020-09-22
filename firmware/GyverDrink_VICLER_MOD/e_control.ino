@@ -31,11 +31,11 @@ void encTick() {
 
     if (curSelected >= 0) {
       shotVolume[(byte)curSelected] = constrain(shotVolume[(byte)curSelected], 1, settingsList[max_volume]);
-      printNum(shotVolume[curSelected]);
+      printNum(shotVolume[curSelected], ml);
     }
     else {
       thisVolume = constrain(thisVolume, 1, settingsList[max_volume]);
-      printNum(thisVolume);
+      printNum(thisVolume, ml);
       for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
     }
 
@@ -45,7 +45,7 @@ void encTick() {
 
 // активация/остановка налива
 void btnTick() {
-  if (btn.pressed()) { // клик!
+  if (btn.pressed()) { // нажатие на основную кнопку
     timeoutReset(); // таймаут сброшен
 
     if (systemState == PUMPING) {
@@ -62,6 +62,22 @@ void btnTick() {
       WAITtimer.reset();
     }
     if (workMode == ManualMode && !showMenu) systemON = true; // система активирована
+#ifndef TM1637
+    if (showMenu) {
+      disp.clear();
+      if (menuPage != MAIN_MENU_PAGE) {
+        menuItem = menuPage + 1;
+        menuPage = MAIN_MENU_PAGE;
+        displayMenu();
+      }
+      else {
+        showMenu = 0;
+        menuItem = 0;
+        menuPage = MAIN_MENU_PAGE;
+        displayMode(workMode);
+      }
+    }
+#endif
   }
 
   // смена режима/вход в меню
@@ -71,23 +87,13 @@ void btnTick() {
     workMode = (workModes)!workMode;
     disp.scrollByte(64 * workMode, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64 * workMode, 50);
 #else
-    //showMenu = !showMenu;
-    if (!showMenu) {
-      showMenu = 1;
-      disp.clear();
-      displayMenu();
-    }
-    else if (menuPage == MAIN_MENU_PAGE) {
-      showMenu = 0;
-      disp.clear();
-      menuItem = 0;
-      displayMode(workMode);
-      printNum(thisVolume);
-    }
+    showMenu = !showMenu;
+    disp.clear();
+    if (showMenu) displayMenu();
     else {
+      menuItem = 0;
       menuPage = MAIN_MENU_PAGE;
-      disp.clear();
-      displayMenu();
+      displayMode(workMode);
     }
 #endif
     timeoutReset();
@@ -131,8 +137,8 @@ void btnTick() {
     }
     LEDchanged = true;
 
-    if (curSelected >= 0) printNum(shotVolume[curSelected]);
-    else  printNum(thisVolume);
+    if (curSelected >= 0) printNum(shotVolume[curSelected], ml);
+    else  printNum(thisVolume, ml);
 
     timeoutReset();
   }
@@ -146,11 +152,10 @@ void btnTick() {
     while (!digitalRead(BTN_PIN));
     resetEEPROM();
     readEEPROM();
-    printNum(thisVolume);
+    printNum(thisVolume, ml);
     servoON();
     servo.attach(SERVO_PIN, parking_pos);
     delay(500);
-    servo.setCurrentDeg(parking_pos);
     servoOFF();
   }
 #endif

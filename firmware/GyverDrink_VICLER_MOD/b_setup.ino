@@ -29,7 +29,7 @@ void setup() {
     disp.displayByte(0x00, 0x00, 0x00, 0x00);
     delay(500);
 #else
-    disp.setFont(Battery19x9);
+    disp.setFont(Battery11x21);
     printInt(get_battery_percent(), Right, 0);
     delay(500);
     disp.clear();
@@ -37,6 +37,9 @@ void setup() {
 #endif
     if (btn.holded()) {
       disp.clear();
+#ifdef TM1637
+      disp.brightness(7);
+#endif
       serviceRoutine(BATTERY);
       break;
     }
@@ -70,9 +73,9 @@ void setup() {
   servo.setDirection(settingsList[inverse_servo]);
   servo.attach(SERVO_PIN, parking_pos);
   delay(500);
-  servo.setCurrentDeg(parking_pos);
   servo.setSpeed(settingsList[servo_speed]);
   servo.setAccel(SERVO_ACCEL / 100.0);
+  servo.stop();
   servoOFF();
 
   /* - Стартовая анимация. Значение ANIMATION_FPS задаёт количество кадров в секунду (чем больше - тем быстрее анимация)

@@ -4,7 +4,6 @@ void serviceRoutine(serviceStates mode) {
   byte serviceText[] = {_S, _E, _r, _U, _i, _C, _E};
   disp.runningString(serviceText, sizeof(serviceText), 150);
   while (!digitalRead(BTN_PIN));  // ждём отпускания
-  byte workModeTemp = workMode;
 #endif
 
   //==============================================================================
@@ -13,6 +12,7 @@ void serviceRoutine(serviceStates mode) {
   timerMinim timer100(100);
 
   if (mode == SERVO) {         // калибровка углов серво
+    byte workModeTemp = workMode;
     workMode = AutoMode;
     for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
     strip.show();
@@ -26,7 +26,7 @@ void serviceRoutine(serviceStates mode) {
     disp.setInvertMode(0);
 #endif
     byte servoPos = parking_pos;
-    printNum(servoPos, 1);
+    printNum(servoPos, deg);
     while (1) {
       enc.tick();
       static int currShot = -1;
@@ -40,9 +40,9 @@ void serviceRoutine(serviceStates mode) {
           shotCount++;
           servoPos = shotPos[currShot];
 #ifdef TM1637
-          printNum((i + 1) * 1000 + shotPos[i], 1);
+          printNum((i + 1) * 1000 + shotPos[i], deg);
 #else
-          printNum(servoPos, 1);
+          printNum(servoPos, deg);
 #endif
           servo.setTargetDeg(servoPos);
           servo.start();
@@ -59,7 +59,7 @@ void serviceRoutine(serviceStates mode) {
           shotCount--;
           if (shotCount == 0) { // убрали последнюю рюмку
             servoPos = parking_pos;
-            printNum(servoPos, 1);
+            printNum(servoPos, deg);
             servo.setTargetDeg(servoPos);
             servo.start();
             servoON();
@@ -73,9 +73,9 @@ void serviceRoutine(serviceStates mode) {
           currShot = i;
           servoPos = shotPos[currShot];
 #ifdef TM1637
-          printNum((i + 1) * 1000 + shotPos[i], 1);
+          printNum((i + 1) * 1000 + shotPos[i], deg);
 #else
-          printNum(servoPos, 1);
+          printNum(servoPos, deg);
 #endif
           servo.setTargetDeg(servoPos);
           servo.start();
@@ -96,32 +96,36 @@ void serviceRoutine(serviceStates mode) {
         if (shotStates[currShot] == EMPTY) {
           shotPos[currShot] = servoPos;
 #ifdef TM1637
-          printNum((currShot + 1) * 1000 + shotPos[currShot], 1);
+          printNum((currShot + 1) * 1000 + shotPos[currShot], deg);
 #else
-          printNum(shotPos[currShot], 1);
+          printNum(shotPos[currShot], deg);
 #endif
         }
-        else printNum(servoPos, 1);
+        else printNum(servoPos, deg);
       }
-      if (btn.holded()) {
+      if (btn.pressed()) {
 #ifdef TM1637
         disp.scrollByte(0, 0, 0, 0, 50);
         mode = VOLUME;
-        workMode = (workModes)workModeTemp;
 #else
         timeoutReset();
-        servo.setTargetDeg(parking_pos);
-        servo.start();
-        servoON();
-        disp.clear();
-        for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
+//        servo.setTargetDeg(parking_pos);
+//        servo.start();
+//        servoON();
+        for (byte i = 0; i < NUM_SHOTS; i++) {
+          if(shotStates[i] == EMPTY) strip.setLED(i, mCOLOR(ORANGE));
+          else strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
+        }
         strip.show();
 #endif
+        workMode = (workModes)workModeTemp;
         break;
       }
     }
-    while (!servo.tick());
+//    while (!servo.tick());
+    servo.stop();
     servoOFF();
+    disp.clear();
     // сохраняем значения углов в память
     for (byte i = 0; i < NUM_SHOTS; i++) EEPROM.update(eeAddress._shotPos + i, shotPos[i]);
     EEPROM.update(eeAddress._parking_pos, parking_pos);
@@ -146,7 +150,7 @@ void serviceRoutine(serviceStates mode) {
     disp.setInvertMode(1);
     printStr("  Калибр. объ¿ма  \n", 0, 0);
     disp.setInvertMode(0);
-    printNum(pumpTime, -1);
+    printNum(pumpTime);
 #endif
     while (1) {
       if (timer100.isReady()) {   // период 100 мс
@@ -156,7 +160,7 @@ void serviceRoutine(serviceStates mode) {
 #ifdef TM1637
           disp.displayInt(pumpTime);
 #else
-          printNum(pumpTime, -1);
+          printNum(pumpTime);
 #endif
           pumpON();
           flag = true;
@@ -181,22 +185,22 @@ void serviceRoutine(serviceStates mode) {
         delay(100);
         strip.setLED(curPumping, mHSV(20, 255, settingsList[stby_light]));
         strip.show();
-        EEPROM.put(eeAddress._time50ml, pumpTime);
+        if (pumpTime > 0) EEPROM.put(eeAddress._time50ml, pumpTime);
         pumpTime = 0;
-        printNum(pumpTime, -1);
+        printNum(pumpTime);
         curPumping = -1;
       }
 
       if (servo.tick()) servoOFF();
       else servoON();
 
-      if (btn.holded()) {
+      if (btn.pressed()) {
 #ifdef TM1637
         disp.scrollByte(0, 0, 0, 0, 50);
 #ifdef BATTERY_PIN
         mode = BATTERY;
 #endif
-#else
+#else   
         timeoutReset();
 #endif
         curPumping = -1;
@@ -254,12 +258,12 @@ void serviceRoutine(serviceStates mode) {
         battery_cal = constrain(battery_cal, 0, 3.0);
       }
 
-      if (btn.holded()) {
+      if (btn.pressed()) {
 #ifdef TM1637
         disp.scrollByte(0, 0, 0, 0, 50);
 #else
         disp.clear();
-        //timeoutReset();
+        timeoutReset();
 #endif
         break;
       }
@@ -273,13 +277,13 @@ void serviceRoutine(serviceStates mode) {
 void settingsMenuHandler(uint8_t selectedItem) {
   bool bypass = false;
   uint8_t parameter = menuItem - 1;
-  if (menuItem == menuItemsNum[menuPage] - 1) { // сброс настроек
+  if (menuItem == menuItemsNum[menuPage]) { // сброс настроек
     resetEEPROM();
     bypass = true;
   }
   else {
     disp.setInvertMode(1);
-    disp.setFont(ZevvPeep8x16);
+//    disp.setFont(ZevvPeep8x16);
     printStr(MenuPages[menuPage][menuItem], 0, selectedItem);
     printStr("                       ");
     printInt(settingsList[parameter], Right);
@@ -307,7 +311,7 @@ void settingsMenuHandler(uint8_t selectedItem) {
 
 
       disp.setInvertMode(1);
-      disp.setFont(ZevvPeep8x16);
+//      disp.setFont(ZevvPeep8x16);
       printStr(MenuPages[menuPage][menuItem], 0, selectedItem);
       printStr("                       ");
       printInt(settingsList[parameter], Right);
@@ -336,6 +340,8 @@ void settingsMenuHandler(uint8_t selectedItem) {
       servo.setDirection(settingsList[inverse_servo]);
       servoON();
       servo.attach(SERVO_PIN, parking_pos);
+      delay(500);
+      servo.stop();
       servoOFF();
       if (thisVolume > settingsList[max_volume]) thisVolume = settingsList[max_volume];
       for (byte i = 0; i < NUM_SHOTS; i++) {
@@ -347,6 +353,7 @@ void settingsMenuHandler(uint8_t selectedItem) {
     }
 
     timeoutTick();
+    if(!timeoutState) return;
     LEDtick();
   }
 }
@@ -364,13 +371,15 @@ void flowTick() {
         else  strip.setLED(i, mCOLOR(ORANGE));                      // подсветили оранжевым
         LEDchanged = true;
         shotCount++;                                                // инкрементировали счётчик поставленных рюмок
-        if (systemState != PUMPING && !showMenu) printNum(shotVolume[i]);
+        if (systemState != PUMPING && !showMenu) printNum(shotVolume[i], ml);
       }
       if (!swState && shotStates[i] != NO_GLASS) {   // убрали пустую/полную рюмку
         shotStates[i] = NO_GLASS;                                   // статус - нет рюмки
-        if (i == curSelected)
-          strip.setLED(curSelected, mCOLOR(WHITE));
-        else if (settingsList[stby_light] > 0)
+        if (i == curSelected) {
+          selectShot = -1;
+          curSelected = -1;
+        }
+        if (settingsList[stby_light] > 0)
           strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
         else strip.setLED(i, mCOLOR(BLACK));
         LEDchanged = true;
@@ -383,7 +392,7 @@ void flowTick() {
           volumeCount = 0;
         }
         shotCount--;
-        if (systemState != PUMPING && !showMenu) printNum(thisVolume);
+        if (systemState != PUMPING && !showMenu) printNum(thisVolume, ml);
       }
       if (shotStates[i] == READY) rainbowFlow(1, i);
       else  rainbowFlow(0, i);
@@ -464,7 +473,7 @@ void flowRoutnie() {
           LEDchanged = true;
         }
       }
-      if (!showMenu) printNum(thisVolume);
+      if (!showMenu) printNum(thisVolume, ml);
     }
     else if ( (workMode == ManualMode) && noGlass)                        // если в ручном режиме, припаркованны и нет рюмок - отключаемся нахрен
     {
@@ -488,7 +497,12 @@ void flowRoutnie() {
     }
 
   } else if (systemState == PUMPING) {                    // если качаем
-    printNum(volumeCount += volumeTick);               // выводим текущий объём на дисплей
+    static byte lastVolumeCount = 0;
+    volumeCount += volumeTick;
+    if((byte)volumeCount != lastVolumeCount){
+      printNum(volumeCount, ml);               // выводим текущий объём на дисплей
+      lastVolumeCount = (byte)volumeCount;
+    }
     int colorCount = MIN_COLOR + COLOR_SCALE * volumeCount / shotVolume[curPumping];  // расчёт цвета для текущего обьёма
     strip.setLED(curPumping, mWHEEL(colorCount));
     LEDchanged = true;
@@ -536,7 +550,7 @@ void prePump() {
   {
     if (timer20.isReady()) {
       volumeCount += 20 * 50.0 / time50ml;
-      printNum(round(volumeCount));
+      printNum(round(volumeCount), ml);
       strip.setLED(curPumping, mWHEEL( (int)(volumeCount * 10 + MIN_COLOR) % 1530) );
       strip.show();
     }
@@ -579,9 +593,16 @@ void timeoutTick() {
     timeoutState = false;
 #ifdef TM1637
     disp.brightness(0);
-    printNum(thisVolume);
+    printNum(thisVolume, ml);
 #else
     disp.setContrast(0);
+    if(showMenu) {
+      showMenu = 0;
+      menuItem = 0;
+      menuPage = MAIN_MENU_PAGE;
+      disp.clear();
+      displayMode(workMode);
+    }
 #endif
     if (settingsList[stby_light]) {
       for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, settingsList[stby_light] / 2);
@@ -760,6 +781,14 @@ bool battery_watchdog() {
     lastMillis = millis();
     batOk = (get_battery_voltage() < (float)BATTERY_LOW) ? 0 : 1;
     if (!batOk) {
+      if(systemState == PUMPING){
+        pumpOFF();                      // помпа выкл
+        shotStates[curPumping] = READY; // налитая рюмка, статус: готов
+        curPumping = -1;                // снимаем выбор рюмки
+        systemState = WAIT; // режим работы - ждать
+        WAITtimer.reset();
+        systemON = false;
+      }
       for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, 0);
 #if(STATUS_LED)
       LED = mHSV(255, 0, 0);
@@ -793,14 +822,14 @@ void displayBattery(bool batOk) {
 
   if ( (currentMillis - lastDisplay >= 1000) && batOk) {
     lastDisplay = currentMillis;
-    disp.setFont(Battery19x9);
+    disp.setFont(Battery11x21);
     printInt(get_battery_percent(), Right, 0);
   }
   else if ( (currentMillis - lastBlink >= 500) && !batOk) {
     lastBlink = currentMillis;
     blinkState = !blinkState;
     if (blinkState) {
-      disp.setFont(Battery19x9);
+      disp.setFont(Battery11x21);
       printInt(get_battery_percent(), Right, 0);
     }
     else disp.clear();

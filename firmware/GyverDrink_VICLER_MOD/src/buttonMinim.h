@@ -87,6 +87,7 @@ boolean buttonMinim::holded() {
   buttonMinim::tick();
   if (flags.holdF && flags.holdedFlag) {
     flags.holdedFlag = false;
+    flags.pressF = false;
     return true;
   }
   else return false;

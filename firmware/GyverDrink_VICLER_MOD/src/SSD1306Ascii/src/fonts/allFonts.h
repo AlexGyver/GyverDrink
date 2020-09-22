@@ -55,7 +55,11 @@
 // any other value means variable width font in FontCreator2 (thiele)
 // format with pixel padding
 
+#include "MonoNum30x40.h"
+#include "Mode213x28.h"
+#include "Mode13x28.h"
 #include "MonoNum22x32.h"
+#include "Battery11x21.h"
 #include "Battery19x9.h"
 #include "CenturyGothic10x16.h" // cyrillic
 #include "OpenSans10x16.h"		// cyrillic
