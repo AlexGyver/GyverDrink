@@ -891,12 +891,6 @@ void displayBattery(bool batOk) {
     if (blinkState) printInt(get_battery_percent(), Right, 0);
     else disp.clear();
   }
-
-#if(MENU_LANG == 1)
-  disp.setFont(CenturyGothic10x16);
-#else
-  disp.setFont(ZevvPeep8x16);
-#endif
 }
 #endif
 #endif
