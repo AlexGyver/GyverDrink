@@ -43,7 +43,10 @@ private:
 
 void ServoSmoothMinim::write(byte angle)
 {
-    _servo.writeMicroseconds(angleToUs(angle)); // 544 - 2400
+    if(_dir)
+        _servo.writeMicroseconds(2944 - angleToUs(angle)); // 2400 - 544
+    else
+        _servo.writeMicroseconds(angleToUs(angle)); // 544 - 2400
 }
 
 void ServoSmoothMinim::attach(byte pin, byte target)
@@ -90,6 +93,11 @@ void ServoSmoothMinim::setTargetDeg(byte target)
 
 void ServoSmoothMinim::setDirection(bool dir)
 {
+    if(_dir != dir){
+        _servoCurrentPos = 2944 - _servoCurrentPos;
+        _newPos = _servoCurrentPos;
+    }
+        
     _dir = dir;
 }
 
@@ -113,7 +121,8 @@ boolean ServoSmoothMinim::tickManual()
         _newPos += (float)(_servoCurrentPos - _newPos) * _k;               // и фильтруем её
         //_newPos = constrain(_newPos, _min, _max); // ограничиваем
         //writeUs((int)_newPos);                    // отправляем на серво
-        _servo.writeMicroseconds(_newPos);
+        if(_dir) _servo.writeMicroseconds(2944 - _newPos);
+        else _servo.writeMicroseconds(_newPos);
     }
     if (abs(_servoTargetPos - (int)_newPos) < SS_DEADZONE)
     {

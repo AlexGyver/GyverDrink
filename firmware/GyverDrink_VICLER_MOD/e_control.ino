@@ -32,10 +32,16 @@ void encTick() {
     if (curSelected >= 0) {
       shotVolume[(byte)curSelected] = constrain(shotVolume[(byte)curSelected], 1, settingsList[max_volume]);
       printNum(shotVolume[curSelected], ml);
+#ifndef TM1637
+      progressBar(shotVolume[curSelected], settingsList[max_volume]);
+#endif
     }
     else {
       thisVolume = constrain(thisVolume, 1, settingsList[max_volume]);
       printNum(thisVolume, ml);
+#ifndef TM1637
+      progressBar(thisVolume, settingsList[max_volume]);
+#endif
       for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
     }
 
@@ -137,8 +143,18 @@ void btnTick() {
     }
     LEDchanged = true;
 
-    if (curSelected >= 0) printNum(shotVolume[curSelected], ml);
-    else  printNum(thisVolume, ml);
+    if (curSelected >= 0) {
+      printNum(shotVolume[curSelected], ml);
+#ifndef TM1637
+      progressBar(shotVolume[curSelected], settingsList[max_volume]);
+#endif
+    }
+    else  {
+      printNum(thisVolume, ml);
+#ifndef TM1637
+      progressBar(thisVolume, settingsList[max_volume]);
+#endif
+    }
 
     timeoutReset();
   }

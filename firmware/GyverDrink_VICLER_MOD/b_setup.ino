@@ -7,8 +7,10 @@ void setup() {
   disp.brightness(7);
 #elif defined OLED_SH1106
   disp.begin(&SH1106_128x64, 0x3C);
+  disp.setContrast(100);
 #elif defined OLED_SSD1306
   disp.begin(&Adafruit128x64, 0x3C);
+  disp.setContrast(100);
 #endif
 
   // епром
@@ -87,7 +89,7 @@ void setup() {
         Время до полного угасания в мс = 1000 * RAINBOW_START_BRIGHTNESS / RAINBOW_FPS
   */
 
-#define RAINBOW_FPS 50
+#define RAINBOW_FPS 60
 #define RAINBOW_START_BRIGHTNESS 250
 
 #ifdef TM1637
@@ -97,8 +99,12 @@ void setup() {
   timerMinim nextSym(1000 / ANIMATION_FPS);
 #else
   timerMinim nextSym(100);
+#if(MENU_LANG == 1)
   disp.setFont(CenturyGothic10x16);
-  disp.setCursor(0, 3);
+#else
+  disp.setFont(ZevvPeep8x16);
+#endif
+  printStr(bootscreen, Center, 3);
 #endif
 
   timerMinim nextColor(1000 / RAINBOW_FPS);
@@ -119,8 +125,14 @@ void setup() {
       showAnimation(animCount);
 #endif
 #else
-      static uint8_t index = 0;
-      if (bootscreen[index] != '\0') disp.print(bootscreen[index++]);
+#if(MENU_LANG == 1)
+      disp.setFont(CenturyGothic10x16);
+#else
+      disp.setFont(ZevvPeep8x16);
+#endif
+      //      static uint8_t index = 0;
+      //      if (bootscreen[index] != '\0') disp.write(bootscreen[index++]);
+      progressBar(RAINBOW_START_BRIGHTNESS - startBrightness, RAINBOW_START_BRIGHTNESS);
 #endif
     }
   }

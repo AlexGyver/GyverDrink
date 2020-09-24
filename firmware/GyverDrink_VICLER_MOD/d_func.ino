@@ -21,9 +21,13 @@ void serviceRoutine(serviceStates mode) {
     delay(1000);
 #else
     disp.clear();
-    disp.setInvertMode(1);
-    printStr("   Калибр. серво   \n", 0, 0);
-    disp.setInvertMode(0);
+    //disp.setInvertMode(1);
+#if(MENU_LANG == 1)
+    printStr("Парковка", 1, 0);
+#else
+    printStr("Parking position", 1, 0);
+#endif
+    //disp.setInvertMode(0);
 #endif
     byte servoPos = parking_pos;
     printNum(servoPos, deg);
@@ -42,6 +46,14 @@ void serviceRoutine(serviceStates mode) {
 #ifdef TM1637
           printNum((i + 1) * 1000 + shotPos[i], deg);
 #else
+#if(MENU_LANG == 1)
+          printStr("Рюмка ", 1, 0);
+#else
+          printStr("Shot ", 1, 0);
+#endif
+          printInt(currShot + 1);
+          clearToEOL();
+          disp.write('\n');
           printNum(servoPos, deg);
 #endif
           servo.setTargetDeg(servoPos);
@@ -59,6 +71,15 @@ void serviceRoutine(serviceStates mode) {
           shotCount--;
           if (shotCount == 0) { // убрали последнюю рюмку
             servoPos = parking_pos;
+#ifndef TM1637
+#if(MENU_LANG == 1)
+            printStr("Парковка", 1, 0);
+#else
+            printStr("Parking position", 1, 0);
+#endif
+            clearToEOL();
+            disp.write('\n');
+#endif
             printNum(servoPos, deg);
             servo.setTargetDeg(servoPos);
             servo.start();
@@ -75,6 +96,14 @@ void serviceRoutine(serviceStates mode) {
 #ifdef TM1637
           printNum((i + 1) * 1000 + shotPos[i], deg);
 #else
+#if(MENU_LANG == 1)
+          printStr("Рюмка ", 1, 0);
+#else
+          printStr("Shot ", 1, 0);
+#endif
+          printInt(currShot + 1);
+          clearToEOL();
+          disp.write('\n');
           printNum(servoPos, deg);
 #endif
           servo.setTargetDeg(servoPos);
@@ -109,11 +138,11 @@ void serviceRoutine(serviceStates mode) {
         mode = VOLUME;
 #else
         timeoutReset();
-//        servo.setTargetDeg(parking_pos);
-//        servo.start();
-//        servoON();
+        //        servo.setTargetDeg(parking_pos);
+        //        servo.start();
+        //        servoON();
         for (byte i = 0; i < NUM_SHOTS; i++) {
-          if(shotStates[i] == EMPTY) strip.setLED(i, mCOLOR(ORANGE));
+          if (shotStates[i] == EMPTY) strip.setLED(i, mCOLOR(ORANGE));
           else strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
         }
         strip.show();
@@ -122,7 +151,7 @@ void serviceRoutine(serviceStates mode) {
         break;
       }
     }
-//    while (!servo.tick());
+    //    while (!servo.tick());
     servo.stop();
     servoOFF();
     disp.clear();
@@ -147,12 +176,19 @@ void serviceRoutine(serviceStates mode) {
     disp.displayInt(pumpTime);
 #else
     disp.clear();
-    disp.setInvertMode(1);
-    printStr("  Калибр. объ¿ма  \n", 0, 0);
-    disp.setInvertMode(0);
+    //disp.setInvertMode(1);
+    printStr(calibration_menu[mode - 1], Center, 0);
+    //disp.setInvertMode(0);
     printNum(pumpTime);
 #endif
+    if (curPumping != -1) {   // если уже стоит рюмка
+      shotStates[curPumping] = EMPTY;
+      systemON = false;
+      systemState = SEARCH;
+      curPumping = -1;
+    }
     while (1) {
+
       if (timer100.isReady()) {   // период 100 мс
         // работа помпы со счётчиком
         if (!digitalRead(ENC_SW) && curPumping != -1) {
@@ -200,13 +236,15 @@ void serviceRoutine(serviceStates mode) {
 #ifdef BATTERY_PIN
         mode = BATTERY;
 #endif
-#else   
+#else
         timeoutReset();
 #endif
+
         curPumping = -1;
         servo.setTargetDeg(parking_pos);
         servo.start();
         servoON();
+
         for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
         strip.show();
         break;
@@ -237,10 +275,9 @@ void serviceRoutine(serviceStates mode) {
     delay(1000);
 #else
     disp.clear();
-    disp.setInvertMode(1);
-    disp.setFont(CenturyGothic10x16);
-    printStr("  Калибр. аккум-а  \n", 0, 0);
-    disp.setInvertMode(0);
+    //disp.setInvertMode(1);
+    printStr(calibration_menu[mode - 1], Center, 0);
+    //disp.setInvertMode(0);
 #endif
     while (1) {
       enc.tick();
@@ -283,9 +320,9 @@ void settingsMenuHandler(uint8_t selectedItem) {
   }
   else {
     disp.setInvertMode(1);
-//    disp.setFont(ZevvPeep8x16);
     printStr(MenuPages[menuPage][menuItem], 0, selectedItem);
-    printStr("                       ");
+    clearToEOL();
+    disp.setInvertMode(0);
     printInt(settingsList[parameter], Right);
   }
   while (1) {
@@ -311,9 +348,9 @@ void settingsMenuHandler(uint8_t selectedItem) {
 
 
       disp.setInvertMode(1);
-//      disp.setFont(ZevvPeep8x16);
       printStr(MenuPages[menuPage][menuItem], 0, selectedItem);
-      printStr("                       ");
+      clearToEOL();
+      disp.setInvertMode(0);
       printInt(settingsList[parameter], Right);
 
       timeoutReset();
@@ -338,9 +375,9 @@ void settingsMenuHandler(uint8_t selectedItem) {
 
       servo.setSpeed(settingsList[servo_speed]);
       servo.setDirection(settingsList[inverse_servo]);
+      servo.start();
       servoON();
-      servo.attach(SERVO_PIN, parking_pos);
-      delay(500);
+      while (!servo.tick());
       servo.stop();
       servoOFF();
       if (thisVolume > settingsList[max_volume]) thisVolume = settingsList[max_volume];
@@ -353,7 +390,7 @@ void settingsMenuHandler(uint8_t selectedItem) {
     }
 
     timeoutTick();
-    if(!timeoutState) return;
+    if (!timeoutState) return;
     LEDtick();
   }
 }
@@ -371,7 +408,12 @@ void flowTick() {
         else  strip.setLED(i, mCOLOR(ORANGE));                      // подсветили оранжевым
         LEDchanged = true;
         shotCount++;                                                // инкрементировали счётчик поставленных рюмок
-        if (systemState != PUMPING && !showMenu) printNum(shotVolume[i], ml);
+        if (systemState != PUMPING && !showMenu) {
+          printNum(shotVolume[i], ml);
+#ifndef TM1637
+          progressBar(shotVolume[i], settingsList[max_volume]);
+#endif
+        }
       }
       if (!swState && shotStates[i] != NO_GLASS) {   // убрали пустую/полную рюмку
         shotStates[i] = NO_GLASS;                                   // статус - нет рюмки
@@ -392,7 +434,12 @@ void flowTick() {
           volumeCount = 0;
         }
         shotCount--;
-        if (systemState != PUMPING && !showMenu) printNum(thisVolume, ml);
+        if (systemState != PUMPING && !showMenu) {
+          printNum(thisVolume, ml);
+#ifndef TM1637
+          progressBar(thisVolume, settingsList[max_volume]);
+#endif
+        }
       }
       if (shotStates[i] == READY) rainbowFlow(1, i);
       else  rainbowFlow(0, i);
@@ -462,7 +509,6 @@ void flowRoutnie() {
           servoON();                                        // включаем серво и паркуемся
 #if(STATUS_LED)
           LED = mHSV(11, 255, STATUS_LED); // orange
-          //strip.show();
           LEDchanged = true;
 #endif
         }
@@ -499,10 +545,14 @@ void flowRoutnie() {
   } else if (systemState == PUMPING) {                    // если качаем
     static byte lastVolumeCount = 0;
     volumeCount += volumeTick;
-    if((byte)volumeCount != lastVolumeCount){
-      printNum(volumeCount, ml);               // выводим текущий объём на дисплей
-      lastVolumeCount = (byte)volumeCount;
+    if (round(volumeCount) != lastVolumeCount) {
+      printNum(round(volumeCount), ml);               // выводим текущий объём на дисплей
+      lastVolumeCount = round(volumeCount);
+#ifndef TM1637
+      progressBar(round(volumeCount), shotVolume[curPumping]);
+#endif
     }
+
     int colorCount = MIN_COLOR + COLOR_SCALE * volumeCount / shotVolume[curPumping];  // расчёт цвета для текущего обьёма
     strip.setLED(curPumping, mWHEEL(colorCount));
     LEDchanged = true;
@@ -521,7 +571,13 @@ void flowRoutnie() {
       WAITtimer.reset();
     }
   } else if (systemState == WAIT) {
-    if (WAITtimer.isReady()) systemState = SEARCH;
+    volumeCount = 0;
+    if (WAITtimer.isReady()) {
+      systemState = SEARCH;
+#ifndef TM1637
+      displayMode(workMode);
+#endif
+    }
   }
 }
 
@@ -545,12 +601,17 @@ void prePump() {
   delay(300); // небольшая задержка перед наливом
 
   pumpON(); // включаем помпу
-  timerMinim timer20(20);
+  FLOWdebounce.reset();
   while (!digitalRead(SW_pins[curPumping]) && !digitalRead(ENC_SW)) // пока стоит рюмка и зажат энкодер, продолжаем наливать
   {
-    if (timer20.isReady()) {
-      volumeCount += 20 * 50.0 / time50ml;
-      printNum(round(volumeCount), ml);
+    if (FLOWdebounce.isReady()) {
+      static byte lastVolumeCount = 0;
+      volumeCount += volumeTick;
+      if (round(volumeCount) != lastVolumeCount) {
+        printNum(round(volumeCount), ml);
+        lastVolumeCount = round(volumeCount);
+      }
+
       strip.setLED(curPumping, mWHEEL( (int)(volumeCount * 10 + MIN_COLOR) % 1530) );
       strip.show();
     }
@@ -567,7 +628,6 @@ void timeoutReset() {
     if (workMode) disp.scrollByte(64, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64, 50);
     else  disp.scrollByte(0, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 0, 50);
 #else
-    disp.setContrast(255);
     disp.invertDisplay((bool)settingsList[invert_display]);
     displayMode(workMode);
 #endif
@@ -595,8 +655,8 @@ void timeoutTick() {
     disp.brightness(0);
     printNum(thisVolume, ml);
 #else
-    disp.setContrast(0);
-    if(showMenu) {
+    //disp.setContrast(0);
+    if (showMenu) {
       showMenu = 0;
       menuItem = 0;
       menuPage = MAIN_MENU_PAGE;
@@ -781,7 +841,7 @@ bool battery_watchdog() {
     lastMillis = millis();
     batOk = (get_battery_voltage() < (float)BATTERY_LOW) ? 0 : 1;
     if (!batOk) {
-      if(systemState == PUMPING){
+      if (systemState == PUMPING) {
         pumpOFF();                      // помпа выкл
         shotStates[curPumping] = READY; // налитая рюмка, статус: готов
         curPumping = -1;                // снимаем выбор рюмки
@@ -819,21 +879,24 @@ void displayBattery(bool batOk) {
   static uint32_t currentMillis, lastDisplay = 0, lastBlink = 0;
   static bool blinkState = true;
   currentMillis = millis();
+  disp.setFont(Battery11x21);
 
   if ( (currentMillis - lastDisplay >= 1000) && batOk) {
     lastDisplay = currentMillis;
-    disp.setFont(Battery11x21);
     printInt(get_battery_percent(), Right, 0);
   }
   else if ( (currentMillis - lastBlink >= 500) && !batOk) {
     lastBlink = currentMillis;
     blinkState = !blinkState;
-    if (blinkState) {
-      disp.setFont(Battery11x21);
-      printInt(get_battery_percent(), Right, 0);
-    }
+    if (blinkState) printInt(get_battery_percent(), Right, 0);
     else disp.clear();
   }
+
+#if(MENU_LANG == 1)
+  disp.setFont(CenturyGothic10x16);
+#else
+  disp.setFont(ZevvPeep8x16);
+#endif
 }
 #endif
 #endif
