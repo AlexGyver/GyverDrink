@@ -125,11 +125,6 @@ void setup() {
       showAnimation(animCount);
 #endif
 #else
-#if(MENU_LANG == 1)
-      disp.setFont(CenturyGothic10x16);
-#else
-      disp.setFont(ZevvPeep8x16);
-#endif
       //      static uint8_t index = 0;
       //      if (bootscreen[index] != '\0') disp.write(bootscreen[index++]);
       progressBar(RAINBOW_START_BRIGHTNESS - startBrightness, RAINBOW_START_BRIGHTNESS);

@@ -232,6 +232,12 @@ void displayMode(workModes mode) {
 void displayMenu() {
   static uint8_t firstItem = 1, selectedItem = 0;
 
+#if(MENU_LANG == 1)
+      disp.setFont(CenturyGothic10x16);
+#else
+      disp.setFont(ZevvPeep8x16);
+#endif
+
   if (selectItem) {
     if (menuPage == MAIN_MENU_PAGE) { // выбор елемента на главной странице Меню
       if (menuItem == 1) { // нажали на режим
