@@ -1,5 +1,5 @@
-//GyverDrink VICLER_MOD_StepMot v2.1
-//14.09.2020
+//GyverDrink VICLER_MOD_StepMot v2.2
+//24.09.2020
 /*
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с шаговым двигателем и дополнительным функционалом
 
@@ -108,7 +108,7 @@ bool timeoutState = false;
 bool volumeChanged = false;
 bool parking = false;
 bool atHome = false;
-bool LEDbreathing = false;
+bool LEDbreathingState = false;
 
 //╞═════════════════════════════╡MACROS╞═════════════════════════════╡
 

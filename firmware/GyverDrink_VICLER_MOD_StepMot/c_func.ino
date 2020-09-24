@@ -149,7 +149,7 @@ void flowTick() {
       TIMEOUTtimer.start();                                        // запускаем таймер для режима ожидания
 #if (STATUS_LED)
       if (timeoutState) {                                          // отключаем динамическую подсветку режима ожидания
-        LEDbreathing = false;
+        LEDbreathingState = false;
         LED = mHSV(255, 0, STATUS_LED); // white
       }
 #endif
@@ -213,7 +213,7 @@ void flowRoutine() {
         stepper.disable();                                // выключили шаговик
         systemON = false;                                 // выключили систему
         parking = 1;
-        LEDbreathing = true;
+        LEDbreathingState = true;
         LEDchanged = true;
         DEBUGln("parked!");
         dispNum(thisVolume);
@@ -271,7 +271,7 @@ void LEDtick() {
   if (LEDchanged && LEDtimer.isReady()) {
     LEDchanged = false;
 #if(STATUS_LED)
-    ledBreathing(LEDbreathingState, NUM_SHOTS, timeoutState);
+    ledBreathing(LEDbreathingState, timeoutState);
 #endif
     strip.show();
   }
@@ -293,7 +293,7 @@ void timeoutReset() {
 #endif
 #if(STATUS_LED)
   LED = mHSV(255, 0, STATUS_LED); // white
-  LEDbreathing = false;
+  LEDbreathingState = false;
 #endif
   LEDchanged = true;
   timeoutState = true;
@@ -316,7 +316,7 @@ void timeoutTick() {
 #endif
     selectShot = -1;
     curSelected = -1;
-    LEDbreathing = true;
+    LEDbreathingState = true;
     LEDchanged = true;
 #if (TIMEOUT_OFF > 0)
     POWEROFFtimer.reset();
@@ -362,7 +362,7 @@ bool homing() {
 #endif
 
 #if(STATUS_LED)
-void breathing(bool _state, uint8_t _shotNum, bool mode) {
+void ledBreathing(bool _state, bool mode) {
   static float _brightness = STATUS_LED;
   static int8_t _dir = -1;
   if (!_state) {
