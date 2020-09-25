@@ -220,9 +220,10 @@ struct EEPROMAddress
   const byte _max_volume = _auto_parking + sizeof(settingsList[auto_parking]);
   const byte _stby_light = _max_volume + sizeof(settingsList[max_volume]);
   const byte _rainbow_flow = _stby_light + sizeof(settingsList[stby_light]);
-  const byte _shots_overall = _rainbow_flow + sizeof(settingsList[rainbow_flow]);
-  const byte _volume_overall = _shots_overall + sizeof(shots_overall);
-  const byte _invert_display = _volume_overall + sizeof(volume_overall);
+  //const byte _shots_overall = _rainbow_flow + sizeof(settingsList[rainbow_flow]);
+  //const byte _volume_overall = _shots_overall + sizeof(shots_overall);
+  //const byte _invert_display = _volume_overall + sizeof(volume_overall);
+  const byte _invert_display = _rainbow_flow + sizeof(settingsList[rainbow_flow]);
 #endif
 } eeAddress;
 

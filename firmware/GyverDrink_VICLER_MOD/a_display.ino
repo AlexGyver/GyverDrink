@@ -281,12 +281,14 @@ void displayMenu() {
     }
     else if (menuPage == STATISTICS_PAGE) {
       if (menuItem == 1) {
-        EEPROM.put(eeAddress._shots_overall, 0);
-        readEEPROM();
+//        EEPROM.put(eeAddress._shots_overall, 0);
+//        readEEPROM();
+          shots_overall = 0;
       }
       else if (menuItem == 2) {
-        EEPROM.put(eeAddress._volume_overall, 0);
-        readEEPROM();
+//        EEPROM.put(eeAddress._volume_overall, 0);
+//        readEEPROM();
+        volume_overall = 0;
       }
     }
     selectItem = 0;
@@ -334,7 +336,7 @@ void displayMenu() {
       if (currItem == 1)  printInt(shots_overall, Right);
       if (currItem == 2)  {
 #if(MENU_LANG == 1)
-        printFloat(volume_overall / 1000.0, 2, disp.displayWidth() - strWidth("0.00л"));
+        printFloat(volume_overall / 1000.0, 2, disp.displayWidth() - strWidth("0.00л") - 1);
         printStr("л");
 #else
         printFloat(volume_overall / 1000.0, 2, disp.displayWidth() - strWidth("0.00l"));

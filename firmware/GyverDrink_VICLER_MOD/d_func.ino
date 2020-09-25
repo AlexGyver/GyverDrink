@@ -619,8 +619,8 @@ void flowRoutnie() {
 #ifndef TM1637
       shots_overall++;
       volume_overall += volumeCount;
-      EEPROM.put(eeAddress._shots_overall, shots_overall);
-      EEPROM.put(eeAddress._volume_overall, volume_overall);
+//      EEPROM.put(eeAddress._shots_overall, shots_overall);
+//      EEPROM.put(eeAddress._volume_overall, volume_overall);
 #endif
       curPumping = -1;                                    // снимаем выбор рюмки
       systemState = WAIT;                                 // режим работы - ждать
