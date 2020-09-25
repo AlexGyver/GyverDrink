@@ -11,7 +11,7 @@ void serviceRoutine(serviceStates mode) {
   //==============================================================================
   timerMinim timer100(100);
 
-  if (mode == SERVO) {         // калибровка углов серво
+  if (mode == SERVO) {
     byte workModeTemp = workMode;
     workMode = AutoMode;
     for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
@@ -23,9 +23,9 @@ void serviceRoutine(serviceStates mode) {
     disp.clear();
     //disp.setInvertMode(1);
 #if(MENU_LANG == 1)
-    printStr("Парковка", 1, 0);
+    printStr("Парковка", Center, 0);
 #else
-    printStr("Parking position", 1, 0);
+    printStr("Parking position", Center, 0);
 #endif
     //disp.setInvertMode(0);
 #endif
@@ -46,10 +46,12 @@ void serviceRoutine(serviceStates mode) {
 #ifdef TM1637
           printNum((i + 1) * 1000 + shotPos[i], deg);
 #else
+          disp.home();
+          clearToEOL();
 #if(MENU_LANG == 1)
-          printStr("Рюмка ", 1, 0);
+          printStr("Рюмка ", Center, 0);
 #else
-          printStr("Shot ", 1, 0);
+          printStr("Shot ", Center, 0);
 #endif
           printInt(currShot + 1);
           clearToEOL();
@@ -73,9 +75,9 @@ void serviceRoutine(serviceStates mode) {
             servoPos = parking_pos;
 #ifndef TM1637
 #if(MENU_LANG == 1)
-            printStr("Парковка", 1, 0);
+            printStr("Парковка", Center, 0);
 #else
-            printStr("Parking position", 1, 0);
+            printStr("Parking position", Center, 0);
 #endif
             clearToEOL();
             disp.write('\n');
@@ -96,10 +98,12 @@ void serviceRoutine(serviceStates mode) {
 #ifdef TM1637
           printNum((i + 1) * 1000 + shotPos[i], deg);
 #else
+          disp.home();
+          clearToEOL();
 #if(MENU_LANG == 1)
-          printStr("Рюмка ", 1, 0);
+          printStr("Рюмка ", Center, 0);
 #else
-          printStr("Shot ", 1, 0);
+          printStr("Shot ", Center, 0);
 #endif
           printInt(currShot + 1);
           clearToEOL();
@@ -164,7 +168,7 @@ void serviceRoutine(serviceStates mode) {
   //                            калибровка объёма
   //==============================================================================
 
-  if (mode == VOLUME) {                      // калибровка объёма
+  if (mode == VOLUME) {
     uint16_t pumpTime = 0;
     bool flag = false;
     for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
@@ -176,9 +180,6 @@ void serviceRoutine(serviceStates mode) {
     disp.displayInt(pumpTime);
 #else
     disp.clear();
-    //disp.setInvertMode(1);
-    printStr(calibration_menu[mode - 1], Center, 0);
-    //disp.setInvertMode(0);
     printNum(pumpTime);
 #endif
     if (curPumping != -1) {   // если уже стоит рюмка
@@ -186,6 +187,22 @@ void serviceRoutine(serviceStates mode) {
       systemON = false;
       systemState = SEARCH;
       curPumping = -1;
+#ifndef TM1637
+#if(MENU_LANG == 1)
+      printStr("Зажмите энкодер", Center, 0);
+#else
+      printStr("Press encoder", Center, 0);
+#endif
+#endif
+    }
+    else {
+#ifndef TM1637
+#if(MENU_LANG == 1)
+      printStr("Поставьте рюмку", Center, 0);
+#else
+      printStr("Place shot", Center, 0);
+#endif
+#endif
     }
     while (1) {
 
@@ -193,6 +210,15 @@ void serviceRoutine(serviceStates mode) {
         // работа помпы со счётчиком
         if (!digitalRead(ENC_SW) && curPumping != -1) {
           if (flag) pumpTime += 100;
+          else {
+#ifndef TM1637
+#if(MENU_LANG == 1)
+            printStr("   Налейте 50мл   ", Center, 0);
+#else
+            printStr("   Fill 50ml   ", Center, 0);
+#endif
+#endif
+          }
 #ifdef TM1637
           disp.displayInt(pumpTime);
 #else
@@ -215,6 +241,13 @@ void serviceRoutine(serviceStates mode) {
           servo.setTargetDeg(shotPos[i]);
           servo.start();
           servoON();
+#ifndef TM1637
+#if(MENU_LANG == 1)
+          printStr("Зажмите энкодер", Center, 0);
+#else
+          printStr("Press encoder", Center, 0);
+#endif
+#endif
         }
       }
       if (digitalRead(SW_pins[curPumping]) && (curPumping > -1)) {
@@ -225,6 +258,13 @@ void serviceRoutine(serviceStates mode) {
         pumpTime = 0;
         printNum(pumpTime);
         curPumping = -1;
+#ifndef TM1637
+#if(MENU_LANG == 1)
+        printStr("Поставьте рюмку", Center, 0);
+#else
+        printStr("  Place shot  ", Center, 0);
+#endif
+#endif
       }
 
       if (servo.tick()) servoOFF();
@@ -276,7 +316,12 @@ void serviceRoutine(serviceStates mode) {
 #else
     disp.clear();
     //disp.setInvertMode(1);
-    printStr(calibration_menu[mode - 1], Center, 0);
+#if(MENU_LANG == 1)
+    printStr("Калибр. аккум-а", Center, 0);
+#else
+    printStr("Battery voltage", Center, 0);
+#endif
+    disp.setFont(MonoNum30x40);
     //disp.setInvertMode(0);
 #endif
     while (1) {
@@ -299,6 +344,12 @@ void serviceRoutine(serviceStates mode) {
 #ifdef TM1637
         disp.scrollByte(0, 0, 0, 0, 50);
 #else
+#if(MENU_LANG == 1)
+        disp.setFont(Vicler8x16);
+        disp.setLetterSpacing(0);
+#else
+        disp.setFont(ZevvPeep8x16);
+#endif
         disp.clear();
         timeoutReset();
 #endif
@@ -319,10 +370,10 @@ void settingsMenuHandler(uint8_t selectedItem) {
     bypass = true;
   }
   else {
-    disp.setInvertMode(1);
+    disp.setInvertMode(0);
     printStr(MenuPages[menuPage][menuItem], 0, selectedItem);
     clearToEOL();
-    disp.setInvertMode(0);
+    disp.setInvertMode(1);
     printInt(settingsList[parameter], Right);
   }
   while (1) {
@@ -347,10 +398,10 @@ void settingsMenuHandler(uint8_t selectedItem) {
       else keepPowerState = 0;
 
 
-      disp.setInvertMode(1);
+      disp.setInvertMode(0);
       printStr(MenuPages[menuPage][menuItem], 0, selectedItem);
       clearToEOL();
-      disp.setInvertMode(0);
+      disp.setInvertMode(1);
       printInt(settingsList[parameter], Right);
 
       timeoutReset();
@@ -361,7 +412,7 @@ void settingsMenuHandler(uint8_t selectedItem) {
       bypass = true;
     }
 
-    if (encBtn.pressed() || bypass) {
+    if (encBtn.pressed() ||  btn.pressed() || bypass) {
       EEPROM.update(eeAddress._timeout_off, settingsList[timeout_off]);
       EEPROM.update(eeAddress._inverse_servo, settingsList[inverse_servo]);
       EEPROM.update(eeAddress._servo_speed, settingsList[servo_speed]);
@@ -476,6 +527,10 @@ void flowRoutnie() {
         curPumping = i;                                   // запоминаем выбор
         systemState = MOVING;                             // режим - движение
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
+        printNum(0, ml);                                  // обнуляем счётчик
+#ifndef TM1637
+        progressBar(0);
+#endif
         if ( abs(shotPos[i] - servo.getCurrentDeg()) > 3) {        // включаем серво только если целевая позиция не совпадает с текущей
           servo.setTargetDeg(shotPos[curPumping]);        // задаём цель
           servo.start();
@@ -543,13 +598,14 @@ void flowRoutnie() {
     }
 
   } else if (systemState == PUMPING) {                    // если качаем
-    static byte lastVolumeCount = 0;
+    static byte lastVolumeCount = 0, tempVolume = 0;
     volumeCount += volumeTick;
-    if (round(volumeCount) != lastVolumeCount) {
-      printNum(round(volumeCount), ml);               // выводим текущий объём на дисплей
-      lastVolumeCount = round(volumeCount);
+    tempVolume = round(volumeCount);
+    if (tempVolume != lastVolumeCount) {
+      printNum(tempVolume, ml);               // выводим текущий объём на дисплей
+      lastVolumeCount = tempVolume;
 #ifndef TM1637
-      progressBar(round(volumeCount), shotVolume[curPumping]);
+      progressBar(tempVolume, shotVolume[curPumping]);
 #endif
     }
 
@@ -569,6 +625,10 @@ void flowRoutnie() {
       curPumping = -1;                                    // снимаем выбор рюмки
       systemState = WAIT;                                 // режим работы - ждать
       WAITtimer.reset();
+      if (volumeChanged) {
+        volumeChanged = false;
+        EEPROM.update(eeAddress._thisVolume, thisVolume);
+      }
     }
   } else if (systemState == WAIT) {
     volumeCount = 0;
@@ -622,6 +682,7 @@ void prePump() {
 // сброс таймаута
 void timeoutReset() {
   if (!timeoutState && !showMenu && (curSelected < 0)) {
+    timeoutState = true;
 #ifdef TM1637
     disp.brightness(7);
     if (!volumeChanged) disp.displayByte(0x00, 0x00, 0x00, 0x00);
@@ -632,7 +693,6 @@ void timeoutReset() {
     displayMode(workMode);
 #endif
   }
-  timeoutState = true;
   TIMEOUTtimer.reset();
   if (!keepPowerState) {
     for (byte i = 0; i < NUM_SHOTS; i++) {
@@ -663,10 +723,10 @@ void timeoutTick() {
       disp.clear();
       displayMode(workMode);
     }
+    else displayMode(workMode);
 #endif
-    if (settingsList[stby_light]) {
+    if (settingsList[stby_light])
       for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, settingsList[stby_light] / 2);
-    }
     LEDbreathingState = true;
     LEDchanged = true;
     selectShot = -1;
@@ -879,7 +939,7 @@ void displayBattery(bool batOk) {
   static uint32_t currentMillis, lastDisplay = 0, lastBlink = 0;
   static bool blinkState = true;
   currentMillis = millis();
-  disp.setFont(Battery11x21);
+  disp.setFont(Battery11x22);
 
   if ( (currentMillis - lastDisplay >= 1000) && batOk) {
     lastDisplay = currentMillis;

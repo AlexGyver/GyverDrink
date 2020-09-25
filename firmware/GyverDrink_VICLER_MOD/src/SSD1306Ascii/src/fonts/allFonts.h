@@ -54,23 +54,22 @@
 // FONT_WIDTH it the max character width.
 // any other value means variable width font in FontCreator2 (thiele)
 // format with pixel padding
-#include "System5x7R.h"
-#include "Pixel.h"
+
+#include "Vicler8x16.h"			// cyrillic
+#include "System5x7R.h"			// cyrillic + latin
+#include "CenturyGothic10x16.h" // cyrillic + latin
+#include "MonoNum22x32.h"
 #include "MonoNum30x40.h"
+#include "Pixel.h"
 #include "Mode12x26.h"
 #include "Mode213x28.h"
 #include "Mode13x28.h"
-#include "MonoNum22x32.h"
 #include "Battery10x17.h"
 #include "iBattery12x19.h"
-#include "Battery11x21.h"
+#include "Battery11x22.h"
 #include "Battery19x9.h"
-#include "CenturyGothic10x16.h" // cyrillic
-#include "OpenSans10x16.h"		// cyrillic
-
 #include "Battery219x9.h"
 #include "Battery22x12.h"
-#include "RobotoNum.h"
 #include "Adafruit5x7.h"        // Font from Adafruit GFX library
 #include "font5x7.h"
 #include "lcd5x7.h"

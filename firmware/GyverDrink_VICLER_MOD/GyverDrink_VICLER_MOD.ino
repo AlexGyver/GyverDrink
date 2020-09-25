@@ -1,6 +1,6 @@
 //GyverDrink VICLER_MOD
-#define VERSION 4.5
-//24.09.2020
+#define VERSION 4.6
+//25.09.2020
 /*
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
 
