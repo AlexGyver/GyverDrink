@@ -61,8 +61,8 @@ void btnTick() {
 #ifndef TM1637
       shots_overall++;
       volume_overall += volumeCount;
-//      EEPROM.put(eeAddress._shots_overall, shots_overall);
-//      EEPROM.put(eeAddress._volume_overall, volume_overall);
+      //      EEPROM.put(eeAddress._shots_overall, shots_overall);
+      //      EEPROM.put(eeAddress._volume_overall, volume_overall);
 #endif
       systemState = WAIT; // режим работы - ждать
       WAITtimer.reset();
@@ -79,6 +79,7 @@ void btnTick() {
       else {
         showMenu = 0;
         menuItem = 0;
+        lastMenuPage = NO_MENU;
         menuPage = MAIN_MENU_PAGE;
         displayMode(workMode);
       }
@@ -98,6 +99,7 @@ void btnTick() {
     if (showMenu) displayMenu();
     else {
       menuItem = 0;
+      lastMenuPage = NO_MENU;
       menuPage = MAIN_MENU_PAGE;
       displayMode(workMode);
     }
@@ -108,6 +110,10 @@ void btnTick() {
   // промывка
   if (encBtn.holding()) {
     if (workMode == AutoMode) return;
+#ifndef TM1637
+    printNum(0, ml);
+    progressBar(0);
+#endif
     prePump();
   }
 
@@ -115,7 +121,7 @@ void btnTick() {
   if (encBtn.pressed()) {
 #ifndef TM1637
     if (showMenu) {
-      selectItem = 1;
+      itemSelected = 1;
       displayMenu();
       return;
     }

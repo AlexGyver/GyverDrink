@@ -321,7 +321,7 @@ void serviceRoutine(serviceStates mode) {
 #else
     printStr("Battery voltage", Center, 0);
 #endif
-    disp.setFont(MonoNum30x40);
+    disp.setFont(FixedNum30x40);
     //disp.setInvertMode(0);
 #endif
     while (1) {
@@ -362,7 +362,7 @@ void serviceRoutine(serviceStates mode) {
 }
 
 #ifndef TM1637
-void settingsMenuHandler(uint8_t selectedItem) {
+void settingsMenuHandler(uint8_t _item) {
   bool bypass = false;
   uint8_t parameter = menuItem - 1;
   if (menuItem == menuItemsNum[menuPage]) { // сброс настроек
@@ -371,7 +371,7 @@ void settingsMenuHandler(uint8_t selectedItem) {
   }
   else {
     disp.setInvertMode(0);
-    printStr(MenuPages[menuPage][menuItem], 0, selectedItem);
+    printStr(MenuPages[menuPage][menuItem], 0, _item);
     clearToEOL();
     disp.setInvertMode(1);
     printInt(settingsList[parameter], Right);
@@ -380,6 +380,7 @@ void settingsMenuHandler(uint8_t selectedItem) {
     enc.tick();
 
     if (enc.isTurn()) {
+      static byte lastParameterValue = 0;
       if (enc.isLeft()) {
         settingsList[parameter] += 1;
       }
@@ -388,6 +389,7 @@ void settingsMenuHandler(uint8_t selectedItem) {
       }
 
       if (settingsList[timeout_off] > 15) settingsList[timeout_off] = 0;
+
       if (settingsList[servo_speed] > 100) settingsList[servo_speed] = 0;
 
       if (settingsList[stby_time]) {
@@ -397,12 +399,19 @@ void settingsMenuHandler(uint8_t selectedItem) {
       if (settingsList[keep_power]) KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
       else keepPowerState = 0;
 
+      if (settingsList[parameter] <= 99 && lastParameterValue >= 100) {
+        disp.setInvertMode(0);
+        printStr("  ", disp.displayWidth() - strWidth("000"));
+        disp.setInvertMode(1);
+      }
+      if (settingsList[parameter] <= 9 && lastParameterValue >= 10) {
+        disp.setInvertMode(0);
+        printStr("  ", disp.displayWidth() - strWidth("00"));
+        disp.setInvertMode(1);
+      }
 
-      disp.setInvertMode(0);
-      printStr(MenuPages[menuPage][menuItem], 0, selectedItem);
-      clearToEOL();
-      disp.setInvertMode(1);
       printInt(settingsList[parameter], Right);
+      lastParameterValue = settingsList[parameter];
 
       timeoutReset();
     }
@@ -431,6 +440,7 @@ void settingsMenuHandler(uint8_t selectedItem) {
       while (!servo.tick());
       servo.stop();
       servoOFF();
+
       if (thisVolume > settingsList[max_volume]) thisVolume = settingsList[max_volume];
       for (byte i = 0; i < NUM_SHOTS; i++) {
         if (shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, settingsList[stby_light]);
@@ -439,9 +449,6 @@ void settingsMenuHandler(uint8_t selectedItem) {
       timeoutReset();
       break;
     }
-
-    timeoutTick();
-    if (!timeoutState) return;
     LEDtick();
   }
 }
@@ -619,8 +626,8 @@ void flowRoutnie() {
 #ifndef TM1637
       shots_overall++;
       volume_overall += volumeCount;
-//      EEPROM.put(eeAddress._shots_overall, shots_overall);
-//      EEPROM.put(eeAddress._volume_overall, volume_overall);
+      //      EEPROM.put(eeAddress._shots_overall, shots_overall);
+      //      EEPROM.put(eeAddress._volume_overall, volume_overall);
 #endif
       curPumping = -1;                                    // снимаем выбор рюмки
       systemState = WAIT;                                 // режим работы - ждать
@@ -719,8 +726,10 @@ void timeoutTick() {
     if (showMenu) {
       showMenu = 0;
       menuItem = 0;
+      lastMenuPage = NO_MENU;
       menuPage = MAIN_MENU_PAGE;
       disp.clear();
+      progressBar(0);
       displayMode(workMode);
     }
     else displayMode(workMode);
@@ -732,7 +741,7 @@ void timeoutTick() {
     selectShot = -1;
     curSelected = -1;
     systemON = false;
-    if (settingsList[timeout_off]) POWEROFFtimer.reset();
+    if (settingsList[timeout_off] > 0) POWEROFFtimer.reset();
     if (volumeChanged) {
       volumeChanged = false;
       EEPROM.update(eeAddress._thisVolume, thisVolume);
@@ -762,11 +771,8 @@ void timeoutTick() {
 #else
       if (settingsList[invert_display]) disp.invertDisplay(false);
       disp.clear();
-      if (showMenu) {
-        menuPage = MAIN_MENU_PAGE;
-        menuItem = 1;
-        showMenu = false;
-      }
+      disp.setFont(FixedNum30x40);
+      printStr("$", Center, 2);
 #endif
       LEDchanged = true;
       POWEROFFtimer.stop();

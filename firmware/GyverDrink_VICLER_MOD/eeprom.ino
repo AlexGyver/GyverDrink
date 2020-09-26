@@ -137,22 +137,9 @@ void readEEPROM() {
   }
   else settingsList[rainbow_flow] = EEPROM.read(eeAddress._rainbow_flow);
 
-  // чтение статистики
-//  if (EEPROM.read(116) != EEPROM_KEY) {
-//    EEPROM.write(116, EEPROM_KEY);
-//    EEPROM.put(eeAddress._shots_overall, 0);
-//  }
-//  else EEPROM.get(eeAddress._shots_overall, shots_overall);
-//
-//  if (EEPROM.read(117) != EEPROM_KEY) {
-//    EEPROM.write(117, EEPROM_KEY);
-//    EEPROM.put(eeAddress._volume_overall, 0);
-//  }
-//  else EEPROM.get(eeAddress._volume_overall, volume_overall);
-
   // инверсия дисплея
-  if (EEPROM.read(118) != EEPROM_KEY) {
-    EEPROM.write(118, EEPROM_KEY);
+  if (EEPROM.read(116) != EEPROM_KEY) {
+    EEPROM.write(116, EEPROM_KEY);
     EEPROM.write(eeAddress._invert_display, INVERT_DISPLAY);
   }
   else settingsList[invert_display] = EEPROM.read(eeAddress._invert_display);
@@ -228,7 +215,7 @@ void resetEEPROM() {
   EEPROM.update(eeAddress._rainbow_flow, RAINBOW_FLOW);
 
   // сброс инвертирования дисплея
-  EEPROM.update(118, EEPROM_KEY);
+  EEPROM.update(116, EEPROM_KEY);
   EEPROM.update(eeAddress._invert_display, INVERT_DISPLAY);
 #endif
 

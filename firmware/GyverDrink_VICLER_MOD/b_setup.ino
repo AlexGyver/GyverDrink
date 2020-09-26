@@ -98,16 +98,16 @@ void setup() {
   timerMinim nextSym(1000 / ANIMATION_FPS);
 #else
   timerMinim nextSym(100);
-#ifndef TM1637
 #if(MENU_LANG == 1)
   disp.setFont(Vicler8x16);
   disp.setLetterSpacing(0);
 #else
   disp.setFont(ZevvPeep8x16);
-#endif
-#endif
+#endif // MENU_LANG
   printStr(bootscreen, Center, 3);
-#endif
+  progressBar(0);
+#endif // TM1637
+
 
   timerMinim nextColor(1000 / RAINBOW_FPS);
 
@@ -127,7 +127,7 @@ void setup() {
       showAnimation(animCount);
 #endif
 #else
-      progressBar(RAINBOW_START_BRIGHTNESS - startBrightness, RAINBOW_START_BRIGHTNESS);
+      progressBar(RAINBOW_START_BRIGHTNESS - startBrightness, RAINBOW_START_BRIGHTNESS - 2);
 #endif
     }
   }
@@ -140,6 +140,7 @@ void setup() {
   }
 #ifndef TM1637
   disp.clear();
+  //progressBar(0);
 #endif
 
 #if (STATUS_LED)

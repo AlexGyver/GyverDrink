@@ -11,7 +11,7 @@
  * me@apetech.de
  *
  * File Name           : Pixel.h
- * Date                : 25.09.2020
+ * Date                : 26.09.2020
  * Font size in bytes  : 24
  * Font width          : 4
  * Font height         : -8
@@ -47,18 +47,18 @@
 
 static const uint8_t Pixel[] PROGMEM = {
     0x00, 0x18, // size
-    0x04,       // width
-    0x08,       // height
-    0x30,       // first char
-    0x02,       // char count
-
+    0x04, // width
+    0x08, // height
+    0x30, // first char
+    0x02, // char count
+    
     // char widths
-    0x01, 0x01,
-
+    0x01, 0x01, 
+    
     // font data
-    0x00, // 48
-    0x70  // 49
-
+    0x40, // 48
+    0x70 // 49
+    
 };
 
 #endif

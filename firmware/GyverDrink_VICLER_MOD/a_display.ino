@@ -9,7 +9,8 @@ void printNum(uint16_t num, int8_t mode = 0);
 SSD1306AsciiAvrI2c disp;
 
 enum MenuPageName { // типы страниц меню
-  MAIN_MENU_PAGE = 0,
+  NO_MENU = -1,
+  MAIN_MENU_PAGE,
   SETTINGS_PAGE,
   CALIBRATION_PAGE,
   STATISTICS_PAGE
@@ -17,7 +18,8 @@ enum MenuPageName { // типы страниц меню
 
 #define MENU_PAGES 4 // количество страниц
 MenuPageName menuPage = MAIN_MENU_PAGE; // актуальная страница
-bool selectItem = 0;
+byte lastMenuPage = NO_MENU; // последняя отображаемая страница
+bool itemSelected = 0;
 
 #ifdef BATTERY_PIN
 uint8_t menuItemsNum[MENU_PAGES] = {4, 11, 3, 2}; // количество строк на каждой странице
@@ -27,14 +29,14 @@ uint8_t menuItemsNum[MENU_PAGES] = {4, 11, 2, 2}; // количество стр
 
 #if(MENU_LANG == 1)
 const char *MenuPages[MENU_PAGES][13] = {
-  { "~~~~~ Меню ~~~~~",
+  { "#####  Меню  #####",
     "",
     " Настройки",
     " Калибровка",
     " Статистика"
   },
 
-  { "~~~ Настройки ~~~",
+  { "###  Настройки  ###",
     "таймаут выкл.",
     "инверсия серво",
     "скорость серво",
@@ -48,7 +50,7 @@ const char *MenuPages[MENU_PAGES][13] = {
     "Сброс"
   },
 
-  { "~~~ Калибровка ~~~",
+  { "###  Калибровка  ###",
     " Серво",
     " Объ@м",
 #ifdef BATTERY_PIN
@@ -58,7 +60,7 @@ const char *MenuPages[MENU_PAGES][13] = {
 #endif
   },
 
-  { "~~ Статистика ~~",
+  { "###  Статистика  ###",
     " Кол-во рюмок",
     " Объ@м",
     ""
@@ -160,32 +162,32 @@ void printNum(uint16_t volume, int8_t postfix = 0) {
   static uint16_t lastVol = 0;
 
   byte shiftY = 0;
-  disp.setFont(MonoNum30x40);
+  disp.setFont(FixedNum30x40);
 
   if (postfix == 1) shiftY = 1;
 
-  if (volume <= 999 && lastVol >= 1000) printStr("////", Center, 3 - shiftY); // "/" = space
+  if (volume <= 999 && lastVol >= 1000) printStr("    ", Center, 3 - shiftY); // "/" = space
   if (volume <= 99 && lastVol >= 100) {
-    printStr("/", Left, 3 - shiftY);
-    printStr("/", Right, 3 - shiftY);
+    printStr(" ", Left, 3 - shiftY);
+    printStr(" ", Right, 3 - shiftY);
   }
   if (volume <= 9 && lastVol >= 10) {
-    printStr("//", Left, 3 - shiftY);
-    printStr("//", Right, 3 - shiftY);
+    printStr("  ", Left, 3 - shiftY);
+    //printStr("  ", Right, 3 - shiftY);
   }
   lastVol = volume;
 
   if (postfix == 1) { // отображение мл
     if (volume > 99) printInt(volume, Left, 3 - shiftY);
-    else if (volume > 9) printInt(volume, (disp.displayWidth() - strWidth("00-")) / 2, 3 - shiftY);
-    else printInt(volume, (disp.displayWidth() - strWidth("0-")) / 2 + 16, 3 - shiftY);
-    printStr("-"); // "ml"
+    else if (volume > 9) printInt(volume, (disp.displayWidth() - strWidth("00%")) / 2, 3 - shiftY);
+    else printInt(volume, (disp.displayWidth() - strWidth("0%")) / 2 + 16, 3 - shiftY);
+    printStr("%"); // "ml"
   }
   else if (postfix == 2) { // отображение угла
-    if (volume > 99) printInt(volume, (disp.displayWidth() - strWidth("000,")) / 2, 3 - shiftY);
-    else if (volume > 9) printInt(volume, (disp.displayWidth() - strWidth("00,")) / 2, 3 - shiftY);
-    else printInt(volume, (disp.displayWidth() - strWidth("0,")) / 2, 3 - shiftY);
-    if (postfix == 2)  printStr(","); // "°"
+    if (volume > 99) printInt(volume, (disp.displayWidth() - strWidth("000*")) / 2, 3 - shiftY);
+    else if (volume > 9) printInt(volume, (disp.displayWidth() - strWidth("00*")) / 2, 3 - shiftY);
+    else printInt(volume, (disp.displayWidth() - strWidth("0*")) / 2 + 16, 3 - shiftY);
+    if (postfix == 2)  printStr("*"); // "°"
   }
   else printInt(volume, Center, 3 - shiftY);
 
@@ -217,10 +219,12 @@ void progressBar(uint16_t value, uint16_t maximum = 50) {
     }
     currX = targetX;
   }
-  else {
+  else if (targetX < currX) {
     for (byte x = currX; x > targetX; x--) {
-      disp.setCursor(x, 7);
-      disp.write('0');
+      if (x % 2 == 0) {
+        disp.setCursor(x, 7);
+        disp.write('0');
+      }
     }
     currX = targetX;
   }
@@ -239,9 +243,8 @@ void displayMode(workModes mode) {
   else clearToEOL('0');//printInt(mode, disp.displayWidth() - strWidth('2') - 26);
 #endif
 
-
   printNum(thisVolume, ml);
-  progressBar(0);
+  if (timeoutState) progressBar(0);
   progressBar(thisVolume, settingsList[max_volume]);
 }
 
@@ -255,13 +258,14 @@ void displayMenu() {
   disp.setFont(ZevvPeep8x16);
 #endif
 
-  if (selectItem) {
+  if (itemSelected) {
     if (menuPage == MAIN_MENU_PAGE) { // выбор елемента на главной странице Меню
       if (menuItem == 1) { // нажали на режим
         workMode = (workModes)!workMode;
-        selectItem = 0;
+        itemSelected = 0;
         showMenu = false;
         disp.clear();
+        lastMenuPage = NO_MENU;
         displayMode(workMode);
 #if (SAVE_MODE == 1)
         EEPROM.update(eeAddress._workMode, workMode);
@@ -278,27 +282,25 @@ void displayMenu() {
     else if (menuPage == CALIBRATION_PAGE)  {
       disp.clear();
       serviceRoutine((serviceStates)(menuItem - 1));
+      lastMenuPage = NO_MENU;
     }
     else if (menuPage == STATISTICS_PAGE) {
-      if (menuItem == 1) {
-//        EEPROM.put(eeAddress._shots_overall, 0);
-//        readEEPROM();
-          shots_overall = 0;
-      }
-      else if (menuItem == 2) {
-//        EEPROM.put(eeAddress._volume_overall, 0);
-//        readEEPROM();
-        volume_overall = 0;
-      }
+      if (menuItem == 1) shots_overall = 0;
+      else if (menuItem == 2) volume_overall = 0;
     }
-    selectItem = 0;
+    itemSelected = 0;
   }
 
   menuItem = constrain(menuItem, 1, menuItemsNum[menuPage]);
 
-  disp.setInvertMode(0);
-  printStr(MenuPages[menuPage][0], Center, 0);
-  disp.write('\n');
+  if (menuPage != lastMenuPage) {
+    disp.setInvertMode(0);
+    printStr(MenuPages[menuPage][0], Center, 0);
+    disp.write('\n');
+    lastMenuPage = menuPage;
+  }
+  else disp.setCursor(0, 2);
+
 
   if (menuItem > firstItem + 2) firstItem = menuItem - 2; // прокрутка елементов меню
   else if (menuItem < firstItem)  firstItem = menuItem;
@@ -308,6 +310,7 @@ void displayMenu() {
 #if(MENU_SELECT == 1)
       disp.setInvertMode(1);
 #else
+      disp.setInvertMode(0);
       disp.write('>');
 #endif
       selectedItem = disp.row();
