@@ -23,7 +23,7 @@
  */
 #ifndef SSD1306AsciiWire_h
 #define SSD1306AsciiWire_h
-#include <Wire.h>
+//#include <Wire.h>
 #include "SSD1306Ascii.h"
 /**
  * @class SSD1306AsciiWire

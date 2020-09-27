@@ -1,6 +1,6 @@
 //GyverDrink VICLER_MOD
-#define VERSION 4.7
-//26.09.2020
+#define VERSION 4.8
+//27.09.2020
 /*
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
 
@@ -98,8 +98,9 @@
 #ifdef TM1637
 #include "src/GyverTM1637/GyverTM1637.h"
 #else
-#include "src/SSD1306Ascii/src/SSD1306AsciiAvrI2c.h"
+#include "src/microWire/microWire.h"
 #include "src/SSD1306Ascii/src/SSD1306Ascii.h"
+#include "src/SSD1306Ascii/src/SSD1306AsciiWire.h"
 #endif
 #include "src/ServoSmoothMinim.h"
 #include "src/microLED/microLED.h"

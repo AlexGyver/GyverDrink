@@ -4,9 +4,9 @@ void serviceRoutine(serviceStates mode);
 GyverTM1637 disp(DISP_CLK, DISP_DIO);
 enum { ml = 1, deg };
 void printNum(uint16_t num, int8_t mode = 0);
-#else
 
-SSD1306AsciiAvrI2c disp;
+#else
+SSD1306AsciiWire disp;
 
 enum MenuPageName { // типы страниц меню
   NO_MENU = -1,

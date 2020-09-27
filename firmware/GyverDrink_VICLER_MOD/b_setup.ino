@@ -6,9 +6,13 @@ void setup() {
   disp.clear();
   disp.brightness(7);
 #elif defined OLED_SH1106
+  Wire.begin();
+  Wire.setClock(900000L);
   disp.begin(&SH1106_128x64, 0x3C);
   disp.setContrast(100);
 #elif defined OLED_SSD1306
+  Wire.begin();
+  Wire.setClock(900000L);
   disp.begin(&Adafruit128x64, 0x3C);
   disp.setContrast(100);
 #endif
