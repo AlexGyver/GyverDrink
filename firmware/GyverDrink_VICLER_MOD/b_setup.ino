@@ -7,12 +7,12 @@ void setup() {
   disp.brightness(7);
 #elif defined OLED_SH1106
   Wire.begin();
-  Wire.setClock(900000L);
+  Wire.setClock(WIRE_SPEED * 1000L);
   disp.begin(&SH1106_128x64, 0x3C);
   disp.setContrast(100);
 #elif defined OLED_SSD1306
   Wire.begin();
-  Wire.setClock(900000L);
+  Wire.setClock(WIRE_SPEED * 1000L);
   disp.begin(&Adafruit128x64, 0x3C);
   disp.setContrast(100);
 #endif
@@ -52,11 +52,11 @@ void setup() {
   }
 #endif
 
-  if (settingsList[timeout_off]) {
+  if (settingsList[timeout_off] > 0) {
     POWEROFFtimer.setInterval(settingsList[timeout_off] * 60000L);
     POWEROFFtimer.start();
   }
-  if (settingsList[keep_power]) {
+  if (settingsList[keep_power] > 0) {
     KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
     KEEP_POWERtimer.start();
   }

@@ -1,6 +1,6 @@
 //GyverDrink VICLER_MOD
-#define VERSION 4.8
-//27.09.2020
+#define VERSION 4.9
+//29.09.2020
 /*
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
 
@@ -94,6 +94,8 @@
 
 //╞═════════════════════════════╡LIBS╞═════════════════════════════╡
 
+//#define USE_TICOSERVO   // использование библиотеки Adafruit_TiCoServo вместо стандартной Servo. При использовании серводвигатель подключать к пину 9 или 10!
+
 #include "Config.h"
 #ifdef TM1637
 #include "src/GyverTM1637/GyverTM1637.h"
@@ -135,7 +137,7 @@ timerMinim KEEP_POWERtimer(KEEP_POWER * 1000L);
 #define MAX_COLOR 765                       // AQUA mWHEEL
 #define COLOR_SCALE (MAX_COLOR - MIN_COLOR) // фактор для плавного изменения цвета во время налива
 
-#define INIT_VOLUME 47
+#define INIT_VOLUME 25
 bool LEDchanged = false;
 bool pumping = false;
 int8_t curPumping = -1;

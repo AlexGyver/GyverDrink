@@ -1,4 +1,11 @@
+
+//#define USE_TICOSERVO
+
+#ifdef USE_TICOSERVO
+#include "Adafruit_TiCoServo/Adafruit_TiCoServo.h"
+#else
 #include <Servo.h>
+#endif
 
 #define SS_SERVO_PERIOD 20 // период работы tick(), мс
 #define SS_DEADZONE 5      // мёртвая зона
@@ -26,7 +33,12 @@ public:
     boolean tick();                         // метод, управляющий сервой, должен опрашиваться как можно чаще.
                                             // Возвращает true, когда целевая позиция достигнута.
                                             // Имеет встроенный таймер с периодом SS_SERVO_PERIOD
+#ifdef USE_TICOSERVO
+    Adafruit_TiCoServo _servo;
+#else
     Servo _servo;
+#endif
+    
 
 private:
     int _servoCurrentPos = 0;
@@ -52,7 +64,7 @@ void ServoSmoothMinim::write(byte angle)
 void ServoSmoothMinim::attach(byte pin, byte target)
 {
     _pin = pin;
-    _servo.attach(_pin);
+    _servo.attach(_pin, 544, 2400);
     write(target);
     _servoTargetPos = angleToUs(target);
     _servoCurrentPos = _servoTargetPos;

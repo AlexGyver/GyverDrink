@@ -45,7 +45,7 @@ const char *MenuPages[MENU_PAGES][13] = {
     "яркость лед",
     "динам. подсветка",
     "макс. объeм",
-    "внешнее питание",
+    "поддерж. питание",
     "инверсия цвета",
     "Сброс"
   },
@@ -278,7 +278,13 @@ void displayMenu() {
         disp.clear();
       }
     }
-    else if (menuPage == SETTINGS_PAGE) settingsMenuHandler(selectedItem);
+    else if (menuPage == SETTINGS_PAGE) {
+      settingsMenuHandler(selectedItem);
+      if (!timeoutState) {
+        itemSelected = 0;
+        return; // произошёл вход в режим ожидания
+      }
+    }
     else if (menuPage == CALIBRATION_PAGE)  {
       disp.clear();
       serviceRoutine((serviceStates)(menuItem - 1));
@@ -339,11 +345,25 @@ void displayMenu() {
       if (currItem == 1)  printInt(shots_overall, Right);
       if (currItem == 2)  {
 #if(MENU_LANG == 1)
-        printFloat(volume_overall / 1000.0, 2, disp.displayWidth() - strWidth("0.00л") - 1);
-        printStr("л");
+        if (volume_overall < 100.0) {
+          if (volume_overall < 10) printInt(volume_overall, disp.displayWidth() - strWidth("0мл") - 1);
+          else printInt(volume_overall, disp.displayWidth() - strWidth("00мл") - 1);
+          printStr("мл");
+        }
+        else {
+          printFloat(volume_overall / 1000.0, 2, disp.displayWidth() - strWidth("0.00л") - 1);
+          printStr("л");
+        }
 #else
-        printFloat(volume_overall / 1000.0, 2, disp.displayWidth() - strWidth("0.00l"));
-        printStr("l");
+        if (volume_overall < 100.0) {
+          if (volume_overall < 10) printInt(volume_overall, disp.displayWidth() - strWidth("0ml") - 1);
+          printInt(volume_overall, disp.displayWidth() - strWidth("00ml") - 1);
+          printStr("ml");
+        }
+        else {
+          printFloat(volume_overall / 1000.0, 2, disp.displayWidth() - strWidth("0.00l"));
+          printStr("l");
+        }
 #endif
       }
       disp.write('\n');

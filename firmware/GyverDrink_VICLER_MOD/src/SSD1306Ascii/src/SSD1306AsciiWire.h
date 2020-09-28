@@ -69,9 +69,9 @@ class SSD1306AsciiWire : public SSD1306Ascii {
    * @brief Set the I2C clock rate to 400 kHz.
    * Deprecated use Wire.setClock(400000L)
    */
-  void set400kHz() __attribute__((deprecated("use Wire.setClock(400000L)"))) {
-    m_oledWire.setClock(400000L);
-  }
+  // void set400kHz() __attribute__((deprecated("use Wire.setClock(400000L)"))) {
+  //   m_oledWire.setClock(400000L);
+  // }
 
  protected:
   void writeDisplay(uint8_t b, uint8_t mode) {

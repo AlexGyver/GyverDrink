@@ -146,7 +146,7 @@ void serviceRoutine(serviceStates mode) {
         //        servo.start();
         //        servoON();
         for (byte i = 0; i < NUM_SHOTS; i++) {
-          if (shotStates[i] == EMPTY) strip.setLED(i, mCOLOR(ORANGE));
+          if (shotStates[i] == EMPTY) strip.setLED(i, mRGB(255, 48, 0));
           else strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
         }
         strip.show();
@@ -396,7 +396,9 @@ void settingsMenuHandler(uint8_t _item) {
         TIMEOUTtimer.setInterval(settingsList[stby_time] * 1000L); // таймаут режима ожидания
         TIMEOUTtimer.reset();
       }
-      if (settingsList[keep_power]) KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
+
+      if (settingsList[keep_power] > 0)
+        KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
       else keepPowerState = 0;
 
       if (settingsList[parameter] <= 99 && lastParameterValue >= 100) {
@@ -433,6 +435,13 @@ void settingsMenuHandler(uint8_t _item) {
       EEPROM.update(eeAddress._keep_power, settingsList[keep_power]);
       EEPROM.update(eeAddress._invert_display, settingsList[invert_display]);
 
+      if (settingsList[timeout_off] > 0) POWEROFFtimer.setInterval(settingsList[timeout_off] * 60000L);
+      if (settingsList[keep_power] > 0) {
+        KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
+        KEEP_POWERtimer.start();
+      }
+      else KEEP_POWERtimer.stop();
+
       servo.setSpeed(settingsList[servo_speed]);
       servo.setDirection(settingsList[inverse_servo]);
       servo.start();
@@ -450,6 +459,8 @@ void settingsMenuHandler(uint8_t _item) {
       break;
     }
     LEDtick();
+    timeoutTick();
+    if (!timeoutState) break;
   }
 }
 #endif
@@ -462,8 +473,8 @@ void flowTick() {
       if (swState && shotStates[i] == NO_GLASS) {  // поставили пустую рюмку
         timeoutReset();                                             // сброс таймаута
         shotStates[i] = EMPTY;                                      // флаг на заправку
-        if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
-        else  strip.setLED(i, mCOLOR(ORANGE));                      // подсветили оранжевым
+        if (i == curSelected) strip.setLED(curSelected, mRGB(255, 255, 255));
+        else  strip.setLED(i, mRGB(255, 48, 0));                      // подсветили оранжевым
         LEDchanged = true;
         shotCount++;                                                // инкрементировали счётчик поставленных рюмок
         if (systemState != PUMPING && !showMenu) {
@@ -481,7 +492,7 @@ void flowTick() {
         }
         if (settingsList[stby_light] > 0)
           strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
-        else strip.setLED(i, mCOLOR(BLACK));
+        else strip.setLED(i, mRGB(0, 0, 0));  // чёрный
         LEDchanged = true;
         //timeoutReset();                                           // сброс таймаута
         if (i == curPumping) {
@@ -703,7 +714,7 @@ void timeoutReset() {
   TIMEOUTtimer.reset();
   if (!keepPowerState) {
     for (byte i = 0; i < NUM_SHOTS; i++) {
-      if (i == curSelected) strip.setLED(curSelected, mCOLOR(WHITE));
+      if (i == curSelected) strip.setLED(curSelected, mRGB(255, 255, 255)); // белый
       else if (shotStates[i] == NO_GLASS) leds[i] = mHSV(20, 255, settingsList[stby_light]);
     }
   }
@@ -728,6 +739,7 @@ void timeoutTick() {
       menuItem = 0;
       lastMenuPage = NO_MENU;
       menuPage = MAIN_MENU_PAGE;
+      disp.setInvertMode(0);
       disp.clear();
       progressBar(0);
       displayMode(workMode);
@@ -761,7 +773,7 @@ void timeoutTick() {
 
   if (settingsList[timeout_off]) {
     if (POWEROFFtimer.isReady() && !timeoutState) {
-      for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mCOLOR(BLACK);
+      for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mRGB(0, 0, 0); // black
 #if(STATUS_LED)
       LED = mHSV(255, 0, 0);  // off
       LEDbreathingState = false;
@@ -799,7 +811,7 @@ void LEDtick() {
 #if(STATUS_LED)
     ledBreathing(LEDbreathingState, timeoutState);
 #endif
-    if (settingsList[keep_power]) keepPower();
+    if (settingsList[keep_power] > 0) keepPower();
     strip.show();
   }
 }
@@ -849,7 +861,8 @@ void keepPower() {
   static bool _dir = 1;
   static float _brightness = 1;
   uint8_t stby_brightness = settingsList[stby_light];
-  if (settingsList[timeout_off]) {
+
+  if (settingsList[timeout_off] > 0) {
     stby_brightness = settingsList[stby_light] * (POWEROFFtimer.isOn() || timeoutState);
   }
   if (!timeoutState) stby_brightness /= 2;

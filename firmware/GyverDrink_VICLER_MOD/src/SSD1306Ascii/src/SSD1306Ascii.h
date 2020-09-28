@@ -120,6 +120,7 @@ struct TickerState {
  * @class SSD1306Ascii
  * @brief SSD1306 base class
  */
+
 class SSD1306Ascii : public Print {
  public:
   using Print::write;
