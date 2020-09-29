@@ -111,7 +111,7 @@ void btnTick() {
   if (encBtn.holding()) {
     if (workMode == AutoMode) return;
 #ifndef TM1637
-    printNum(0, ml);
+    printNum(volumeCount, ml);
     progressBar(0);
 #endif
     prePump();
