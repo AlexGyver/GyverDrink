@@ -81,6 +81,7 @@ void btnTick() {
         menuItem = 0;
         lastMenuPage = NO_MENU;
         menuPage = MAIN_MENU_PAGE;
+        progressBar(-1);
         displayMode(workMode);
       }
     }
@@ -101,6 +102,7 @@ void btnTick() {
       menuItem = 0;
       lastMenuPage = NO_MENU;
       menuPage = MAIN_MENU_PAGE;
+      progressBar(-1);
       displayMode(workMode);
     }
 #endif

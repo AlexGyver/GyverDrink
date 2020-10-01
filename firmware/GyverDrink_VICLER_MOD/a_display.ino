@@ -28,7 +28,7 @@ uint8_t menuItemsNum[MENU_PAGES] = {4, 11, 2, 2}; // количество стр
 #endif
 
 #if(MENU_LANG == 1)
-const char *MenuPages[MENU_PAGES][13] = {
+const char *MenuPages[MENU_PAGES][12] = {
   { "#####  Меню  #####",
     "",
     " Настройки",
@@ -68,7 +68,7 @@ const char *MenuPages[MENU_PAGES][13] = {
 };
 
 #else
-const char *MenuPages[MENU_PAGES][13] = {
+const char *MenuPages[MENU_PAGES][12] = {
   { "Menu",
     "",
     "Settings",
@@ -199,33 +199,42 @@ void printNum(uint16_t volume, int8_t postfix = 0) {
 #endif
 }
 
-void progressBar(uint16_t value, uint16_t maximum = 50) {
-  disp.setFont(Pixel);
-  static byte currX = 0, targetX = 0;
+void progressBar(int16_t value, uint16_t maximum = 50) {
+  disp.setFont(ProgBar);
+  disp.setLetterSpacing(0);
+  static int16_t currX = 0, targetX = 0;
 
-  if (value == 0) {
+  if (value == -1) {
     disp.setCursor(0, 7);
-    for (int i = 0; i < disp.displayWidth(); i++) disp.write('0');
+    for (int i = 0; i < disp.displayWidth(); i++) {
+      if (i % 2 == 0) disp.write('.');
+      else disp.write(' ');
+    }
     currX = 0;
     return;
   }
 
-  targetX = value * (127.0 / maximum);
+  targetX = value * (128.0 / maximum);
 
   if (targetX > currX) {
-    for (byte x = currX; x < targetX; x ++) {
-      disp.setCursor(x, 7);
-      disp.write('1');
+    do
+    {
+      disp.setCursor(currX, 7);
+      disp.write('-');
+      if (value == thisVolume && systemState != PUMPING) delay(5);
     }
-    currX = targetX;
+    while (targetX > ++currX);
   }
   else if (targetX < currX) {
-    for (byte x = currX; x > targetX; x--) {
-      if (x % 2 == 0) {
-        disp.setCursor(x, 7);
-        disp.write('0');
+    do {
+      disp.setCursor(min(currX, disp.displayWidth() - 1), 7);
+      if (currX % 2 == 0) {
+        disp.write('.');
+        if (value == thisVolume) delay(5);
+        else if (value == 0) delay(3);
       }
-    }
+      else disp.write(' ');
+    } while (targetX <= --currX);
     currX = targetX;
   }
 }
@@ -240,11 +249,11 @@ void displayMode(workModes mode) {
   else printInt(0, disp.displayWidth() - 52);
 #else
   if (!timeoutState) printInt(2, Right);
-  else clearToEOL('0');//printInt(mode, disp.displayWidth() - strWidth('2') - 26);
+  else clearToEOL('0');
 #endif
 
   printNum(thisVolume, ml);
-  if (timeoutState) progressBar(0);
+  //if (timeoutState) progressBar(0);
   progressBar(thisVolume, settingsList[max_volume]);
 }
 
@@ -266,6 +275,7 @@ void displayMenu() {
         showMenu = false;
         disp.clear();
         lastMenuPage = NO_MENU;
+        progressBar(-1);
         displayMode(workMode);
 #if (SAVE_MODE == 1)
         EEPROM.update(eeAddress._workMode, workMode);

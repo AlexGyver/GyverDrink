@@ -17,6 +17,8 @@ void setup() {
   disp.setContrast(100);
 #endif
 
+  //disp.displayRemap(1); // переворот дисплея на 180 градусов
+
   // епром
   readEEPROM();
 
@@ -101,15 +103,15 @@ void setup() {
 #define ANIMATION_FPS 20
   timerMinim nextSym(1000 / ANIMATION_FPS);
 #else
-  timerMinim nextSym(100);
+  timerMinim nextSym(25);
 #if(MENU_LANG == 1)
   disp.setFont(Vicler8x16);
   disp.setLetterSpacing(0);
 #else
   disp.setFont(ZevvPeep8x16);
 #endif // MENU_LANG
-  printStr(bootscreen, Center, 3);
-  progressBar(0);
+  static byte targetX = (disp.displayWidth() - strWidth(bootscreen)) / 2;
+  progressBar(-1);
 #endif // TM1637
 
 
@@ -131,6 +133,19 @@ void setup() {
       showAnimation(animCount);
 #endif
 #else
+      static byte currX = 128;
+      if (currX > targetX) {
+#if(MENU_LANG == 1)
+        disp.setFont(Vicler8x16);
+        disp.setLetterSpacing(0);
+#else
+        disp.setFont(ZevvPeep8x16);
+#endif
+        printStr(bootscreen, currX, 3);
+        clearToEOL();
+        currX--;
+      }
+
       progressBar(RAINBOW_START_BRIGHTNESS - startBrightness, RAINBOW_START_BRIGHTNESS - 2);
 #endif
     }
@@ -144,7 +159,7 @@ void setup() {
   }
 #ifndef TM1637
   disp.clear();
-  //progressBar(0);
+  progressBar(-1);
 #endif
 
 #if (STATUS_LED)

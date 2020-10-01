@@ -2,7 +2,7 @@
 
 /*
  *
- * Pixel
+ * ProgBar
  *
  * created with FontCreator
  * written by F. Maximilian Thiele
@@ -10,14 +10,14 @@
  * http://www.apetech.de/fontCreator
  * me@apetech.de
  *
- * File Name           : Pixel.h
- * Date                : 26.09.2020
- * Font size in bytes  : 24
- * Font width          : 4
- * Font height         : -8
- * Font first char     : 48
+ * File Name           : ProgBar.h
+ * Date                : 01.10.2020
+ * Font size in bytes  : 48
+ * Font width          : 1
+ * Font height         : 8
+ * Font first char     : 32
  * Font last char      : 50
- * Font used chars     : 2
+ * Font used chars     : 18
  *
  * The font data are defined as
  *
@@ -39,25 +39,27 @@
 #include <inttypes.h>
 #include <avr/pgmspace.h>
 
-#ifndef PIXEL_H
-#define PIXEL_H
+#ifndef PROGBAR_H
+#define PROGBAR_H
 
-#define PIXEL_WIDTH 4
-#define PIXEL_HEIGHT 8
+#define PROGBAR_WIDTH 1
+#define PROGBAR_HEIGHT 8
 
-static const uint8_t Pixel[] PROGMEM = {
-    0x00, 0x18, // size
-    0x04, // width
+static const uint8_t ProgBar[] PROGMEM = {
+    0x00, 0x30, // size
+    0x01, // width
     0x08, // height
-    0x30, // first char
-    0x02, // char count
+    0x20, // first char
+    0x12, // char count
     
     // char widths
-    0x01, 0x01, 
+    0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+    0x00, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 
     
     // font data
-    0x40, // 48
-    0x70 // 49
+    0x00, // 32
+    0x70, // 45
+    0x40, // 46
     
 };
 

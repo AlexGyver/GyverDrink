@@ -471,12 +471,12 @@ void flowTick() {
     for (byte i = 0; i < NUM_SHOTS; i++) {
       bool swState = !digitalRead(SW_pins[i]) ^ SWITCH_LEVEL;
       if (swState && shotStates[i] == NO_GLASS) {  // поставили пустую рюмку
-        timeoutReset();                                             // сброс таймаута
         shotStates[i] = EMPTY;                                      // флаг на заправку
         if (i == curSelected) strip.setLED(curSelected, mRGB(255, 255, 255));
         else  strip.setLED(i, mRGB(255, 48, 0));                      // подсветили оранжевым
         LEDchanged = true;
         shotCount++;                                                // инкрементировали счётчик поставленных рюмок
+        timeoutReset();                                             // сброс таймаута
         if (systemState != PUMPING && !showMenu) {
           printNum(shotVolume[i], ml);
 #ifndef TM1637
@@ -545,9 +545,18 @@ void flowRoutnie() {
         curPumping = i;                                   // запоминаем выбор
         systemState = MOVING;                             // режим - движение
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
-        printNum(0, ml);                                  // обнуляем счётчик
+
+        // обнуляем счётчик
 #ifndef TM1637
-        progressBar(0);
+        if (parking) {  // если начинаем наливать в первую рюмку
+          progressBar(0);
+          disp.setFont(FixedNum30x40);
+          disp.setCursor(0, 2);
+          clearToEOL();
+          byte targetX = (disp.displayWidth() - strWidth("0%")) / 2 + 16;
+          byte currX = 128;
+          while (currX-- > targetX) printStr("0%", currX, 2);
+        }
 #endif
         if ( abs(shotPos[i] - servo.getCurrentDeg()) > 3) {        // включаем серво только если целевая позиция не совпадает с текущей
           servo.setTargetDeg(shotPos[curPumping]);        // задаём цель
@@ -575,7 +584,6 @@ void flowRoutnie() {
         LEDchanged = true;
       }
       else {                                              // если же в ручном режиме:
-
         if (abs(servo.getTargetDeg() - parking_pos) > 3) {
           servo.setTargetDeg(parking_pos);
           servo.start();
@@ -583,6 +591,9 @@ void flowRoutnie() {
 #if(STATUS_LED)
           LED = mHSV(11, 255, STATUS_LED); // orange
           LEDchanged = true;
+#endif
+#ifndef TM1637
+          displayMode(workMode);
 #endif
         }
         if (servo.tick()) {                               // едем до упора
@@ -612,6 +623,9 @@ void flowRoutnie() {
       FLOWtimer.setInterval((long)shotVolume[curPumping] * time50ml / 50);  // перенастроили таймер
       FLOWtimer.reset();                                  // сброс таймера
       volumeCount = 0;
+#ifndef TM1637
+      progressBar(-1);
+#endif
       pumpON();                                           // НАЛИВАЙ!
     }
 
@@ -651,10 +665,10 @@ void flowRoutnie() {
   } else if (systemState == WAIT) {
     volumeCount = 0;
     if (WAITtimer.isReady()) {
-      systemState = SEARCH;
 #ifndef TM1637
-      displayMode(workMode);
+      //displayMode(workMode);
 #endif
+      systemState = SEARCH;
     }
   }
 }
@@ -708,6 +722,7 @@ void timeoutReset() {
     else  disp.scrollByte(0, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 0, 50);
 #else
     disp.invertDisplay((bool)settingsList[invert_display]);
+    progressBar(-1);
     displayMode(workMode);
 #endif
   }
@@ -741,7 +756,7 @@ void timeoutTick() {
       menuPage = MAIN_MENU_PAGE;
       disp.setInvertMode(0);
       disp.clear();
-      progressBar(0);
+      progressBar(-1);
       displayMode(workMode);
     }
     else displayMode(workMode);
