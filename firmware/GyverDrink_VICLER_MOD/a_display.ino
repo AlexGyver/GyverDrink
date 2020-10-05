@@ -177,7 +177,7 @@ void printNum(uint16_t volume, int8_t postfix = 0) {
     printStr(" ", Left, 3 - shiftY);
     printStr(" ", Right, 3 - shiftY);
   }
-  if (volume <= 9 && lastVol >= 10) {
+  if ( (volume <= 9 && lastVol >= 10) || !timeoutState ) {
     printStr("  ", Left, 3 - shiftY);
     //printStr("  ", Right, 3 - shiftY);
   }
@@ -259,7 +259,6 @@ void displayMode(workModes mode) {
 #endif
 
   printNum(thisVolume, ml);
-  //if (timeoutState) progressBar(0);
   progressBar(thisVolume, settingsList[max_volume]);
 }
 
