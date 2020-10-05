@@ -725,7 +725,7 @@ void timeoutReset() {
     if (workMode) disp.scrollByte(64, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64, 50);
     else  disp.scrollByte(0, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 0, 50);
 #else
-    disp.setContrast(50);
+    disp.setContrast(100);
     disp.invertDisplay((bool)settingsList[invert_display]);
     progressBar(-1);
     displayMode(workMode);
@@ -753,7 +753,7 @@ void timeoutTick() {
     disp.brightness(0);
     printNum(thisVolume, ml);
 #else
-    //disp.setContrast(0);
+    disp.setContrast(0);
     if (showMenu) {
       showMenu = 0;
       menuItem = 0;
