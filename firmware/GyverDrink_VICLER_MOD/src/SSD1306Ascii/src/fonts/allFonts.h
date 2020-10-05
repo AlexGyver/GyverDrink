@@ -55,6 +55,8 @@
 // any other value means variable width font in FontCreator2 (thiele)
 // format with pixel padding
 
+#include "BigIcon36x40.h"
+#include "FixedNum30x40_2.h"
 #include "ProgBar.h"
 #include "Vicler8x16.h"			// cyrillic
 #include "System5x7R.h"			// cyrillic + latin

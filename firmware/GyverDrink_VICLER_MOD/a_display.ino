@@ -8,6 +8,12 @@ void printNum(uint16_t num, int8_t mode = 0);
 #else
 SSD1306AsciiWire disp;
 
+#if (NUM_FONT == 0)
+#define BIG_NUM_FONT FixedNum30x40
+#elif (NUM_FONT == 1)
+#define BIG_NUM_FONT FixedNum30x40_2
+#endif
+
 enum MenuPageName { // типы страниц меню
   NO_MENU = -1,
   MAIN_MENU_PAGE,
@@ -162,7 +168,7 @@ void printNum(uint16_t volume, int8_t postfix = 0) {
   static uint16_t lastVol = 0;
 
   byte shiftY = 0;
-  disp.setFont(FixedNum30x40);
+  disp.setFont(BIG_NUM_FONT);
 
   if (postfix == 1) shiftY = 1;
 

@@ -321,7 +321,7 @@ void serviceRoutine(serviceStates mode) {
 #else
     printStr("Battery voltage", Center, 0);
 #endif
-    disp.setFont(FixedNum30x40);
+    disp.setFont(BIG_NUM_FONT);
     //disp.setInvertMode(0);
 #endif
     while (1) {
@@ -546,18 +546,7 @@ void flowRoutnie() {
         systemState = MOVING;                             // режим - движение
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
 
-        // обнуляем счётчик
-#ifndef TM1637
-        if (parking) {  // если начинаем наливать в первую рюмку
-          progressBar(0);
-          disp.setFont(FixedNum30x40);
-          disp.setCursor(0, 2);
-          clearToEOL();
-          byte targetX = (disp.displayWidth() - strWidth("0%")) / 2 + 16;
-          byte currX = 128;
-          while (currX-- > targetX) printStr("0%", currX, 2);
-        }
-#endif
+
         if ( abs(shotPos[i] - servo.getCurrentDeg()) > 3) {        // включаем серво только если целевая позиция не совпадает с текущей
           servo.setTargetDeg(shotPos[curPumping]);        // задаём цель
           servo.start();
@@ -573,6 +562,9 @@ void flowRoutnie() {
           servo.attach(SERVO_PIN, parking_pos);
           delay(500);
         }
+#ifndef TM1637
+        progressBar(0);
+#endif
         break;
       }
     }
@@ -612,12 +604,26 @@ void flowRoutnie() {
 
 
   } else if (systemState == MOVING) {                     // движение к рюмке
-
     if (servoReady) {                                   // если приехали
 #if(STATUS_LED)
       LED = mHSV(255, 0, STATUS_LED); // white
       strip.show();
 #endif
+      // обнуляем счётчик
+#ifndef TM1637
+      //progressBar(0);
+      disp.setFont(BIG_NUM_FONT);
+      disp.setCursor(0, 2);
+      clearToEOL();
+      byte targetX = (disp.displayWidth() - strWidth("0%")) / 2 + 16;
+      byte currX = 128;
+      while (currX > targetX) {
+        currX -= 3;
+        printStr("0%", max(currX, targetX), 2);
+        disp.write(' ');
+      }
+#endif
+
       systemState = PUMPING;                              // режим - наливание
       delay(300);
       FLOWtimer.setInterval((long)shotVolume[curPumping] * time50ml / 50);  // перенастроили таймер
@@ -664,12 +670,10 @@ void flowRoutnie() {
     }
   } else if (systemState == WAIT) {
     volumeCount = 0;
-    if (WAITtimer.isReady()) {
-#ifndef TM1637
-      //displayMode(workMode);
+#ifdef TM1637
+    if (WAITtimer.isReady())
 #endif
       systemState = SEARCH;
-    }
   }
 }
 
@@ -721,6 +725,7 @@ void timeoutReset() {
     if (workMode) disp.scrollByte(64, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64, 50);
     else  disp.scrollByte(0, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 0, 50);
 #else
+    disp.setContrast(50);
     disp.invertDisplay((bool)settingsList[invert_display]);
     progressBar(-1);
     displayMode(workMode);
@@ -798,8 +803,9 @@ void timeoutTick() {
 #else
       if (settingsList[invert_display]) disp.invertDisplay(false);
       disp.clear();
-      disp.setFont(FixedNum30x40);
-      printStr("$", Center, 2);
+      disp.setContrast(0);
+      disp.setFont(BigIcon36x40);
+      printStr("1", Center, 2);
 #endif
       LEDchanged = true;
       POWEROFFtimer.stop();
