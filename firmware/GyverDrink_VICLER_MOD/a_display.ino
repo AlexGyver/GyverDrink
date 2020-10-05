@@ -258,6 +258,8 @@ void displayMode(workModes mode) {
   else clearToEOL('0');
 #endif
 
+  disp.setFont(BIG_NUM_FONT);
+  printStr("  ", Left, 2);
   printNum(thisVolume, ml);
   progressBar(thisVolume, settingsList[max_volume]);
 }
