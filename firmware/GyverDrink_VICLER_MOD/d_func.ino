@@ -753,7 +753,7 @@ void timeoutTick() {
     disp.brightness(0);
     printNum(thisVolume, ml);
 #else
-    disp.setContrast(0);
+    disp.setContrast(1);
     if (showMenu) {
       showMenu = 0;
       menuItem = 0;
@@ -803,7 +803,6 @@ void timeoutTick() {
 #else
       if (settingsList[invert_display]) disp.invertDisplay(false);
       disp.clear();
-      disp.setContrast(0);
       disp.setFont(BigIcon36x40);
       printStr("1", Center, 2);
 #endif

@@ -7,12 +7,12 @@ SSD1306AsciiWire oled;
 
 void setup() {
   Wire.begin();
-  Wire.setClock(800000L);
+  Wire.setClock(400000L);
   
   oled.begin(&Adafruit128x64, 0x3C); // SSD1306 / SSD1309
   //oled.begin(&SH1106_128x64, 0x3C);   // SH1106
   
-  oled.setFont(System5x7);
+  oled.setFont(ZevvPeep8x16);
 }
 void loop() {
   
