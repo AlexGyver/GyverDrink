@@ -670,10 +670,7 @@ void flowRoutnie() {
     }
   } else if (systemState == WAIT) {
     volumeCount = 0;
-#ifdef TM1637
-    if (WAITtimer.isReady())
-#endif
-      systemState = SEARCH;
+    if (WAITtimer.isReady()) systemState = SEARCH;
   }
 }
 
