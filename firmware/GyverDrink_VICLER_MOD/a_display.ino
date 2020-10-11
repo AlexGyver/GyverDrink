@@ -77,9 +77,9 @@ const char *MenuPages[MENU_PAGES][12] = {
 const char *MenuPages[MENU_PAGES][12] = {
   { "Menu",
     "",
-    "Settings",
-    "Calibration",
-    "Statistics"
+    " Settings",
+    " Calibration",
+    " Statistics"
   },
 
   { "Settings",
@@ -97,18 +97,18 @@ const char *MenuPages[MENU_PAGES][12] = {
   },
 
   { "Calibration",
-    "Servo",
-    "Volume",
+    " Servo",
+    " Volume",
 #ifdef BATTERY_PIN
-    "Battery"
+    " Battery"
 #else
     ""
 #endif
   },
 
   { "Statistics",
-    "Shots",
-    "Volume",
+    " Shots",
+    " Volume",
     ""
   }
 };
@@ -345,7 +345,7 @@ void displayMenu() {
       if (workMode == ManualMode) MenuPages[menuPage][currItem] = " Авто режим";
       else  MenuPages[menuPage][currItem] = " Ручной режим";
 #else
-      if (workMode == ManualMode) MenuPages[menuPage][currItem] = "Auto mode";
+      if (workMode == ManualMode) MenuPages[menuPage][currItem] = " Auto mode";
       else  MenuPages[menuPage][currItem] = " Manual mode";
 #endif
     }

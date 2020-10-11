@@ -1,6 +1,6 @@
 //GyverDrink VICLER_MOD
-#define VERSION 5.3
-//07.10.2020
+#define VERSION 5.5
+//11.10.2020
 /*
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
   ==============================================================================================
@@ -177,7 +177,6 @@ float battery_voltage = 4.2;
 float battery_cal = BATTERY_CAL;
 bool keepPowerState = false;
 bool volumeChanged = false;
-bool servoReady = 0;
 uint8_t animCount = 7;
 uint8_t parking_pos = PARKING_POS;
 bool showMenu = 0;

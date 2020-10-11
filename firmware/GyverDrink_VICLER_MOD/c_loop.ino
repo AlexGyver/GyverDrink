@@ -3,12 +3,12 @@
 //  static uint32_t cnt_loop = 0;
 //  static uint32_t tm_m = 0;
 //  cnt_loop++;
-//  if ((millis() - tm_m) >= 1000)
+//  if ((millis() - tm_m) >= 500)
 //  {
 //    //Serial.println(cnt_loop / 1000.0);
 //    disp.setFont(Vicler8x16);
 //    printStr("    ", Left, 0);
-//    printInt(cnt_loop / 1000.0, Left, 0);
+//    printInt(cnt_loop / 500.0, Left, 0);
 //    cnt_loop = 0;
 //    tm_m = millis();
 //  }

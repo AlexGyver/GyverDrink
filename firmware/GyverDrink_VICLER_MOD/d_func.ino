@@ -21,13 +21,14 @@ void serviceRoutine(serviceStates mode) {
     delay(1000);
 #else
     disp.clear();
-    //disp.setInvertMode(1);
+    disp.setInvertMode(1);
+    clearToEOL();
 #if(MENU_LANG == 1)
     printStr("Парковка", Center, 0);
 #else
-    printStr("Parking position", Center, 0);
+    printStr("Parking", Center, 0);
 #endif
-    //disp.setInvertMode(0);
+    disp.setInvertMode(0);
 #endif
     byte servoPos = parking_pos;
     printNum(servoPos, deg);
@@ -36,7 +37,7 @@ void serviceRoutine(serviceStates mode) {
       static int currShot = -1;
       // зажигаем светодиоды от кнопок
       for (byte i = 0; i < NUM_SHOTS; i++) {
-        if (!digitalRead(SW_pins[i]) && shotStates[i] != EMPTY) {
+        if (!digitalRead(SW_pins[i]) && shotStates[i] != EMPTY) { // поставили рюмку
           strip.setLED(i, mHSV(255, 0, 50));
           strip.show();
           shotStates[i] = EMPTY;
@@ -47,6 +48,7 @@ void serviceRoutine(serviceStates mode) {
           printNum((i + 1) * 1000 + shotPos[i], deg);
 #else
           disp.home();
+          disp.setInvertMode(1);
           clearToEOL();
 #if(MENU_LANG == 1)
           printStr("Рюмка ", Center, 0);
@@ -56,6 +58,7 @@ void serviceRoutine(serviceStates mode) {
           printInt(currShot + 1);
           clearToEOL();
           disp.write('\n');
+          disp.setInvertMode(0);
           printNum(servoPos, deg);
 #endif
           servo.setTargetDeg(servoPos);
@@ -65,7 +68,7 @@ void serviceRoutine(serviceStates mode) {
           servoOFF();
           break;
         }
-        if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  {
+        if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  { // убрали рюмку
           strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
           strip.show();
           shotStates[i] = NO_GLASS;
@@ -74,19 +77,24 @@ void serviceRoutine(serviceStates mode) {
           if (shotCount == 0) { // убрали последнюю рюмку
             servoPos = parking_pos;
 #ifndef TM1637
+            disp.home();
+            disp.setInvertMode(1);
+            clearToEOL();
 #if(MENU_LANG == 1)
             printStr("Парковка", Center, 0);
 #else
-            printStr("Parking position", Center, 0);
+            printStr("Parking", Center, 0);
 #endif
             clearToEOL();
             disp.write('\n');
+            disp.setInvertMode(0);
 #endif
             printNum(servoPos, deg);
             servo.setTargetDeg(servoPos);
             servo.start();
             servoON();
             while (!servo.tick());
+            servo.stop();
             servoOFF();
             break;
           }
@@ -99,6 +107,7 @@ void serviceRoutine(serviceStates mode) {
           printNum((i + 1) * 1000 + shotPos[i], deg);
 #else
           disp.home();
+          disp.setInvertMode(1);
           clearToEOL();
 #if(MENU_LANG == 1)
           printStr("Рюмка ", Center, 0);
@@ -108,6 +117,7 @@ void serviceRoutine(serviceStates mode) {
           printInt(currShot + 1);
           clearToEOL();
           disp.write('\n');
+          disp.setInvertMode(0);
           printNum(servoPos, deg);
 #endif
           servo.setTargetDeg(servoPos);
@@ -189,19 +199,27 @@ void serviceRoutine(serviceStates mode) {
       curPumping = -1;
 #ifndef TM1637
 #if(MENU_LANG == 1)
+      disp.home();
+      disp.setInvertMode(1);
+      clearToEOL();
       printStr("Зажмите энкодер", Center, 0);
 #else
       printStr("Press encoder", Center, 0);
 #endif
+      disp.setInvertMode(0);
 #endif
     }
     else {
 #ifndef TM1637
+      disp.home();
+      disp.setInvertMode(1);
+      clearToEOL();
 #if(MENU_LANG == 1)
       printStr("Поставьте рюмку", Center, 0);
 #else
       printStr("Place shot", Center, 0);
 #endif
+      disp.setInvertMode(0);
 #endif
     }
     while (1) {
@@ -212,11 +230,15 @@ void serviceRoutine(serviceStates mode) {
           if (flag) pumpTime += 100;
           else {
 #ifndef TM1637
+            disp.home();
+            disp.setInvertMode(1);
+            clearToEOL();
 #if(MENU_LANG == 1)
             printStr("   Налейте 50мл   ", Center, 0);
 #else
             printStr("   Fill 50ml   ", Center, 0);
 #endif
+            disp.setInvertMode(0);
 #endif
           }
 #ifdef TM1637
@@ -242,11 +264,15 @@ void serviceRoutine(serviceStates mode) {
           servo.start();
           servoON();
 #ifndef TM1637
+          disp.home();
+          disp.setInvertMode(1);
+          clearToEOL();
 #if(MENU_LANG == 1)
           printStr("Зажмите энкодер", Center, 0);
 #else
           printStr("Press encoder", Center, 0);
 #endif
+          disp.setInvertMode(0);
 #endif
         }
       }
@@ -259,11 +285,15 @@ void serviceRoutine(serviceStates mode) {
         printNum(pumpTime);
         curPumping = -1;
 #ifndef TM1637
+        disp.home();
+        disp.setInvertMode(1);
+        clearToEOL();
 #if(MENU_LANG == 1)
         printStr("Поставьте рюмку", Center, 0);
 #else
         printStr("  Place shot  ", Center, 0);
 #endif
+        disp.setInvertMode(0);
 #endif
       }
 
@@ -315,14 +345,15 @@ void serviceRoutine(serviceStates mode) {
     delay(1000);
 #else
     disp.clear();
-    //disp.setInvertMode(1);
+    disp.setInvertMode(1);
+    clearToEOL();
 #if(MENU_LANG == 1)
     printStr("Калибр. аккум-а", Center, 0);
 #else
     printStr("Battery voltage", Center, 0);
 #endif
     disp.setFont(BIG_NUM_FONT);
-    //disp.setInvertMode(0);
+    disp.setInvertMode(0);
 #endif
     while (1) {
       enc.tick();
@@ -526,14 +557,14 @@ void flowTick() {
     else  TIMEOUTtimer.stop();
 
     if (workMode == AutoMode)           // авто
-      flowRoutnie();       // крутим отработку кнопок и поиск рюмок
+      flowRoutine();       // крутим отработку кнопок и поиск рюмок
     else if (systemON)    // ручной
-      flowRoutnie();     // если активны - ищем рюмки и всё такое
+      flowRoutine();     // если активны - ищем рюмки и всё такое
   }
 }
 
 // поиск и заливка
-void flowRoutnie() {
+void flowRoutine() {
   if (showMenu) return;
 
   if (systemState == SEARCH) {                            // если поиск рюмки
@@ -546,8 +577,8 @@ void flowRoutnie() {
         systemState = MOVING;                             // режим - движение
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
 
-
-        if ( abs(shotPos[i] - servo.getCurrentDeg()) > 3) {        // включаем серво только если целевая позиция не совпадает с текущей
+        // включаем серво только если целевая позиция не совпадает с текущей
+        if (servo.getCurrentDeg() != shotPos[i]) {
           servo.setTargetDeg(shotPos[curPumping]);        // задаём цель
           servo.start();
           servoON();                                      // вкл питание серво
@@ -568,6 +599,7 @@ void flowRoutnie() {
         break;
       }
     }
+
     if (noGlass && !parking) {                            // если не нашли ни одной пустой рюмки и не припаркованны
       if ( (workMode == AutoMode) && settingsList[auto_parking] == 0) {                // если в авто режиме:
         systemON = false;                                 // выключили систему
@@ -576,7 +608,7 @@ void flowRoutnie() {
         LEDchanged = true;
       }
       else {                                              // если же в ручном режиме:
-        if (abs(servo.getTargetDeg() - parking_pos) > 3) {
+        if (servo.getTargetDeg() != parking_pos) {
           servo.setTargetDeg(parking_pos);
           servo.start();
           servoON();                                        // включаем серво и паркуемся
@@ -589,22 +621,18 @@ void flowRoutnie() {
 #endif
         }
         if (servo.tick()) {                               // едем до упора
+          servo.stop();
           systemON = false;                               // выключили систему
           parking = true;                                 // на месте!
           LEDbreathingState = true;
           LEDchanged = true;
         }
       }
-      if (!showMenu) printNum(thisVolume, ml);
     }
-    else if ( (workMode == ManualMode) && noGlass)                        // если в ручном режиме, припаркованны и нет рюмок - отключаемся нахрен
-    {
-      systemON = false;
-    }
-
-
-  } else if (systemState == MOVING) {                     // движение к рюмке
-    if (servoReady) {                                   // если приехали
+    else if ( (workMode == ManualMode) && noGlass) systemON = false;     // если в ручном режиме, припаркованны и нет рюмок - отключаемся нахрен
+  }
+  else if (systemState == MOVING) {                     // движение к рюмке
+    if (servo.tick()) {                                   // если приехали
 #if(STATUS_LED)
       LED = mHSV(255, 0, STATUS_LED); // white
       strip.show();
@@ -657,8 +685,6 @@ void flowRoutnie() {
 #ifndef TM1637
       shots_overall++;
       volume_overall += volumeCount;
-      //      EEPROM.put(eeAddress._shots_overall, shots_overall);
-      //      EEPROM.put(eeAddress._volume_overall, volume_overall);
 #endif
       curPumping = -1;                                    // снимаем выбор рюмки
       systemState = WAIT;                                 // режим работы - ждать
@@ -670,7 +696,10 @@ void flowRoutnie() {
     }
   } else if (systemState == WAIT) {
     volumeCount = 0;
-    if (WAITtimer.isReady()) systemState = SEARCH;
+#ifdef TM1637
+    if (WAITtimer.isReady())
+#endif
+      systemState = SEARCH;
   }
 }
 
@@ -781,7 +810,6 @@ void timeoutTick() {
   }
 
   if (settingsList[keep_power]) {
-    //if (KEEP_POWERtimer.isReady() && (shotCount == 0) && ( (settingsList[keep_power] < settingsList[stby_time]) || showMenu) && (curSelected == -1)) {
     if (KEEP_POWERtimer.isReady() && (shotCount == 0) && (curSelected == -1)) {
       keepPowerState = 1;
       LEDchanged = true;
@@ -811,14 +839,8 @@ void timeoutTick() {
 
 // обработка движения серво
 void servoTick() {
-  if (servo.tick()) {
-    servoOFF();
-    servoReady = 1;
-  }
-  else {
-    servoON();
-    servoReady = 0;
-  }
+  if (servo.tick()) servoOFF();
+  else servoON();
 }
 
 // отрисовка светодиодов по флагу (50мс)
