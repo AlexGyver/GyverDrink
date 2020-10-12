@@ -344,12 +344,18 @@ void serviceRoutine(serviceStates mode) {
     disp.scrollByte(_dash, _3, _dash, _empty, 50);
     delay(1000);
 #else
+#if(MENU_LANG == 1)
     disp.clear();
     disp.setInvertMode(1);
+    disp.setFont(Vicler8x16);
+    disp.setLetterSpacing(0);
     clearToEOL();
-#if(MENU_LANG == 1)
     printStr("Калибр. аккум-а", Center, 0);
 #else
+    disp.clear();
+    disp.setInvertMode(1);
+    disp.setFont(ZevvPeep8x16);
+    clearToEOL();
     printStr("Battery voltage", Center, 0);
 #endif
     disp.setFont(BIG_NUM_FONT);
@@ -366,8 +372,8 @@ void serviceRoutine(serviceStates mode) {
 #endif
 
       if (enc.isTurn()) {
-        if (enc.isLeft())  battery_cal += 0.01;
-        if (enc.isRight()) battery_cal -= 0.01;
+        if (enc.isLeft())  battery_cal += 0.005;
+        if (enc.isRight()) battery_cal -= 0.005;
         battery_cal = constrain(battery_cal, 0, 3.0);
       }
 
@@ -382,7 +388,7 @@ void serviceRoutine(serviceStates mode) {
         disp.setFont(ZevvPeep8x16);
 #endif
         disp.clear();
-        timeoutReset();
+        if (showMenu) timeoutReset();
 #endif
         break;
       }
@@ -751,7 +757,7 @@ void timeoutReset() {
     if (workMode) disp.scrollByte(64, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64, 50);
     else  disp.scrollByte(0, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 0, 50);
 #else
-    disp.setContrast(100);
+    disp.setContrast(OLED_CONTRAST);
     disp.invertDisplay((bool)settingsList[invert_display]);
     progressBar(-1);
     displayMode(workMode);
@@ -934,7 +940,7 @@ void keepPower() {
 float filter(float value) {
   static float k = 1.0, filteredValue = 4.0;
   if (battery_voltage < (BATTERY_LOW)) k = 1.0;
-  else k = 0.1;
+  else k = 0.05;
   filteredValue = (1.0 - k) * filteredValue + k * value;
   return filteredValue;
 }
@@ -978,14 +984,18 @@ bool battery_watchdog() {
       disp.displayByte(0x39, 0x09, 0x09, 0x0F);
       delay(500);
       disp.displayByte(0x00, 0x00, 0x00, 0x00);
-#endif
+#else
       showMenu = false;
+      menuItem = 0;
+      lastMenuPage = NO_MENU;
+      menuPage = MAIN_MENU_PAGE;
+#endif
     }
     else if (!lastOkStatus) timeoutReset();
     lastOkStatus = batOk;
   }
 #ifndef TM1637
-  if (POWEROFFtimer.isOn() || timeoutState) displayBattery(batOk);
+  if (POWEROFFtimer.isOn() || timeoutState || !batOk) displayBattery(batOk);
 #endif
   return batOk;
 }

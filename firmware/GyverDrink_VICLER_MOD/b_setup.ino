@@ -9,12 +9,12 @@ void setup() {
   Wire.begin();
   Wire.setClock(WIRE_SPEED * 1000L);
   disp.begin(&SH1106_128x64, 0x3C);
-  disp.setContrast(100);
+  disp.setContrast(OLED_CONTRAST);
 #elif defined OLED_SSD1306
   Wire.begin();
   Wire.setClock(WIRE_SPEED * 1000L);
   disp.begin(&Adafruit128x64, 0x3C);
-  disp.setContrast(100);
+  disp.setContrast(OLED_CONTRAST);
 #endif
 
   //disp.displayRemap(1); // переворот дисплея на 180 градусов
