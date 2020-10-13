@@ -1,6 +1,6 @@
-#ifdef TM1637
+#if defined TM1637 || defined ANALOG_METER
 #define EEPROM_KEY (11 + VERSION * 10)
-#else
+#elif defined OLED
 #define EEPROM_KEY (22 + VERSION * 10)
 #endif
 
@@ -53,7 +53,7 @@ void readEEPROM() {
   // чтение калибровки аккумулятора
   if (EEPROM.read(105) != EEPROM_KEY) {
     EEPROM.write(105, EEPROM_KEY);
-    EEPROM.put(eeAddress._battery_cal, BATTERY_CAL);
+    EEPROM.put(eeAddress._battery_cal, 1.0);
   }
   else EEPROM.get(eeAddress._battery_cal, battery_cal);
 #endif
@@ -71,7 +71,7 @@ void readEEPROM() {
   }
 #endif
 
-#ifndef TM1637
+#ifdef OLED
   //╞═════════════════════╡ Чтение параметров меню ╞══════════════════════╡
 
   // чтение значения таймаута
@@ -84,7 +84,7 @@ void readEEPROM() {
   // чтение таймаута режима ожидания
   if (EEPROM.read(108) != EEPROM_KEY) {
     EEPROM.write(108, EEPROM_KEY);
-    EEPROM.write(eeAddress._stby_time, STBY_TIME);
+    EEPROM.write(eeAddress._stby_time, TIMEOUT_STBY);
   }
   else settingsList[stby_time] = EEPROM.read(eeAddress._stby_time);
 
@@ -174,17 +174,17 @@ void resetEEPROM() {
 #ifdef BATTERY_PIN
   //сброс калибровки аккумулятора
   EEPROM.update(105, EEPROM_KEY);
-  EEPROM.put(eeAddress._battery_cal, BATTERY_CAL);
+  EEPROM.put(eeAddress._battery_cal, 1.0);
 #endif
 
-#ifndef TM1637
+#ifdef OLED
   // сброс значения таймаута
   EEPROM.update(107, EEPROM_KEY);
   EEPROM.update(eeAddress._timeout_off, TIMEOUT_OFF);
 
   // сброс таймаута режима ожидания
   EEPROM.update(108, EEPROM_KEY);
-  EEPROM.update(eeAddress._stby_time, STBY_TIME);
+  EEPROM.update(eeAddress._stby_time, TIMEOUT_STBY);
 
   // сброс функции поддержания питания от повербанка
   EEPROM.update(109, EEPROM_KEY);

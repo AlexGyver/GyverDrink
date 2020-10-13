@@ -5,7 +5,78 @@ GyverTM1637 disp(DISP_CLK, DISP_DIO);
 enum { ml = 1, deg };
 void printNum(uint16_t num, int8_t mode = 0);
 
-#else
+//==================================================================================================
+
+#elif defined ANALOG_METER
+byte err_vector[256] = {
+  0,  1,  1,  2,  2,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,  5,
+  5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  8,  8,  8,  9,
+  9,  9,  10, 10, 10, 11, 11, 12, 12, 12, 13, 13, 14, 14, 14, 14,
+  14, 15, 15, 15, 15, 16, 16, 16, 17, 17, 18, 18, 18, 19, 19, 19,
+  20, 20, 21, 21, 21, 22, 22, 23, 23, 24, 24, 25, 26, 26, 26, 27,
+  27, 27, 28, 28, 28, 29, 29, 29, 30, 30, 31, 31, 31, 32, 32, 32,
+  33, 33, 34, 34, 34, 35, 35, 35, 36, 36, 36, 37, 37, 38, 38, 38,
+  39, 39, 40, 40, 40, 40, 40, 41, 41, 41, 41, 42, 42, 43, 43, 44,
+  44, 44, 44, 44, 45, 45, 45, 45, 45, 46, 46, 46, 46, 46, 47, 47,
+  47, 47, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 49,
+  49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49,
+  49, 49, 49, 48, 48, 48, 48, 48, 48, 48, 48, 47, 47, 47, 47, 46,
+  46, 46, 45, 45, 44, 44, 44, 43, 43, 43, 43, 42, 42, 42, 41, 41,
+  40, 40, 39, 39, 38, 38, 37, 37, 36, 36, 35, 34, 33, 33, 32, 31,
+  31, 30, 29, 28, 28, 27, 26, 25, 24, 23, 22, 22, 21, 20, 19, 19,
+  18, 17, 16, 15, 14, 13, 12, 11, 10, 9,  7,  5,  4,  3,  1,  0,
+};
+
+float smooth(float value) {
+  static float k = 0.5, filteredValue = 0.0;
+  filteredValue = (1.0 - k) * filteredValue + k * value;
+  return filteredValue;
+}
+
+void printNum(uint16_t num, int8_t mode = 0) {
+  static byte lastVal = 255;
+  byte value = round(num * 255.0 / settingsList[max_volume]);
+  Serial.println(num);
+
+  if ( (value == 0) && (lastVal > 0) ) {
+    for (byte i = lastVal; i > 0; i--) {
+      analogWrite(ANALOG_METER_PIN, i - err_vector[i]);
+      delay(2);
+    }
+    lastVal = value;
+  }
+
+  if ( (lastVal == 0) && (value > 0)) {
+    for (byte i = 0; i < value; i++) {
+      analogWrite(ANALOG_METER_PIN, i - err_vector[i]);
+      delay(3);
+    }
+    lastVal = value;
+  }
+  if ( (lastVal == 255) && (num == thisVolume) ) {
+    for (byte i = lastVal; i > value; i--) {
+      analogWrite(ANALOG_METER_PIN, i - err_vector[i]);
+      delay(3);
+    }
+    lastVal = value;
+  }
+
+  if (value > lastVal)
+    for (byte i = lastVal; i < value; i++) analogWrite(ANALOG_METER_PIN, i - err_vector[i]);
+  else if (value < lastVal)
+    for (byte i = lastVal; i > value; i--) analogWrite(ANALOG_METER_PIN, i - err_vector[i]);
+
+  lastVal = value;
+}
+
+struct disp {
+  void clear() {}
+} disp;
+enum { ml = 1, deg };
+
+//==================================================================================================
+
+#elif defined OLED
 SSD1306AsciiWire disp;
 
 #if (NUM_FONT == 0)
@@ -112,7 +183,6 @@ const char *MenuPages[MENU_PAGES][12] = {
     ""
   }
 };
-
 #endif
 
 byte strWidth(const char str[]) {
@@ -278,6 +348,7 @@ void displayMenu() {
     if (menuPage == MAIN_MENU_PAGE) { // выбор елемента на главной странице Меню
       if (menuItem == 1) { // нажали на режим
         workMode = (workModes)!workMode;
+        timeoutReset();
         itemSelected = 0;
         showMenu = false;
         disp.clear();
@@ -394,4 +465,4 @@ void displayMenu() {
   disp.setInvertMode(0);
 }
 
-#endif
+#endif /* OLED */

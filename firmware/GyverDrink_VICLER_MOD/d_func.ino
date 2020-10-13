@@ -19,7 +19,7 @@ void serviceRoutine(serviceStates mode) {
 #ifdef TM1637
     disp.scrollByte(_dash, _1, _dash, _empty, 50);
     delay(1000);
-#else
+#elif defined OLED
     disp.clear();
     disp.setInvertMode(1);
     clearToEOL();
@@ -46,7 +46,7 @@ void serviceRoutine(serviceStates mode) {
           servoPos = shotPos[currShot];
 #ifdef TM1637
           printNum((i + 1) * 1000 + shotPos[i], deg);
-#else
+#elif defined OLED
           disp.home();
           disp.setInvertMode(1);
           clearToEOL();
@@ -76,7 +76,7 @@ void serviceRoutine(serviceStates mode) {
           shotCount--;
           if (shotCount == 0) { // убрали последнюю рюмку
             servoPos = parking_pos;
-#ifndef TM1637
+#ifdef OLED
             disp.home();
             disp.setInvertMode(1);
             clearToEOL();
@@ -105,7 +105,7 @@ void serviceRoutine(serviceStates mode) {
           servoPos = shotPos[currShot];
 #ifdef TM1637
           printNum((i + 1) * 1000 + shotPos[i], deg);
-#else
+#elif defined OLED
           disp.home();
           disp.setInvertMode(1);
           clearToEOL();
@@ -140,7 +140,7 @@ void serviceRoutine(serviceStates mode) {
           shotPos[currShot] = servoPos;
 #ifdef TM1637
           printNum((currShot + 1) * 1000 + shotPos[currShot], deg);
-#else
+#elif defined OLED
           printNum(shotPos[currShot], deg);
 #endif
         }
@@ -150,7 +150,7 @@ void serviceRoutine(serviceStates mode) {
 #ifdef TM1637
         disp.scrollByte(0, 0, 0, 0, 50);
         mode = VOLUME;
-#else
+#elif defined OLED
         timeoutReset();
         //        servo.setTargetDeg(parking_pos);
         //        servo.start();
@@ -188,7 +188,7 @@ void serviceRoutine(serviceStates mode) {
     disp.scrollByte(_dash, _2, _dash, _empty, 50);
     delay(1000);
     disp.displayInt(pumpTime);
-#else
+#elif defined OLED
     disp.clear();
     printNum(pumpTime);
 #endif
@@ -197,7 +197,7 @@ void serviceRoutine(serviceStates mode) {
       systemON = false;
       systemState = SEARCH;
       curPumping = -1;
-#ifndef TM1637
+#ifdef OLED
 #if(MENU_LANG == 1)
       disp.home();
       disp.setInvertMode(1);
@@ -210,7 +210,7 @@ void serviceRoutine(serviceStates mode) {
 #endif
     }
     else {
-#ifndef TM1637
+#ifdef OLED
       disp.home();
       disp.setInvertMode(1);
       clearToEOL();
@@ -229,7 +229,7 @@ void serviceRoutine(serviceStates mode) {
         if (!digitalRead(ENC_SW) && curPumping != -1) {
           if (flag) pumpTime += 100;
           else {
-#ifndef TM1637
+#ifdef OLED
             disp.home();
             disp.setInvertMode(1);
             clearToEOL();
@@ -243,7 +243,7 @@ void serviceRoutine(serviceStates mode) {
           }
 #ifdef TM1637
           disp.displayInt(pumpTime);
-#else
+#elif defined OLED
           printNum(pumpTime);
 #endif
           pumpON();
@@ -263,7 +263,7 @@ void serviceRoutine(serviceStates mode) {
           servo.setTargetDeg(shotPos[i]);
           servo.start();
           servoON();
-#ifndef TM1637
+#ifdef OLED
           disp.home();
           disp.setInvertMode(1);
           clearToEOL();
@@ -284,7 +284,7 @@ void serviceRoutine(serviceStates mode) {
         pumpTime = 0;
         printNum(pumpTime);
         curPumping = -1;
-#ifndef TM1637
+#ifdef OLED
         disp.home();
         disp.setInvertMode(1);
         clearToEOL();
@@ -306,7 +306,7 @@ void serviceRoutine(serviceStates mode) {
 #ifdef BATTERY_PIN
         mode = BATTERY;
 #endif
-#else
+#elif defined OLED
         timeoutReset();
 #endif
 
@@ -343,7 +343,7 @@ void serviceRoutine(serviceStates mode) {
     while (!digitalRead(BTN_PIN));  // ждём отпускания
     disp.scrollByte(_dash, _3, _dash, _empty, 50);
     delay(1000);
-#else
+#elif defined OLED
 #if(MENU_LANG == 1)
     disp.clear();
     disp.setInvertMode(1);
@@ -367,7 +367,7 @@ void serviceRoutine(serviceStates mode) {
       if (timer100.isReady())
 #ifdef TM1637
         printNum(get_battery_voltage() * 1000);
-#else
+#elif defined OLED
         printFloat(get_battery_voltage(), 2, Center, 3);
 #endif
 
@@ -380,7 +380,7 @@ void serviceRoutine(serviceStates mode) {
       if (btn.pressed()) {
 #ifdef TM1637
         disp.scrollByte(0, 0, 0, 0, 50);
-#else
+#elif defined OLED
 #if(MENU_LANG == 1)
         disp.setFont(Vicler8x16);
         disp.setLetterSpacing(0);
@@ -398,7 +398,7 @@ void serviceRoutine(serviceStates mode) {
 #endif
 }
 
-#ifndef TM1637
+#ifdef OLED
 void settingsMenuHandler(uint8_t _item) {
   bool bypass = false;
   uint8_t parameter = menuItem - 1;
@@ -516,7 +516,7 @@ void flowTick() {
         timeoutReset();                                             // сброс таймаута
         if (systemState != PUMPING && !showMenu) {
           printNum(shotVolume[i], ml);
-#ifndef TM1637
+#ifdef OLED
           progressBar(shotVolume[i], settingsList[max_volume]);
 #endif
         }
@@ -542,7 +542,7 @@ void flowTick() {
         shotCount--;
         if (systemState != PUMPING && !showMenu) {
           printNum(thisVolume, ml);
-#ifndef TM1637
+#ifdef OLED
           progressBar(thisVolume, settingsList[max_volume]);
 #endif
         }
@@ -552,12 +552,13 @@ void flowTick() {
     }
     if (shotCount == 0) {                                          // если нет ни одной рюмки
       TIMEOUTtimer.start();
-#if (STATUS_LED)
-      if (timeoutState) {                                          // отключаем динамическую подсветку режима ожидания
-        LEDbreathingState = false;
-        LED = mHSV(255, 0, STATUS_LED); // white
-      }
-#endif
+      //#if (STATUS_LED)
+      //      if (timeoutState) {                                          // отключаем динамическую подсветку режима ожидания
+      //        LEDbreathingState = false;
+      //        if(workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, STATUS_LED);
+      //        else LED = mHSV(AUTO_MODE_STATUS_COLOR, STATUS_LED);
+      //      }
+      //#endif
       if (!parking && !systemON) systemON = true;
     }
     else  TIMEOUTtimer.stop();
@@ -599,8 +600,10 @@ void flowRoutine() {
           servo.attach(SERVO_PIN, parking_pos);
           delay(500);
         }
-#ifndef TM1637
+#ifdef OLED
         progressBar(0);
+#elif defined ANALOG_METER
+        printNum(0);
 #endif
         break;
       }
@@ -610,8 +613,10 @@ void flowRoutine() {
       if ( (workMode == AutoMode) && settingsList[auto_parking] == 0) {                // если в авто режиме:
         systemON = false;                                 // выключили систему
         parking = true;                                   // уже на месте!
-        LEDbreathingState = true;
-        LEDchanged = true;
+#if(STATUS_LED)
+        if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, STATUS_LED);
+        else LED = mHSV(AUTO_MODE_STATUS_COLOR, STATUS_LED);
+#endif
       }
       else {                                              // если же в ручном режиме:
         if (servo.getTargetDeg() != parking_pos) {
@@ -622,7 +627,7 @@ void flowRoutine() {
           LED = mHSV(11, 255, STATUS_LED); // orange
           LEDchanged = true;
 #endif
-#ifndef TM1637
+#ifdef OLED
           displayMode(workMode);
 #endif
         }
@@ -630,8 +635,11 @@ void flowRoutine() {
           servo.stop();
           systemON = false;                               // выключили систему
           parking = true;                                 // на месте!
-          LEDbreathingState = true;
+#if(STATUS_LED)
+          if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, STATUS_LED);
+          else LED = mHSV(AUTO_MODE_STATUS_COLOR, STATUS_LED);
           LEDchanged = true;
+#endif
         }
       }
     }
@@ -640,11 +648,12 @@ void flowRoutine() {
   else if (systemState == MOVING) {                     // движение к рюмке
     if (servo.tick()) {                                   // если приехали
 #if(STATUS_LED)
-      LED = mHSV(255, 0, STATUS_LED); // white
+      if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, STATUS_LED);
+      else LED = mHSV(AUTO_MODE_STATUS_COLOR, STATUS_LED);
       strip.show();
 #endif
       // обнуляем счётчик
-#ifndef TM1637
+#ifdef OLED
       //progressBar(0);
       disp.setFont(BIG_NUM_FONT);
       disp.setCursor(0, 2);
@@ -663,7 +672,7 @@ void flowRoutine() {
       FLOWtimer.setInterval((long)shotVolume[curPumping] * time50ml / 50);  // перенастроили таймер
       FLOWtimer.reset();                                  // сброс таймера
       volumeCount = 0;
-#ifndef TM1637
+#ifdef OLED
       progressBar(-1);
 #endif
       pumpON();                                           // НАЛИВАЙ!
@@ -676,7 +685,7 @@ void flowRoutine() {
     if (tempVolume != lastVolumeCount) {
       printNum(tempVolume, ml);               // выводим текущий объём на дисплей
       lastVolumeCount = tempVolume;
-#ifndef TM1637
+#ifdef OLED
       progressBar(tempVolume, shotVolume[curPumping]);
 #endif
     }
@@ -688,7 +697,7 @@ void flowRoutine() {
     if (FLOWtimer.isReady()) {                            // если налили (таймер)
       pumpOFF();                                          // помпа выкл
       shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
-#ifndef TM1637
+#ifdef OLED
       shots_overall++;
       volume_overall += volumeCount;
 #endif
@@ -756,7 +765,7 @@ void timeoutReset() {
     if (!volumeChanged) disp.displayByte(0x00, 0x00, 0x00, 0x00);
     if (workMode) disp.scrollByte(64, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64, 50);
     else  disp.scrollByte(0, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 0, 50);
-#else
+#elif defined OLED
     disp.setContrast(OLED_CONTRAST);
     disp.invertDisplay((bool)settingsList[invert_display]);
     progressBar(-1);
@@ -771,10 +780,12 @@ void timeoutReset() {
     }
   }
 #if(STATUS_LED)
-  LED = mHSV(255, 0, STATUS_LED); // white
+  if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, STATUS_LED);
+  else LED = mHSV(AUTO_MODE_STATUS_COLOR, STATUS_LED);
   LEDbreathingState = false;
 #endif
-  LEDchanged = true;
+  //  LEDchanged = true;
+  strip.show();
 }
 
 // сам таймаут
@@ -784,7 +795,7 @@ void timeoutTick() {
 #ifdef TM1637
     disp.brightness(0);
     printNum(thisVolume, ml);
-#else
+#elif defined OLED
     disp.setContrast(1);
     if (showMenu) {
       showMenu = 0;
@@ -826,12 +837,12 @@ void timeoutTick() {
     if (POWEROFFtimer.isReady() && !timeoutState) {
       for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mRGB(0, 0, 0); // black
 #if(STATUS_LED)
-      LED = mHSV(255, 0, 0);  // off
+      LED = mHSV(0, 0, 0);  // off
       LEDbreathingState = false;
 #endif
 #ifdef TM1637
       disp.scrollByte(0, 0, 0, 0, 50);
-#else
+#elif defined OLED
       if (settingsList[invert_display]) disp.invertDisplay(false);
       disp.clear();
       disp.setFont(BigIcon36x40);
@@ -854,7 +865,7 @@ void LEDtick() {
   if (LEDchanged && LEDtimer.isReady()) {
     LEDchanged = false;
 #if(STATUS_LED)
-    ledBreathing(LEDbreathingState, timeoutState);
+    ledBreathing(LEDbreathingState);
 #endif
     if (settingsList[keep_power] > 0) keepPower();
     strip.show();
@@ -876,7 +887,7 @@ void rainbowFlow(bool _state, uint8_t _shotNum) {
 }
 
 #if(STATUS_LED)
-void ledBreathing(bool _state, bool mode) {
+void ledBreathing(bool _state) {
   static float _brightness = STATUS_LED;
   static int8_t _dir = -1;
   if (!_state) {
@@ -893,10 +904,8 @@ void ledBreathing(bool _state, bool mode) {
     _brightness = STATUS_LED;
     _dir = -1;
   }
-  if (mode) LED = mHSV(130, 255, _brightness); // бирюзовый
-  else {
-    LED = mHSV(255, 0, _brightness);  // белый
-  }
+  if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, _brightness);
+  else LED = mHSV(AUTO_MODE_STATUS_COLOR, _brightness);
 
   LEDchanged = true;
 }
@@ -975,7 +984,7 @@ bool battery_watchdog() {
       }
       for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, 0);
 #if(STATUS_LED)
-      LED = mHSV(255, 0, 0);
+      LED = mHSV(0, 0, 0);
 #endif
       strip.show();
       timeoutState = false;
@@ -984,7 +993,7 @@ bool battery_watchdog() {
       disp.displayByte(0x39, 0x09, 0x09, 0x0F);
       delay(500);
       disp.displayByte(0x00, 0x00, 0x00, 0x00);
-#else
+#elif defined OLED
       showMenu = false;
       menuItem = 0;
       lastMenuPage = NO_MENU;
@@ -994,13 +1003,13 @@ bool battery_watchdog() {
     else if (!lastOkStatus) timeoutReset();
     lastOkStatus = batOk;
   }
-#ifndef TM1637
+#ifdef OLED
   if (POWEROFFtimer.isOn() || timeoutState || !batOk) displayBattery(batOk);
 #endif
   return batOk;
 }
 
-#ifndef TM1637
+#ifdef OLED
 void displayBattery(bool batOk) {
   if ( batOk && showMenu ) return;
 

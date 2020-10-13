@@ -21,7 +21,7 @@ void encTick() {
       }
     }
 
-#ifndef TM1637
+#ifdef OLED
     if (showMenu) {
       displayMenu();
       timeoutReset();
@@ -32,14 +32,14 @@ void encTick() {
     if (curSelected >= 0) {
       shotVolume[(byte)curSelected] = constrain(shotVolume[(byte)curSelected], 1, settingsList[max_volume]);
       printNum(shotVolume[curSelected], ml);
-#ifndef TM1637
+#ifdef OLED
       progressBar(shotVolume[curSelected], settingsList[max_volume]);
 #endif
     }
     else {
       thisVolume = constrain(thisVolume, 1, settingsList[max_volume]);
       printNum(thisVolume, ml);
-#ifndef TM1637
+#ifdef OLED
       progressBar(thisVolume, settingsList[max_volume]);
 #endif
       for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
@@ -58,7 +58,7 @@ void btnTick() {
       pumpOFF();                      // помпа выкл
       shotStates[curPumping] = READY; // налитая рюмка, статус: готов
       curPumping = -1;                // снимаем выбор рюмки
-#ifndef TM1637
+#ifdef OLED
       shots_overall++;
       volume_overall += volumeCount;
       //      EEPROM.put(eeAddress._shots_overall, shots_overall);
@@ -68,7 +68,7 @@ void btnTick() {
       WAITtimer.reset();
     }
     if (workMode == ManualMode && !showMenu) systemON = true; // система активирована
-#ifndef TM1637
+#ifdef OLED
     if (showMenu) {
       disp.clear();
       if (menuPage != MAIN_MENU_PAGE) {
@@ -94,7 +94,7 @@ void btnTick() {
 #ifdef TM1637
     workMode = (workModes)!workMode;
     disp.scrollByte(64 * workMode, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64 * workMode, 50);
-#else
+#elif defined OLED
     showMenu = !showMenu;
     disp.clear();
     if (showMenu) displayMenu();
@@ -105,14 +105,16 @@ void btnTick() {
       progressBar(-1);
       displayMode(workMode);
     }
-#endif
+#elif defined ANALOG_METER
+    workMode = (workModes)!workMode;
+#endif /* ANALOG_METER */
     timeoutReset();
   }
 
   // промывка
   if (encBtn.holding()) {
     if (workMode == AutoMode) return;
-#ifndef TM1637
+#ifdef OLED
     printNum(volumeCount, ml);
     progressBar(0);
 #endif
@@ -121,7 +123,7 @@ void btnTick() {
 
   // выбор рюмки
   if (encBtn.pressed()) {
-#ifndef TM1637
+#ifdef OLED
     if (showMenu) {
       itemSelected = 1;
       displayMenu();
@@ -153,13 +155,13 @@ void btnTick() {
 
     if (curSelected >= 0) {
       printNum(shotVolume[curSelected], ml);
-#ifndef TM1637
+#ifdef OLED
       progressBar(shotVolume[curSelected], settingsList[max_volume]);
 #endif
     }
     else  {
       printNum(thisVolume, ml);
-#ifndef TM1637
+#ifdef OLED
       progressBar(thisVolume, settingsList[max_volume]);
 #endif
     }

@@ -1,20 +1,21 @@
-
 void setup() {
   //Serial.begin(115200);
   // старт дисплея
 #ifdef TM1637
   disp.clear();
   disp.brightness(7);
-#elif defined OLED_SH1106
-  Wire.begin();
-  Wire.setClock(WIRE_SPEED * 1000L);
-  disp.begin(&SH1106_128x64, 0x3C);
-  disp.setContrast(OLED_CONTRAST);
-#elif defined OLED_SSD1306
+#elif defined OLED
+#if (OLED == 0)
   Wire.begin();
   Wire.setClock(WIRE_SPEED * 1000L);
   disp.begin(&Adafruit128x64, 0x3C);
   disp.setContrast(OLED_CONTRAST);
+#elif (OLED == 1)
+  Wire.begin();
+  Wire.setClock(WIRE_SPEED * 1000L);
+  disp.begin(&SH1106_128x64, 0x3C);
+  disp.setContrast(OLED_CONTRAST);
+#endif
 #endif
 
   //disp.displayRemap(1); // переворот дисплея на 180 градусов
@@ -36,7 +37,7 @@ void setup() {
     delay(500);
     disp.displayByte(0x00, 0x00, 0x00, 0x00);
     delay(500);
-#else
+#elif defined OLED
     disp.setFont(Battery11x22);
     printInt(get_battery_percent(), Right, 0);
     delay(500);
@@ -70,6 +71,9 @@ void setup() {
   // настройка пинов
   pinMode(PUMP_POWER, 1);
   pinMode(SERVO_POWER, 1);
+#ifdef ANALOG_METER
+  pinMode(ANALOG_METER_PIN, OUTPUT);
+#endif
   for (byte i = 0; i < NUM_SHOTS; i++)
     if (SWITCH_LEVEL == 0) pinMode(SW_pins[i], INPUT_PULLUP);
 #ifdef BATTERY_PIN
@@ -101,7 +105,7 @@ void setup() {
   //#define ANIMATION_NUM 7
 #define ANIMATION_FPS 20
   timerMinim nextSym(1000 / ANIMATION_FPS);
-#else
+#elif defined OLED
   timerMinim nextSym(25);
 #if(MENU_LANG == 1)
   disp.setFont(Vicler8x16);
@@ -111,6 +115,8 @@ void setup() {
 #endif // MENU_LANG
   static byte targetX = (disp.displayWidth() - strWidth(bootscreen)) / 2;
   progressBar(-1);
+#elif defined ANALOG_METER
+  timerMinim nextSym(1000 / RAINBOW_FPS);
 #endif // TM1637
 
 
@@ -131,7 +137,7 @@ void setup() {
 #else
       showAnimation(animCount);
 #endif
-#else
+#elif defined OLED
       static byte currX = 128;
       if (currX > targetX) {
 #if(MENU_LANG == 1)
@@ -144,8 +150,11 @@ void setup() {
         clearToEOL();
         currX--;
       }
-
       progressBar(RAINBOW_START_BRIGHTNESS - startBrightness, RAINBOW_START_BRIGHTNESS - 2);
+#elif defined ANALOG_METER
+      static byte i = 0;
+      i += round(255.0 / RAINBOW_START_BRIGHTNESS);
+      analogWrite(ANALOG_METER_PIN, i - err_vector[i]);
 #endif
     }
   }
@@ -156,20 +165,23 @@ void setup() {
       delay(10);
     }
   }
-#ifndef TM1637
+#ifdef OLED
   disp.clear();
   progressBar(-1);
+#elif defined ANALOG_METER
+  printNum(thisVolume);
 #endif
 
 #if (STATUS_LED)
-  LED = mHSV(255, 0, STATUS_LED); // white
+  if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, STATUS_LED);
+  else LED = mHSV(AUTO_MODE_STATUS_COLOR, STATUS_LED);
   strip.show();
 #endif
 
   if (!digitalRead(BTN_PIN))
 #ifdef TM1637
     serviceRoutine(serviceState);
-#else
+#elif defined OLED
   {
     showMenu = true;
     menuPage = CALIBRATION_PAGE;

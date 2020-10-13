@@ -1,11 +1,13 @@
 //GyverDrink VICLER_MOD
-#define VERSION 5.6
-//12.10.2020
+#define VERSION 5.7
+//13.10.2020
 /*
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
   ==============================================================================================
 
    ⚠ Все настройки в файле Config.h ⚠
+   ! Все схемы подключений находятся в файле Config.h в секции Пины !
+
 
    ⚫ Arduino Nano в качестве управляющего микроконтроллера (ATmega 328P).
 
@@ -27,18 +29,18 @@
 
    ⚫ Режим изменяется удержанием основной кнопки в течении полусекунды.
         Ручной режим: разлив начинается только после однократного нажатия на основную кнопку.
-        Авто режим(по краям дисплея отображенны штрихи): разлив начинается автоматически сразу после установки рюмки.
+        Авто режим: разлив начинается автоматически сразу после установки рюмки.
 
    ⚫ Возможность настроить объём для каждой рюмки отдельно:
         Функция активна только если количество поставленных рюмок > 1
-        При однократном нажатии на энкодер подсвечивается место рюмки, объём которой изменяется вращением энкодера. При повторном нажатии подсвечивается следующая рюмка.
+        При однократном нажатии на энкодер подсвечивается место рюмки, объём которой изменяется вращением энкодера. При повторном нажатии подсвечивается следующая установленная рюмка.
         Если же ни одна рюмка не подсвечивается белым, вращение энкодера изменяет объём для всех рюмок одновременно (как в обычном ручном режиме).
 
    ⚫ Разлив можно остановить в любое время нажатием на основную кнопку.
 
-   ⚫ Последний выбранный объём сохраняется после перехода устройства в режим ожидания.
+   ⚫ Последний выбранный объём сохраняется после перехода устройства в режим ожидания и после успешного налива
 
-   ⚫ Дополнительный статус-светодиод подключается к светодиоду последней рюмки, активируется в STATUS_LED.
+   ⚫ Дополнительный статус-светодиод подключается к светодиоду последней рюмки, активируется в STATUS_LED. Служит для индикации режимов работы
 
    ⚫ Индикация заряда аккумулятора и слежение за напряжением.
         Активируется раскоментированием строки #define BATTERY_PIN ...
@@ -48,9 +50,9 @@
    ⚫ Стартовая анимация и динамическая подсветка рюмок во время и после налива.
 
 
-  =====================================
-  Особенности версии на TM1637 дисплее
-  =====================================
+  ================================================
+  ■■■■■ Особенности версии на TM1637 дисплее ■■■■■
+  ================================================
   Сервис режим.
    ⚫ Вход в сервис режим осуществляется удержанием основной кнопки выбора режима во время стартовой анимации до появления на дисплее надписи "SerViCE". После отпускания кнопки на дисплее появится номер этапа калибровки:
 
@@ -76,9 +78,9 @@
    ⚫ При зажатии кнопки выбора режима более 5 секунд, происходит сброс настроек из памяти (TIME_50ML, SHOT_POSITIONS, PARKING_POS и BATTERY_CAL) до первоначальных, прописанных в Config.h.
 
 
-  =====================================
-  Особенности версии на OLED дисплее
-  =====================================
+  ==============================================
+  ■■■■■ Особенности версии на OLED дисплее ■■■■■
+  ==============================================
 
    ⚫ Наличие полноценного, графического меню. Вход/Выход зажатием основной кнопки более полусекунды. Выход из подменю в основное однократным нажатием.
 
@@ -89,30 +91,29 @@
    ⚫ Ведение статистики. Количество налитых рюмок и общий объём. При нажатии на кнопку энкодера, выбранное значение сбрасывается
 
 
-  =========================================================
-  Все схемы подключений находятся в Config.h в секции Пины
-  =========================================================
+  =====================================================================================================
 
-
-   ₽$€ На чашечку кофе автору:        http://paypal.me/vicler
+   ₽$€ На чашечку кофе автору:        http://paypal.me/vicler или viktorglekler@googlemail.com (PayPal)
 
    ★ Исходники на GitHub:             https://github.com/VICLER/GyverDrink
 
    ★ Оригинальный проект AlexGyver:   https://alexgyver.ru/GyverDrink/
+
+   ====================================================================================================
 */
 
 #ifndef __AVR_ATmega328P__
 #error "Not ATmega328P board!"
 #endif
 
-//╞═════════════════════════════╡LIBS╞═════════════════════════════╡
+//╞═══════════════════════════════════════╡LIBS╞═══════════════════════════════════════╡
 
 //#define USE_TICOSERVO   // использование библиотеки Adafruit_TiCoServo вместо стандартной Servo. При использовании серводвигатель подключать к пину 9 или 10!
 
 #include "Config.h"
 #ifdef TM1637
 #include "src/GyverTM1637/GyverTM1637.h"
-#else
+#elif defined OLED
 #include "src/microWire/microWire.h"
 #include "src/SSD1306Ascii/src/SSD1306Ascii.h"
 #include "src/SSD1306Ascii/src/SSD1306AsciiWire.h"
@@ -124,14 +125,14 @@
 #include "src/timer2Minim.h"
 #include <EEPROM.h>
 
-//╞═════════════════════════════╡DATA╞═════════════════════════════╡
+//╞═══════════════════════════════════════╡DATA╞═══════════════════════════════════════╡
 
 #if (STATUS_LED)
 #define statusLed 1
 #else
 #define statusLed 0
 #endif
-LEDdata leds[NUM_SHOTS + statusLed];                  // буфер ленты типа LEDdata (размер зависит от COLOR_DEBTH)
+LEDdata leds[NUM_SHOTS + statusLed];                  // буфер ленты типа LEDdata
 microLED strip(leds, NUM_SHOTS + statusLed, LED_PIN); // объект лента
 ServoSmoothMinim servo;
 encMinim enc(ENC_CLK, ENC_DT, ENC_SW, 1, 1); // пин clk, пин dt, пин sw, направление (0/1), тип (0/1)
@@ -142,13 +143,16 @@ timerMinim LEDtimer(30);
 timerMinim FLOWdebounce(15);
 timerMinim FLOWtimer(2000);
 timerMinim WAITtimer(500);
-timerMinim TIMEOUTtimer(STBY_TIME * 1000L); // таймаут режима ожидания
+timerMinim TIMEOUTtimer(TIMEOUT_STBY * 1000L); // таймаут режима ожидания
 timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
 timerMinim KEEP_POWERtimer(KEEP_POWER * 1000L);
 
 #define MIN_COLOR 48                        // ORANGE mWHEEL
 #define MAX_COLOR 765                       // AQUA mWHEEL
 #define COLOR_SCALE (MAX_COLOR - MIN_COLOR) // фактор для плавного изменения цвета во время налива
+
+#define MANUAL_MODE_STATUS_COLOR 140, 255 // цвет статусного светодиода в ручном режиме (цвет, насыщенность)
+#define AUTO_MODE_STATUS_COLOR 100, 255  // цвет статусного светодиода в авто режиме (цвет, насыщенность)
 
 #define INIT_VOLUME 25
 bool LEDchanged = false;
@@ -174,7 +178,7 @@ bool timeoutState = false;
 bool parking = true;
 bool LEDbreathingState = false;
 float battery_voltage = 4.2;
-float battery_cal = BATTERY_CAL;
+float battery_cal = 1.0;
 bool keepPowerState = false;
 bool volumeChanged = false;
 uint8_t animCount = 7;
@@ -182,7 +186,7 @@ uint8_t parking_pos = PARKING_POS;
 bool showMenu = 0;
 uint8_t menuItem = 0;
 
-#ifndef TM1637
+#ifdef OLED
 uint16_t shots_overall = 0, volume_overall = 0;
 char bootscreen[] = {BOOTSCREEN};
 #endif
@@ -207,7 +211,7 @@ uint8_t settingsList[] = {
   INVERSE_SERVO,
   SERVO_SPEED,
   AUTO_PARKING,
-  STBY_TIME,
+  TIMEOUT_STBY,
   STBY_LIGHT,
   RAINBOW_FLOW,
   MAX_VOLUME,
@@ -225,7 +229,7 @@ struct EEPROMAddress
   const byte _workMode = _parking_pos + sizeof(parking_pos);
   const byte _battery_cal = _workMode + sizeof(byte);
   const byte _animCount = _battery_cal + sizeof(battery_cal);
-#ifndef TM1637
+#ifdef OLED
   const byte _timeout_off = _animCount + sizeof(animCount);
   const byte _stby_time = _timeout_off + sizeof(settingsList[timeout_off]);
   const byte _keep_power = _stby_time + sizeof(settingsList[stby_time]);
@@ -239,7 +243,7 @@ struct EEPROMAddress
 #endif
 } eeAddress;
 
-//╞═════════════════════════════╡MACROS╞═════════════════════════════╡
+//╞═══════════════════════════════════════╡MACROS╞═══════════════════════════════════════╡
 
 #define servoON() digitalWrite(SERVO_POWER, 1)
 #define servoOFF() digitalWrite(SERVO_POWER, 0)
