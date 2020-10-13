@@ -151,9 +151,6 @@ timerMinim KEEP_POWERtimer(KEEP_POWER * 1000L);
 #define MAX_COLOR 765                       // AQUA mWHEEL
 #define COLOR_SCALE (MAX_COLOR - MIN_COLOR) // фактор для плавного изменения цвета во время налива
 
-#define MANUAL_MODE_STATUS_COLOR 140, 255 // цвет статусного светодиода в ручном режиме (цвет, насыщенность)
-#define AUTO_MODE_STATUS_COLOR 100, 255  // цвет статусного светодиода в авто режиме (цвет, насыщенность)
-
 #define INIT_VOLUME 25
 bool LEDchanged = false;
 bool pumping = false;
