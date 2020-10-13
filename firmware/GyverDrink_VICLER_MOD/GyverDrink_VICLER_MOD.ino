@@ -151,6 +151,8 @@ timerMinim KEEP_POWERtimer(KEEP_POWER * 1000L);
 #define MAX_COLOR 765                       // AQUA mWHEEL
 #define COLOR_SCALE (MAX_COLOR - MIN_COLOR) // фактор для плавного изменения цвета во время налива
 
+#define BATTERY_LOW    3.3   // минимальное напряжение аккумулятора
+
 #define INIT_VOLUME 25
 bool LEDchanged = false;
 bool pumping = false;
