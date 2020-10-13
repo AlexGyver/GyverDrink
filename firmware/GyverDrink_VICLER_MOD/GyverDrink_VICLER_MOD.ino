@@ -135,7 +135,7 @@
 LEDdata leds[NUM_SHOTS + statusLed];                  // буфер ленты типа LEDdata
 microLED strip(leds, NUM_SHOTS + statusLed, LED_PIN); // объект лента
 ServoSmoothMinim servo;
-encMinim enc(ENC_CLK, ENC_DT, ENC_SW, 1, 1); // пин clk, пин dt, пин sw, направление (0/1), тип (0/1)
+encMinim enc(ENC_CLK, ENC_DT, ENC_SW, ENCODER_DIR, ENCODER_TYPE); // пин clk, пин dt, пин sw, направление (0/1), тип (0/1)
 
 buttonMinim btn(BTN_PIN);
 buttonMinim encBtn(ENC_SW);
