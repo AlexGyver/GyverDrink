@@ -20,7 +20,7 @@
 - Полноценное меню с настройками, калибровкой и статистикой в OLED версии прошивки
 - Страница исходного проекта на сайте: https://alexgyver.ru/GyverDrink/
 
-[Демонстрация версии с OLED дисплеем] (https://youtu.be/Gz3xwlsXfk0)
+[Демонстрация версии с OLED дисплеем](https://youtu.be/Gz3xwlsXfk0)
 ![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/Oled_Demo.jpg)
 
 <a id="chapter-1"></a>
