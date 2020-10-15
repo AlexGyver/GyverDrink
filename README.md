@@ -21,7 +21,6 @@
 - Страница исходного проекта на сайте: https://alexgyver.ru/GyverDrink/
 
 [Демонстрация версии с OLED дисплеем](https://youtu.be/Gz3xwlsXfk0)
-![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/Oled_Demo.jpg)
 
 <a id="chapter-1"></a>
 ## Схемы
