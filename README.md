@@ -35,7 +35,7 @@
 <a id="chapter-2"></a>
 ## Полезная информация
 * [Сайт AlexGyver](http://alexgyver.ru/)
-* [Обсуждение проекта на форуме](https://community.alexgyver.ru/threads/nalivator-obsuzhdenie-proekta.1880/)
+* [Обсуждение проекта на форуме](https://community.alexgyver.ru/threads/nalivator-obsuzhdenie-proekta.1880/) *(Вопросы задавать тут)*
 * [Основной YouTube канал AlexGyver](https://www.youtube.com/channel/UCgtAOyEQdAyjvm9ATCi_Aig?sub_confirmation=1)
 * [YouTube канал про Arduino от AlexGyver](https://www.youtube.com/channel/UC4axiS76D784-ofoTdo5zOA?sub_confirmation=1)
 * [Видеоуроки по пайке](https://www.youtube.com/playlist?list=PLOT_HeyBraBuMIwfSYu7kCKXxQGsUKcqR)
