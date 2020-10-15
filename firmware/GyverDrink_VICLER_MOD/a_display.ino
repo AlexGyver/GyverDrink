@@ -293,7 +293,7 @@ void progressBar(int16_t value, uint16_t maximum = 50) {
     {
       disp.setCursor(currX, 7);
       disp.write('-');
-      if (value == thisVolume && systemState != PUMPING) delay(4);
+      if (value == thisVolume && systemState != PUMPING) delay(2);
     }
     while (targetX > ++currX);
   }
@@ -303,7 +303,7 @@ void progressBar(int16_t value, uint16_t maximum = 50) {
       if (currX % 2 == 0) {
         disp.write('.');
         if (value == thisVolume) delay(5);
-        else if (value == 0) delay(3);
+        else if (value == 0) delay(2);
       }
       else disp.write(' ');
     } while (targetX <= --currX);
