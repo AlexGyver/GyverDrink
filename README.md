@@ -25,15 +25,19 @@
 
 <a id="chapter-1"></a>
 ## Схемы
+- [Схема исходного проекта](https://github.com/AlexGyver/GyverDrink) *(все настройки подключений для каждой прошивки так же находятся в Config.h в секции "Пины")*
 - Все схемы подключений для каждой прошивки так же находятся в Config.h в секции Соединения
 ![SCHEME](https://github.com/AlexGyver/GyverDrink/blob/master/schemes/scheme1.jpg)
 ![SCHEME](https://github.com/AlexGyver/GyverDrink/blob/master/schemes/scheme2.jpg)
+- Схема модификации сенсорной клавиатуры *(по желанию - подключается вместо кнопок/датчиков)*
 ![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/TTP229_configuration.jpg)
+- Схема модификации шагового двигателя для подключения *(по желанию - подключается вместо сервопривода)*
 ![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/StepMot_connection.jpg)
 
 <a id="chapter-2"></a>
 ## Полезная информация
 * [Сайт AlexGyver](http://alexgyver.ru/)
+* [Обсуждение проекта на форуме](https://community.alexgyver.ru/threads/nalivator-obsuzhdenie-proekta.1880/)
 * [Основной YouTube канал AlexGyver](https://www.youtube.com/channel/UCgtAOyEQdAyjvm9ATCi_Aig?sub_confirmation=1)
 * [YouTube канал про Arduino от AlexGyver](https://www.youtube.com/channel/UC4axiS76D784-ofoTdo5zOA?sub_confirmation=1)
 * [Видеоуроки по пайке](https://www.youtube.com/playlist?list=PLOT_HeyBraBuMIwfSYu7kCKXxQGsUKcqR)
