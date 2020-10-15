@@ -5,16 +5,12 @@ void setup() {
   disp.clear();
   disp.brightness(7);
 #elif defined OLED
+  Wire.begin();
+  Wire.setClock(WIRE_SPEED * 1000L);
 #if (OLED == 0)
-  Wire.begin();
-  Wire.setClock(WIRE_SPEED * 1000L);
   disp.begin(&Adafruit128x64, 0x3C);
-  disp.setContrast(OLED_CONTRAST);
 #elif (OLED == 1)
-  Wire.begin();
-  Wire.setClock(WIRE_SPEED * 1000L);
   disp.begin(&SH1106_128x64, 0x3C);
-  disp.setContrast(OLED_CONTRAST);
 #endif
 #endif
 

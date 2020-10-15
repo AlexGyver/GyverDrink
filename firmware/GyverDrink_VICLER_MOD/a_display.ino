@@ -27,12 +27,6 @@ byte err_vector[256] = {
   18, 17, 16, 15, 14, 13, 12, 11, 10, 9,  7,  5,  4,  3,  1,  0,
 };
 
-float smooth(float value) {
-  static float k = 0.5, filteredValue = 0.0;
-  filteredValue = (1.0 - k) * filteredValue + k * value;
-  return filteredValue;
-}
-
 void printNum(uint16_t num, int8_t mode = 0) {
   static byte lastVal = 255;
   byte value = round(num * 255.0 / settingsList[max_volume]);
@@ -69,10 +63,12 @@ void printNum(uint16_t num, int8_t mode = 0) {
   lastVal = value;
 }
 
+/* для совместимости */
 struct disp {
   void clear() {}
 } disp;
 enum { ml = 1, deg };
+
 
 //==================================================================================================
 
