@@ -38,7 +38,7 @@ void encTick() {
     }
     else {
       thisVolume = constrain(thisVolume, 1, settingsList[max_volume]);
-      printNum(thisVolume, ml);
+      if (timeoutState) printNum(thisVolume, ml);
 #ifdef OLED
       progressBar(thisVolume, settingsList[max_volume]);
 #endif
@@ -83,6 +83,7 @@ void btnTick() {
         menuPage = MAIN_MENU_PAGE;
         progressBar(-1);
         displayMode(workMode);
+        displayVolume();
       }
     }
 #endif
@@ -104,6 +105,7 @@ void btnTick() {
       menuPage = MAIN_MENU_PAGE;
       progressBar(-1);
       displayMode(workMode);
+      displayVolume();
     }
 #elif defined ANALOG_METER
     workMode = (workModes)!workMode;

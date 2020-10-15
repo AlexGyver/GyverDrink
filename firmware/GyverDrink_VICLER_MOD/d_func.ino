@@ -628,7 +628,7 @@ void flowRoutine() {
           LEDchanged = true;
 #endif
 #ifdef OLED
-          displayMode(workMode);
+          displayVolume();
 #endif
         }
         if (servo.tick()) {                               // едем до упора
@@ -654,7 +654,6 @@ void flowRoutine() {
 #endif
       // обнуляем счётчик
 #ifdef OLED
-      //progressBar(0);
       disp.setFont(BIG_NUM_FONT);
       disp.setCursor(0, 2);
       clearToEOL();
@@ -768,8 +767,20 @@ void timeoutReset() {
 #elif defined OLED
     disp.setContrast(OLED_CONTRAST);
     disp.invertDisplay((bool)settingsList[invert_display]);
-    progressBar(-1);
+    if (!POWEROFFtimer.isOn()) {
+      disp.setFont(BIG_NUM_FONT); // очищаем большую иконку режима ожидания
+      printStr("  ", Left, 2);
+      progressBar(-1);
+    }
     displayMode(workMode);
+    displayVolume();
+    // стираем иконку режима ожидания
+    disp.setFont(Mode12x26);
+#ifdef BATTERY_PIN
+    printInt(0, disp.displayWidth() - 52, 0);
+#else
+    printInt(0, Right, 0);
+#endif /* BATTERY_PIN*/
 #endif
   }
   TIMEOUTtimer.reset();
@@ -805,9 +816,16 @@ void timeoutTick() {
       disp.setInvertMode(0);
       disp.clear();
       progressBar(-1);
-      displayMode(workMode);
+      displayVolume();
     }
-    else displayMode(workMode);
+    displayMode(workMode);
+    // выводим иконку режима ожидания
+    disp.setFont(Mode12x26);
+#ifdef BATTERY_PIN
+    printInt(2, disp.displayWidth() - strWidth("2") - 26, 0);
+#else
+    printInt(2, Right, 0);
+#endif /* BATTERY_PIN*/
 #endif
     if (settingsList[stby_light])
       for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, settingsList[stby_light] / 2);
@@ -817,10 +835,10 @@ void timeoutTick() {
     curSelected = -1;
     systemON = false;
     if (settingsList[timeout_off] > 0) POWEROFFtimer.reset();
-    if (volumeChanged) {
-      volumeChanged = false;
-      EEPROM.update(eeAddress._thisVolume, thisVolume);
-    }
+    //    if (volumeChanged) {
+    //      volumeChanged = false;
+    //      EEPROM.update(eeAddress._thisVolume, thisVolume);
+    //    }
 #if (SAVE_MODE == 1)
     EEPROM.update(eeAddress._workMode, workMode);
 #endif

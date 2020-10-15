@@ -293,7 +293,7 @@ void progressBar(int16_t value, uint16_t maximum = 50) {
     {
       disp.setCursor(currX, 7);
       disp.write('-');
-      if (value == thisVolume && systemState != PUMPING) delay(5);
+      if (value == thisVolume && systemState != PUMPING) delay(4);
     }
     while (targetX > ++currX);
   }
@@ -316,16 +316,14 @@ void displayMode(workModes mode) {
   disp.setFont(Mode12x26);
   printInt(mode, 1, 0); // выводим иконку режима
 
-#ifdef BATTERY_PIN
-  if (!timeoutState) printInt(2, disp.displayWidth() - strWidth("2") - 26);
-  else printInt(0, disp.displayWidth() - 52);
-#else
-  if (!timeoutState) printInt(2, Right);
-  else clearToEOL('0');
+#ifdef BATTERY_PIN // выводим иконку батареи
+  disp.setFont(Battery11x22);
+  printInt(get_battery_percent(), Right, 0);
 #endif
+}
 
+void displayVolume() {
   disp.setFont(BIG_NUM_FONT);
-  printStr("  ", Left, 2);
   printNum(thisVolume, ml);
   progressBar(thisVolume, settingsList[max_volume]);
 }
@@ -351,6 +349,7 @@ void displayMenu() {
         lastMenuPage = NO_MENU;
         progressBar(-1);
         displayMode(workMode);
+        displayVolume();
 #if (SAVE_MODE == 1)
         EEPROM.update(eeAddress._workMode, workMode);
 #endif
