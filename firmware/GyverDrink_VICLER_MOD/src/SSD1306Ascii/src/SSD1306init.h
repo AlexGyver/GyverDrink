@@ -60,7 +60,7 @@
 /** Set Display on. */
 #define SSD1306_DISPLAYON 0xAF
 /**Set GDDRAM Page Start Address. */
-#define SSD1306_SETSTARTPAGE 0XB0
+#define SSD1306_SETSTARTPAGE 0xB0
 /** Set COM output scan direction normal. */
 #define SSD1306_COMSCANINC 0xC0
 /** Set COM output scan direction reversed. */
@@ -78,16 +78,16 @@
 /** Deactivate scroll */
 #define SSD1306_DEACTIVATE_SCROLL 0x2E
 /** No Operation Command. */
-#define SSD1306_NOP 0XE3
+#define SSD1306_NOP 0xE3
 //------------------------------------------------------------------------------
 /** Set Pump voltage value: (30H~33H) 6.4, 7.4, 8.0 (POR), 9.0. */
-#define SH1106_SET_PUMP_VOLTAGE 0X30
+#define SH1106_SET_PUMP_VOLTAGE 0x30
 /** First byte of set charge pump mode */
-#define SH1106_SET_PUMP_MODE 0XAD
+#define SH1106_SET_PUMP_MODE 0xAD
 /** Second byte charge pump on. */
-#define SH1106_PUMP_ON 0X8B
+#define SH1106_PUMP_ON 0x8B
 /** Second byte charge pump off. */
-#define SH1106_PUMP_OFF 0X8A
+#define SH1106_PUMP_OFF 0x8A
 //------------------------------------------------------------------------------
 /**
  * @struct DevType
@@ -239,28 +239,30 @@ static const DevType MEM_TYPE Adafruit128x64 = {
 // This section is based on https://github.com/stanleyhuangyc/MultiLCD
 /** Initialization commands for a 128x64 SH1106 oled display. */
 static const uint8_t MEM_TYPE SH1106_128x64init[] = {
-  SSD1306_DISPLAYOFF,
-  SSD1306_SETSTARTPAGE | 0X0,            // set page address
-  SSD1306_SETCONTRAST, 0x80,             // 128
-  SSD1306_SEGREMAP | 0X1,                // set segment remap
-  SSD1306_NORMALDISPLAY,                 // normal / reverse
-  SSD1306_SETMULTIPLEX, 0x3F,            // ratio 64
-  SH1106_SET_PUMP_MODE, SH1106_PUMP_ON,  // set charge pump enable
-  SH1106_SET_PUMP_VOLTAGE | 0X2,         // 8.0 volts
-  SSD1306_COMSCANDEC,                    // Com scan direction
-  SSD1306_SETDISPLAYOFFSET, 0X00,        // set display offset
-  SSD1306_SETDISPLAYCLOCKDIV, 0X80,      // set osc division
-  SSD1306_SETPRECHARGE, 0X1F,            // set pre-charge period
-  SSD1306_SETCOMPINS, 0X12,              // set COM pins
-  SSD1306_SETVCOMDETECT,  0x40,          // set vcomh
-  SSD1306_DISPLAYON
-};
+    SSD1306_DISPLAYOFF,
+    SSD1306_SETSTARTPAGE | 0X0,           // set page address
+    SSD1306_SETCONTRAST, 0x80,            // 128
+    SSD1306_SEGREMAP | 0X1,               // set segment remap
+    SSD1306_NORMALDISPLAY,                // normal / reverse
+    SSD1306_SETMULTIPLEX, 0x3F,           // ratio 64
+    SH1106_SET_PUMP_MODE, SH1106_PUMP_ON, // set charge pump enable
+    SH1106_SET_PUMP_VOLTAGE | 0X2,        // 8.0 volts
+    SSD1306_COMSCANDEC,                   // Com scan direction
+    SSD1306_SETDISPLAYOFFSET, 0X00,       // set display offset
+    SSD1306_SETDISPLAYCLOCKDIV, 0X80,     // set osc division
+    SSD1306_SETPRECHARGE, 0X1F,           // set pre-charge period
+    SSD1306_SETCOMPINS, 0X12,             // set COM pins
+    SSD1306_SETVCOMDETECT, 0x40,          // set vcomh
+    SSD1306_DISPLAYON
+    };
 /** Initialize a 128x64 oled SH1106 display. */
-static const DevType MEM_TYPE SH1106_128x64 =  {
-  SH1106_128x64init,
-  sizeof(SH1106_128x64init),
-  128,
-  64,
-  2    // SH1106 is a 132x64 controller.  Use middle 128 columns.
+static const DevType MEM_TYPE SH1106_128x64 = {
+    // SH1106_128x64init,
+    // sizeof(SH1106_128x64init),
+    Adafruit128x64init,
+    sizeof(Adafruit128x64init),
+    128,
+    64,
+    2 // SH1106 is a 132x64 controller.  Use middle 128 columns.
 };
 #endif  // SSD1306init_h

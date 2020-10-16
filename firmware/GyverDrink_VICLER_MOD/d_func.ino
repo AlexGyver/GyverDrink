@@ -1037,7 +1037,7 @@ void displayBattery(bool batOk) {
   static uint32_t currentMillis, lastDisplay = 0, lastBlink = 0;
   static bool blinkState = true;
   currentMillis = millis();
-  disp.setFont(Battery11x22);
+  disp.setFont(Battery12x22);
 
   if ( (currentMillis - lastDisplay >= 1000) && batOk) {
     lastDisplay = currentMillis;

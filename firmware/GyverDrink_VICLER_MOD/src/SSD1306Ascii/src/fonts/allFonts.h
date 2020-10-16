@@ -69,7 +69,7 @@
 #include "Mode13x28.h"
 #include "Battery10x17.h"
 #include "iBattery12x19.h"
-#include "Battery11x22.h"
+#include "Battery12x22.h"
 #include "Battery19x9.h"
 #include "Battery219x9.h"
 #include "Battery22x12.h"

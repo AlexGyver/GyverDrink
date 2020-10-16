@@ -34,7 +34,7 @@ void setup() {
     disp.displayByte(0x00, 0x00, 0x00, 0x00);
     delay(500);
 #elif defined OLED
-    disp.setFont(Battery11x22);
+    disp.setFont(Battery12x22);
     printInt(get_battery_percent(), Right, 0);
     delay(500);
     disp.clear();

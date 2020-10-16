@@ -133,7 +133,7 @@ const char *MenuPages[MENU_PAGES][12] = {
 #endif
   },
 
-  { "###  Статистика  ###",
+  { "### Статистика  ###",
     " Кол-во рюмок",
     " Объ@м",
     ""
@@ -317,7 +317,7 @@ void displayMode(workModes mode) {
   printInt(mode, 1, 0); // выводим иконку режима
 
 #ifdef BATTERY_PIN // выводим иконку батареи
-  disp.setFont(Battery11x22);
+  disp.setFont(Battery12x22);
   printInt(get_battery_percent(), Right, 0);
 #endif
 }
@@ -331,12 +331,12 @@ void displayVolume() {
 void displayMenu() {
   static uint8_t firstItem = 1, selectedItem = 0;
 
-#if(MENU_LANG == 1)
+  //#if(MENU_LANG == 1)
   disp.setFont(Vicler8x16);
   disp.setLetterSpacing(0);
-#else
-  disp.setFont(ZevvPeep8x16);
-#endif
+  //#else
+  //  disp.setFont(ZevvPeep8x16);
+  //#endif
 
   if (itemSelected) {
     if (menuPage == MAIN_MENU_PAGE) { // выбор елемента на главной странице Меню
