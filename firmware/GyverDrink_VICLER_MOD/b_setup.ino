@@ -102,7 +102,7 @@ void setup() {
 #define ANIMATION_FPS 20
   timerMinim nextSym(1000 / ANIMATION_FPS);
 #elif defined OLED
-  timerMinim nextSym(25);
+  timerMinim nextSym(10);
 #if(MENU_LANG == 1)
   disp.setFont(Vicler8x16);
   disp.setLetterSpacing(0);
@@ -144,7 +144,7 @@ void setup() {
 #endif
         printStr(bootscreen, currX, 3);
         clearToEOL();
-        currX--;
+        currX -= 5;
       }
       progressBar(RAINBOW_START_BRIGHTNESS - startBrightness, RAINBOW_START_BRIGHTNESS - 2);
 #elif defined ANALOG_METER

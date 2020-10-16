@@ -601,6 +601,7 @@ void flowRoutine() {
           delay(500);
         }
 #ifdef OLED
+        printNum(shotVolume[curPumping], ml);
         progressBar(0);
 #elif defined ANALOG_METER
         printNum(0);
@@ -776,11 +777,12 @@ void timeoutReset() {
     displayVolume();
     // стираем иконку режима ожидания
     disp.setFont(Mode12x26);
-#ifdef BATTERY_PIN
-    printInt(0, disp.displayWidth() - 52, 0);
-#else
-    printInt(0, Right, 0);
-#endif /* BATTERY_PIN*/
+    //#ifdef BATTERY_PIN
+    //printInt(0, disp.displayWidth() - 52, 0);
+    printInt(0, Center, 0);
+    //#else
+    //    printInt(0, Right, 0);
+    //#endif /* BATTERY_PIN*/
 #endif
   }
   TIMEOUTtimer.reset();
@@ -821,11 +823,12 @@ void timeoutTick() {
     displayMode(workMode);
     // выводим иконку режима ожидания
     disp.setFont(Mode12x26);
-#ifdef BATTERY_PIN
-    printInt(2, disp.displayWidth() - strWidth("2") - 26, 0);
-#else
-    printInt(2, Right, 0);
-#endif /* BATTERY_PIN*/
+    //#ifdef BATTERY_PIN
+    //printInt(2, disp.displayWidth() - strWidth("2") - 26, 0);
+    printInt(2, Center, 0);
+    //#else
+    //    printInt(2, Right, 0);
+    //#endif /* BATTERY_PIN*/
 #endif
     if (settingsList[stby_light])
       for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, settingsList[stby_light] / 2);
