@@ -333,12 +333,12 @@ void displayVolume() {
 void displayMenu() {
   static uint8_t firstItem = 1, selectedItem = 0;
 
-  //#if(MENU_LANG == 1)
+#if(MENU_LANG == 1)
   disp.setFont(Vicler8x16);
   disp.setLetterSpacing(0);
-  //#else
-  //  disp.setFont(ZevvPeep8x16);
-  //#endif
+#else
+  disp.setFont(ZevvPeep8x16);
+#endif
 
   if (itemSelected) {
     if (menuPage == MAIN_MENU_PAGE) { // выбор елемента на главной странице Меню
@@ -421,7 +421,18 @@ void displayMenu() {
     if (menuPage == SETTINGS_PAGE)  {
       printStr(MenuPages[menuPage][currItem]);
       clearToEOL();
-      if (currItem < menuItemsNum[menuPage])  printInt(settingsList[currItem - 1], Right);
+      if (currItem < menuItemsNum[menuPage]) {
+        byte parameter = currItem - 1;
+#if(MENU_LANG == 1)
+        if ( (parameter == inverse_servo) || (parameter == auto_parking) || (parameter == rainbow_flow) || (parameter == invert_display) ) {
+          if (settingsList[parameter] == 0) printStr("(", Right);
+          else printStr(")", Right);
+        }
+        else printInt(settingsList[parameter], Right);
+#else
+        printInt(settingsList[parameter], Right);
+#endif
+      }
       disp.write('\n');
     }
     else if (menuPage == STATISTICS_PAGE) {

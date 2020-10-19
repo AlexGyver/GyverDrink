@@ -403,11 +403,13 @@ void settingsMenuHandler(uint8_t _item) {
     bypass = true;
   }
   else {
-    disp.setInvertMode(0);
-    printStr(MenuPages[menuPage][menuItem], 0, _item);
-    clearToEOL();
-    disp.setInvertMode(1);
-    printInt(settingsList[parameter], Right);
+    if ( (parameter != inverse_servo) && (parameter != auto_parking) && (parameter != rainbow_flow) && (parameter != invert_display) ) { // boolean parameters
+      disp.setInvertMode(0);
+      printStr(MenuPages[menuPage][menuItem], 0, _item);
+      clearToEOL();
+      disp.setInvertMode(1);
+      printInt(settingsList[parameter], Right);
+    }
   }
   while (1) {
     enc.tick();
@@ -451,7 +453,7 @@ void settingsMenuHandler(uint8_t _item) {
       timeoutReset();
     }
 
-    if ( (parameter == inverse_servo) || (parameter == auto_parking) || (parameter == rainbow_flow) || (parameter == invert_display) ) {
+    if ( (parameter == inverse_servo) || (parameter == auto_parking) || (parameter == rainbow_flow) || (parameter == invert_display) ) { // boolean parameters
       settingsList[parameter] = !settingsList[parameter];
       bypass = true;
     }
