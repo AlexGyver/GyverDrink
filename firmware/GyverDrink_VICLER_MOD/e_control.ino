@@ -150,8 +150,8 @@ void btnTick() {
 
     for (byte i = 0; i < NUM_SHOTS; i++) {
       if (i == curSelected) strip.setLED(curSelected, mRGB(255, 255, 255)); // white
-      else if (shotStates[i] == EMPTY)  strip.setLED(i, mRGB(255, 48, 0));  // orange
-      else  strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
+      else if (shotStates[i] == EMPTY)  strip.setLED(i, mHSV(settingsList[leds_color], 255, 255));
+      //else  strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
     }
     LEDchanged = true;
 

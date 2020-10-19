@@ -1,6 +1,6 @@
 //GyverDrink VICLER_MOD
-#define VERSION 6.0
-//17.10.2020
+#define VERSION 6.1
+//19.10.2020
 /*
   ==============================================================================================
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
@@ -148,10 +148,6 @@ timerMinim TIMEOUTtimer(TIMEOUT_STBY * 1000L); // таймаут режима о
 timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
 timerMinim KEEP_POWERtimer(KEEP_POWER * 1000L);
 
-#define MIN_COLOR 48                        // ORANGE mWHEEL
-#define MAX_COLOR 765                       // AQUA mWHEEL
-#define COLOR_SCALE (MAX_COLOR - MIN_COLOR) // фактор для плавного изменения цвета во время налива
-
 #define BATTERY_LOW    3.3   // минимальное напряжение аккумулятора
 
 #define INIT_VOLUME 25
@@ -185,6 +181,7 @@ uint8_t animCount = 7;
 uint8_t parking_pos = PARKING_POS;
 bool showMenu = 0;
 uint8_t menuItem = 0;
+byte volumeColor[NUM_SHOTS];
 
 #ifdef OLED
 uint16_t shots_overall = 0, volume_overall = 0;
@@ -203,7 +200,8 @@ enum
   rainbow_flow,
   max_volume,
   keep_power,
-  invert_display
+  invert_display,
+  leds_color
 };
 // массив параметров в меню настроек OLED
 uint8_t settingsList[] = {
@@ -216,7 +214,8 @@ uint8_t settingsList[] = {
   RAINBOW_FLOW,
   MAX_VOLUME,
   KEEP_POWER,
-  INVERT_DISPLAY
+  INVERT_DISPLAY,
+  LEDS_COLOR
 };
 
 // расчёт адрессных ячеек для сохранения параметров
@@ -240,6 +239,7 @@ struct EEPROMAddress
   const byte _stby_light = _max_volume + sizeof(settingsList[max_volume]);
   const byte _rainbow_flow = _stby_light + sizeof(settingsList[stby_light]);
   const byte _invert_display = _rainbow_flow + sizeof(settingsList[rainbow_flow]);
+  const byte _leds_color = _invert_display + sizeof(settingsList[invert_display]);
 #endif
 } eeAddress;
 

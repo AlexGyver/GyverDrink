@@ -144,6 +144,13 @@ void readEEPROM() {
   }
   else settingsList[invert_display] = EEPROM.read(eeAddress._invert_display);
   disp.invertDisplay((bool)settingsList[invert_display]);
+
+  // цвет светодиодов
+  if (EEPROM.read(117) != EEPROM_KEY) {
+    EEPROM.write(117, EEPROM_KEY);
+    EEPROM.write(eeAddress._leds_color, LEDS_COLOR);
+  }
+  else settingsList[leds_color] = EEPROM.read(eeAddress._leds_color);
 #endif
 }
 
@@ -217,6 +224,11 @@ void resetEEPROM() {
   // сброс инвертирования дисплея
   EEPROM.update(116, EEPROM_KEY);
   EEPROM.update(eeAddress._invert_display, INVERT_DISPLAY);
+
+  // сброс цвета светодиодов
+  EEPROM.update(117, EEPROM_KEY);
+  EEPROM.update(eeAddress._leds_color, LEDS_COLOR);
+
 #endif
 
   readEEPROM();

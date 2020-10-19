@@ -156,7 +156,7 @@ void setup() {
   }
   if (settingsList[stby_light] > 0) {
     for (byte i = 0; i < settingsList[stby_light]; i++) {
-      for (byte j = 0; j < NUM_SHOTS; j++)  leds[j] = mHSV(20, 255, i);
+      for (byte j = 0; j < NUM_SHOTS; j++)  leds[j] = mHSV(settingsList[leds_color], 255, i);
       strip.show();
       delay(10);
     }

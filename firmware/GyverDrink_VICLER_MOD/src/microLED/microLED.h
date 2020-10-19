@@ -125,7 +125,7 @@ enum COLORS {
 
 // Функции
 LEDdata mRGB(byte r, byte g, byte b);	// RGB 255, 255, 255
-LEDdata mWHEEL(int color);				// цвета 0-1530
+//LEDdata mWHEEL(int color);				// цвета 0-1530
 //LEDdata mHEX(uint32_t color);			// HEX цвет
 LEDdata mHSV(byte h, byte s, byte v);	// HSV 255, 255, 255
 //LEDdata mCOLOR(COLORS color);			// цвет
@@ -144,7 +144,7 @@ public:
 	//void setHSV(int num, byte h, byte s, byte v); 	// HSV
 	//void setHEX(int num, uint32_t color);			// HEX
 	//void setColor(int num, COLORS color);			// стандартный цвет (см. "Стандартные цвета")
-	void colorWheel(int num, int color);			// цвет 0-1530	
+	//void colorWheel(int num, int color);			// цвет 0-1530	
 	//void fill(LEDdata color);						// заливка цветом (mRGB, mWHEEL, mHEX, mHSV)
 	void setLED(int n, LEDdata color);				// ставим цвет светодиода (mRGB, mWHEEL, mHEX, mHSV)	
 	//uint32_t getColorHEX(int num);					// получить HEX цвет диода (для сравнения и т.п.)
@@ -232,9 +232,9 @@ microLED::microLED(LEDdata *LEDarray, byte pin, byte width, byte height, M_type 
 // 	LEDbuffer[num] = mHEX(color);
 // }
 
-void microLED::colorWheel(int num, int color) {
-	LEDbuffer[num] = mWHEEL(color);
-}
+// void microLED::colorWheel(int num, int color) {
+// 	LEDbuffer[num] = mWHEEL(color);
+// }
 
 // void microLED::setColor(int num, COLORS color) {
 // 	LEDbuffer[num] = mCOLOR(color);
@@ -505,40 +505,40 @@ LEDdata mHSV(byte h, byte s, byte v) {
 // 	return mRGB( (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF );
 // }
 
-LEDdata mWHEEL(int color) {
-	byte _r = 0, _g = 0, _b = 0;
-	if (color <= 255) {           // красный макс, зелёный растёт
-		_r = 255;
-		_g = color;
-		_b = 0;
-	}
-	else if (color > 255 && color <= 510) {   // зелёный макс, падает красный
-		_r = 510 - color;
-		_g = 255;
-		_b = 0;
-	}
-	else if (color > 510 && color <= 765) {   // зелёный макс, растёт синий
-		_r = 0;
-		_g = 255;
-		_b = color - 510;
-	}
-	else if (color > 765 && color <= 1020) {  // синий макс, падает зелёный
-		_r = 0;
-		_g = 1020 - color;
-		_b = 255;
-	}
-	else if (color > 1020 && color <= 1275) {   // синий макс, растёт красный
-		_r = color - 1020;
-		_g = 0;
-		_b = 255;
-	}
-	else if (color > 1275 && color <= 1530) { // красный макс, падает синий
-		_r = 255;
-		_g = 0;
-		_b = 1530 - color;
-	}
-	return mRGB(_r, _g, _b);
-}
+// LEDdata mWHEEL(int color) {
+// 	byte _r = 0, _g = 0, _b = 0;
+// 	if (color <= 255) {           // красный макс, зелёный растёт
+// 		_r = 255;
+// 		_g = color;
+// 		_b = 0;
+// 	}
+// 	else if (color > 255 && color <= 510) {   // зелёный макс, падает красный
+// 		_r = 510 - color;
+// 		_g = 255;
+// 		_b = 0;
+// 	}
+// 	else if (color > 510 && color <= 765) {   // зелёный макс, растёт синий
+// 		_r = 0;
+// 		_g = 255;
+// 		_b = color - 510;
+// 	}
+// 	else if (color > 765 && color <= 1020) {  // синий макс, падает зелёный
+// 		_r = 0;
+// 		_g = 1020 - color;
+// 		_b = 255;
+// 	}
+// 	else if (color > 1020 && color <= 1275) {   // синий макс, растёт красный
+// 		_r = color - 1020;
+// 		_g = 0;
+// 		_b = 255;
+// 	}
+// 	else if (color > 1275 && color <= 1530) { // красный макс, падает синий
+// 		_r = 255;
+// 		_g = 0;
+// 		_b = 1530 - color;
+// 	}
+// 	return mRGB(_r, _g, _b);
+// }
 
 // LEDdata mCOLOR(COLORS color) {
 // 	return mHEX(color);
