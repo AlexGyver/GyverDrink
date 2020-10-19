@@ -612,8 +612,8 @@ void flowRoutine() {
         systemON = false;                                 // выключили систему
         parking = true;                                   // уже на месте!
 #if(STATUS_LED)
-        if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, STATUS_LED);
-        else LED = mHSV(AUTO_MODE_STATUS_COLOR, STATUS_LED);
+        if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, 255, STATUS_LED);
+        else LED = mHSV(AUTO_MODE_STATUS_COLOR, 255, STATUS_LED);
 #endif
       }
       else {                                              // если же в ручном режиме:
@@ -634,8 +634,8 @@ void flowRoutine() {
           systemON = false;                               // выключили систему
           parking = true;                                 // на месте!
 #if(STATUS_LED)
-          if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, STATUS_LED);
-          else LED = mHSV(AUTO_MODE_STATUS_COLOR, STATUS_LED);
+          if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, 255, STATUS_LED);
+          else LED = mHSV(AUTO_MODE_STATUS_COLOR, 255, STATUS_LED);
           LEDchanged = true;
 #endif
         }
@@ -646,8 +646,8 @@ void flowRoutine() {
   else if (systemState == MOVING) {                     // движение к рюмке
     if (servo.tick()) {                                   // если приехали
 #if(STATUS_LED)
-      if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, STATUS_LED);
-      else LED = mHSV(AUTO_MODE_STATUS_COLOR, STATUS_LED);
+      if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, 255, STATUS_LED);
+      else LED = mHSV(AUTO_MODE_STATUS_COLOR, 255, STATUS_LED);
       strip.show();
 #endif
       // обнуляем счётчик
@@ -792,8 +792,8 @@ void timeoutReset() {
     }
   }
 #if(STATUS_LED)
-  if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, STATUS_LED);
-  else LED = mHSV(AUTO_MODE_STATUS_COLOR, STATUS_LED);
+  if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, 255, STATUS_LED);
+  else LED = mHSV(AUTO_MODE_STATUS_COLOR, 255, STATUS_LED);
   LEDbreathingState = false;
 #endif
   //  LEDchanged = true;
@@ -920,8 +920,8 @@ void ledBreathing(bool _state) {
     _brightness = STATUS_LED;
     _dir = -1;
   }
-  if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, _brightness);
-  else LED = mHSV(AUTO_MODE_STATUS_COLOR, _brightness);
+  if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, 255, _brightness);
+  else LED = mHSV(AUTO_MODE_STATUS_COLOR, 255, _brightness);
 
   LEDchanged = true;
 }

@@ -169,8 +169,8 @@ void setup() {
 #endif
 
 #if (STATUS_LED)
-  if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, STATUS_LED);
-  else LED = mHSV(AUTO_MODE_STATUS_COLOR, STATUS_LED);
+  if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, 255, STATUS_LED);
+  else LED = mHSV(AUTO_MODE_STATUS_COLOR, 255, STATUS_LED);
   strip.show();
 #endif
 
