@@ -1,4 +1,5 @@
 
+timerMinim timer100(100);
 void serviceRoutine(serviceStates mode) {
 #ifdef TM1637
   byte serviceText[] = {_S, _E, _r, _U, _i, _C, _E};
@@ -9,7 +10,6 @@ void serviceRoutine(serviceStates mode) {
   //==============================================================================
   //                       настройка серводвигателя
   //==============================================================================
-  timerMinim timer100(100);
 
   if (mode == SERVO) {
     byte workModeTemp = workMode;
@@ -340,17 +340,14 @@ void serviceRoutine(serviceStates mode) {
     disp.scrollByte(_dash, _3, _dash, _empty, 50);
     delay(1000);
 #elif defined OLED
-#if(MENU_LANG == 1)
     disp.clear();
     disp.setInvertMode(1);
-    disp.setFont(Vicler8x16);
+    disp.setFont(MAIN_FONT);
+#if(MENU_LANG == 1)
     disp.setLetterSpacing(0);
     clearToEOL();
     printStr("Калибр. аккум-а", Center, 0);
 #else
-    disp.clear();
-    disp.setInvertMode(1);
-    disp.setFont(ZevvPeep8x16);
     clearToEOL();
     printStr("Battery voltage", Center, 0);
 #endif
@@ -377,11 +374,9 @@ void serviceRoutine(serviceStates mode) {
 #ifdef TM1637
         disp.scrollByte(0, 0, 0, 0, 50);
 #elif defined OLED
+        disp.setFont(MAIN_FONT);
 #if(MENU_LANG == 1)
-        disp.setFont(Vicler8x16);
         disp.setLetterSpacing(0);
-#else
-        disp.setFont(ZevvPeep8x16);
 #endif
         disp.clear();
         if (showMenu) timeoutReset();
@@ -406,7 +401,7 @@ void settingsMenuHandler(uint8_t _item) {
     if ( (parameter != inverse_servo) && (parameter != auto_parking) && (parameter != rainbow_flow) && (parameter != invert_display) ) { // boolean parameters
       disp.setInvertMode(0);
       printStr(MenuPages[menuPage][menuItem], 0, _item);
-      clearToEOL();
+      clearToEOL('\'');
       disp.setInvertMode(1);
       printInt(settingsList[parameter], Right);
     }
@@ -551,13 +546,6 @@ void flowTick() {
     }
     if (shotCount == 0) {                                          // если нет ни одной рюмки
       TIMEOUTtimer.start();
-      //#if (STATUS_LED)
-      //      if (timeoutState) {                                          // отключаем динамическую подсветку режима ожидания
-      //        LEDbreathingState = false;
-      //        if(workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, STATUS_LED);
-      //        else LED = mHSV(AUTO_MODE_STATUS_COLOR, STATUS_LED);
-      //      }
-      //#endif
       if (!parking && !systemON) systemON = true;
     }
     else  TIMEOUTtimer.stop();
@@ -590,8 +578,10 @@ void flowRoutine() {
           servoON();                                      // вкл питание серво
           parking = false;
 #if(STATUS_LED)
-          LED = mHSV(11, 255, STATUS_LED); // orange
-          strip.show();
+          //LED = mHSV(11, 255, STATUS_LED); // orange
+          LEDblinkState = true;
+          LEDchanged = true;
+          //strip.show();
 #endif
         }
         else if (shotPos[i] == parking_pos) {             // если положение рюмки совпадает с парковочным
@@ -614,8 +604,8 @@ void flowRoutine() {
         systemON = false;                                 // выключили систему
         parking = true;                                   // уже на месте!
 #if(STATUS_LED)
-        if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, 255, STATUS_LED);
-        else LED = mHSV(AUTO_MODE_STATUS_COLOR, 255, STATUS_LED);
+        if (workMode == ManualMode) LED = mHSV(manualModeStatusColor, 255, STATUS_LED);
+        else LED = mHSV(autoModeStatusColor, 255, STATUS_LED);
 #endif
       }
       else {                                              // если же в ручном режиме:
@@ -624,7 +614,8 @@ void flowRoutine() {
           servo.start();
           servoON();                                        // включаем серво и паркуемся
 #if(STATUS_LED)
-          LED = mHSV(11, 255, STATUS_LED); // orange
+          //LED = mHSV(11, 255, STATUS_LED); // orange
+          LEDblinkState = true;
           LEDchanged = true;
 #endif
 #ifdef OLED
@@ -636,8 +627,9 @@ void flowRoutine() {
           systemON = false;                               // выключили систему
           parking = true;                                 // на месте!
 #if(STATUS_LED)
-          if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, 255, STATUS_LED);
-          else LED = mHSV(AUTO_MODE_STATUS_COLOR, 255, STATUS_LED);
+          LEDblinkState = false;
+          if (workMode == ManualMode) LED = mHSV(manualModeStatusColor, 255, STATUS_LED);
+          else LED = mHSV(autoModeStatusColor, 255, STATUS_LED);
           LEDchanged = true;
 #endif
         }
@@ -648,8 +640,9 @@ void flowRoutine() {
   else if (systemState == MOVING) {                     // движение к рюмке
     if (servo.tick()) {                                   // если приехали
 #if(STATUS_LED)
-      if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, 255, STATUS_LED);
-      else LED = mHSV(AUTO_MODE_STATUS_COLOR, 255, STATUS_LED);
+      LEDblinkState = false;
+      if (workMode == ManualMode) LED = mHSV(manualModeStatusColor, 255, STATUS_LED);
+      else LED = mHSV(autoModeStatusColor, 255, STATUS_LED);
       strip.show();
 #endif
       // обнуляем счётчик
@@ -794,8 +787,8 @@ void timeoutReset() {
     }
   }
 #if(STATUS_LED)
-  if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, 255, STATUS_LED);
-  else LED = mHSV(AUTO_MODE_STATUS_COLOR, 255, STATUS_LED);
+  if (workMode == ManualMode) LED = mHSV(manualModeStatusColor, 255, STATUS_LED);
+  else LED = mHSV(autoModeStatusColor, 255, STATUS_LED);
   LEDbreathingState = false;
 #endif
   //  LEDchanged = true;
@@ -884,6 +877,7 @@ void LEDtick() {
     LEDchanged = false;
 #if(STATUS_LED)
     ledBreathing(LEDbreathingState);
+    ledBlink(LEDblinkState);
 #endif
     if (settingsList[keep_power] > 0) keepPower();
     strip.show();
@@ -922,8 +916,20 @@ void ledBreathing(bool _state) {
     _brightness = STATUS_LED;
     _dir = -1;
   }
-  if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, 255, _brightness);
-  else LED = mHSV(AUTO_MODE_STATUS_COLOR, 255, _brightness);
+  if (workMode == ManualMode) LED = mHSV(manualModeStatusColor, 255, _brightness);
+  else LED = mHSV(autoModeStatusColor, 255, _brightness);
+
+  LEDchanged = true;
+}
+
+void ledBlink(bool _state) {
+  if (!_state) return;
+
+  static bool _blink = true;
+
+  if (timer100.isReady()) _blink = !_blink;
+
+  LED = mHSV(11, 255, STATUS_LED * _blink); // orange
 
   LEDchanged = true;
 }
@@ -1020,7 +1026,9 @@ bool battery_watchdog() {
 #endif
     }
     else if (!lastOkStatus) {
+#ifdef OLED
       progressBar(-1);
+#endif
       timeoutReset();
     }
     lastOkStatus = batOk;

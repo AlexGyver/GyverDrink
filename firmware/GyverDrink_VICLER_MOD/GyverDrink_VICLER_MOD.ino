@@ -1,6 +1,6 @@
 //GyverDrink VICLER_MOD
-#define VERSION 6.1
-//19.10.2020
+#define VERSION 6.2
+//23.10.2020
 /*
   ==============================================================================================
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
@@ -173,15 +173,20 @@ bool systemON = false;
 bool timeoutState = false;
 bool parking = true;
 bool LEDbreathingState = false;
+bool LEDblinkState = false;
 float battery_voltage = 4.2;
 float battery_cal = 1.0;
 bool keepPowerState = false;
 bool volumeChanged = false;
-uint8_t animCount = 7;
 uint8_t parking_pos = PARKING_POS;
+uint8_t animCount = 7;
 bool showMenu = 0;
 uint8_t menuItem = 0;
 byte volumeColor[NUM_SHOTS];
+const int ledsColor = LEDS_COLOR / 360.0 * 255;
+const int manualModeStatusColor = MANUAL_MODE_STATUS_COLOR / 360.0 * 255;
+const int autoModeStatusColor = AUTO_MODE_STATUS_COLOR / 360.0 * 255;
+
 
 #ifdef OLED
 uint16_t shots_overall = 0, volume_overall = 0;
@@ -215,7 +220,7 @@ uint8_t settingsList[] = {
   MAX_VOLUME,
   KEEP_POWER,
   INVERT_DISPLAY,
-  LEDS_COLOR
+  ledsColor
 };
 
 // расчёт адрессных ячеек для сохранения параметров

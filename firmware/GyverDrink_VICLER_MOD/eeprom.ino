@@ -148,7 +148,7 @@ void readEEPROM() {
   // цвет светодиодов
   if (EEPROM.read(117) != EEPROM_KEY) {
     EEPROM.write(117, EEPROM_KEY);
-    EEPROM.write(eeAddress._leds_color, LEDS_COLOR);
+    EEPROM.write(eeAddress._leds_color, ledsColor);
   }
   else settingsList[leds_color] = EEPROM.read(eeAddress._leds_color);
 #endif
@@ -227,7 +227,7 @@ void resetEEPROM() {
 
   // сброс цвета светодиодов
   EEPROM.update(117, EEPROM_KEY);
-  EEPROM.update(eeAddress._leds_color, LEDS_COLOR);
+  EEPROM.update(eeAddress._leds_color, ledsColor);
 
 #endif
 

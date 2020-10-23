@@ -103,11 +103,9 @@ void setup() {
   timerMinim nextSym(1000 / ANIMATION_FPS);
 #elif defined OLED
   timerMinim nextSym(10);
+  disp.setFont(MAIN_FONT);
 #if(MENU_LANG == 1)
-  disp.setFont(Vicler8x16);
   disp.setLetterSpacing(0);
-#else
-  disp.setFont(ZevvPeep8x16);
 #endif // MENU_LANG
   static byte targetX = (disp.displayWidth() - strWidth(bootscreen)) / 2;
   progressBar(-1);
@@ -136,11 +134,9 @@ void setup() {
 #elif defined OLED
       static byte currX = 128;
       if (currX > targetX) {
+        disp.setFont(MAIN_FONT);
 #if(MENU_LANG == 1)
-        disp.setFont(Vicler8x16);
         disp.setLetterSpacing(0);
-#else
-        disp.setFont(ZevvPeep8x16);
 #endif
         printStr(bootscreen, currX, 3);
         clearToEOL();
@@ -169,8 +165,8 @@ void setup() {
 #endif
 
 #if (STATUS_LED)
-  if (workMode == ManualMode) LED = mHSV(MANUAL_MODE_STATUS_COLOR, 255, STATUS_LED);
-  else LED = mHSV(AUTO_MODE_STATUS_COLOR, 255, STATUS_LED);
+  if (workMode == ManualMode) LED = mHSV(manualModeStatusColor, 255, STATUS_LED);
+  else LED = mHSV(autoModeStatusColor, 255, STATUS_LED);
   strip.show();
 #endif
 

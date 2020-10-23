@@ -81,6 +81,12 @@ SSD1306AsciiWire disp;
 #define BIG_NUM_FONT FixedNum30x40_2
 #endif
 
+#if (MENU_LANG == 1)
+#define MAIN_FONT Vicler8x16
+#else
+#define MAIN_FONT ZevvPeep8x16
+#endif
+
 enum MenuPageName { // типы страниц меню
   NO_MENU = -1,
   MAIN_MENU_PAGE,
@@ -101,7 +107,7 @@ uint8_t menuItemsNum[MENU_PAGES] = {4, 12, 2, 2}; // количество стр
 #endif
 
 #if(MENU_LANG == 1)
-const char *MenuPages[MENU_PAGES][13] = {
+const char *MenuPages[][13] = {
   { "#####  Меню  #####",
     "",
     " Настройки",
@@ -142,7 +148,7 @@ const char *MenuPages[MENU_PAGES][13] = {
 };
 
 #else
-const char *MenuPages[MENU_PAGES][13] = {
+const char *MenuPages[][13] = {
   { "Menu",
     "",
     " Settings",
@@ -202,7 +208,7 @@ enum text_position {
   Right
 };
 
-void clearToEOL(char ch = ' ') {
+void clearToEOL(const char ch = ' ') {
   byte i = 1 + (disp.displayWidth() - disp.col()) / disp.charWidth(ch);
   while (i--) disp.write(ch);
 }
@@ -265,11 +271,9 @@ void printNum(uint16_t volume, int8_t postfix = 0) {
   }
   else printInt(volume, Center, 3 - shiftY);
 
+  disp.setFont(MAIN_FONT);
 #if(MENU_LANG == 1)
-  disp.setFont(Vicler8x16);
   disp.setLetterSpacing(0);
-#else
-  disp.setFont(ZevvPeep8x16);
 #endif
 }
 
@@ -334,10 +338,10 @@ void displayMenu() {
   static uint8_t firstItem = 1, selectedItem = 0;
 
 #if(MENU_LANG == 1)
-  disp.setFont(Vicler8x16);
+  disp.setFont(MAIN_FONT);
   disp.setLetterSpacing(0);
 #else
-  disp.setFont(ZevvPeep8x16);
+  disp.setFont(MAIN_FONT);
 #endif
 
   if (itemSelected) {
@@ -453,7 +457,7 @@ void displayMenu() {
 #else
         if (volume_overall < 100.0) {
           if (volume_overall < 10) printInt(volume_overall, disp.displayWidth() - strWidth("0ml") - 1);
-          printInt(volume_overall, disp.displayWidth() - strWidth("00ml") - 1);
+          else printInt(volume_overall, disp.displayWidth() - strWidth("00ml") - 1);
           printStr("ml");
         }
         else {
