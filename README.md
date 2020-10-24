@@ -24,7 +24,7 @@
 
 <a id="chapter-1"></a>
 ## Схемы
-- [Схема исходного проекта](https://github.com/AlexGyver/GyverDrink) *(все настройки подключений для каждой прошивки так же находятся в Config.h в секции "Соедидения")*
+- Все настройки подключений так же находятся в Config.h в секции "Соедидения"
 ![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/scheme1.jpg)
 ![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/scheme2.png)
 - Схема модификации сенсорной клавиатуры *(по желанию - подключается вместо кнопок/датчиков)*
