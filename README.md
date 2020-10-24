@@ -26,7 +26,7 @@
 ## Схемы
 - [Схема исходного проекта](https://github.com/AlexGyver/GyverDrink) *(все настройки подключений для каждой прошивки так же находятся в Config.h в секции "Соедидения")*
 ![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/scheme1.jpg)
-![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/scheme2.jpg)
+![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/scheme2.png)
 - Схема модификации сенсорной клавиатуры *(по желанию - подключается вместо кнопок/датчиков)*
 ![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/TTP229_configuration.jpg)
 - Схема модификации шагового двигателя для подключения *(по желанию - подключается вместо сервопривода)*
