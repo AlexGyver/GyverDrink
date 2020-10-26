@@ -25,7 +25,6 @@
 <a id="chapter-1"></a>
 ## Схемы
 - Все настройки подключений так же находятся в Config.h в секции "Соедидения"
-![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/scheme1.jpg)
 - Питание помпы от 5В
 ![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/scheme2.png)
 - Питание помпы от >5В
