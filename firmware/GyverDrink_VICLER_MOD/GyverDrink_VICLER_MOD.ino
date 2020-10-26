@@ -1,6 +1,6 @@
 //GyverDrink VICLER_MOD
-#define VERSION 6.2
-//23.10.2020
+#define VERSION 6.3
+//27.10.2020
 /*
   ==============================================================================================
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
@@ -206,7 +206,8 @@ enum
   max_volume,
   keep_power,
   invert_display,
-  leds_color
+  leds_color,
+  oled_contrast
 };
 // массив параметров в меню настроек OLED
 uint8_t settingsList[] = {
@@ -220,7 +221,8 @@ uint8_t settingsList[] = {
   MAX_VOLUME,
   KEEP_POWER,
   INVERT_DISPLAY,
-  ledsColor
+  ledsColor,
+  OLED_CONTRAST
 };
 
 // расчёт адрессных ячеек для сохранения параметров
@@ -245,6 +247,7 @@ struct EEPROMAddress
   const byte _rainbow_flow = _stby_light + sizeof(settingsList[stby_light]);
   const byte _invert_display = _rainbow_flow + sizeof(settingsList[rainbow_flow]);
   const byte _leds_color = _invert_display + sizeof(settingsList[invert_display]);
+  const byte _oled_contrast = _leds_color + sizeof(settingsList[_leds_color]);
 #endif
 } eeAddress;
 

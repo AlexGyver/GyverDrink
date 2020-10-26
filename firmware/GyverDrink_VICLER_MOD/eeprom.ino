@@ -151,6 +151,13 @@ void readEEPROM() {
     EEPROM.write(eeAddress._leds_color, ledsColor);
   }
   else settingsList[leds_color] = EEPROM.read(eeAddress._leds_color);
+
+  // яркость олед дисплея
+  if (EEPROM.read(118) != EEPROM_KEY) {
+    EEPROM.write(118, EEPROM_KEY);
+    EEPROM.write(eeAddress._oled_contrast, OLED_CONTRAST);
+  }
+  else settingsList[oled_contrast] = EEPROM.read(eeAddress._oled_contrast);
 #endif
 }
 
@@ -228,6 +235,10 @@ void resetEEPROM() {
   // сброс цвета светодиодов
   EEPROM.update(117, EEPROM_KEY);
   EEPROM.update(eeAddress._leds_color, ledsColor);
+
+  //сброс яркости олед дисплея
+  EEPROM.update(118, EEPROM_KEY);
+  EEPROM.update(eeAddress._oled_contrast, OLED_CONTRAST);
 
 #endif
 

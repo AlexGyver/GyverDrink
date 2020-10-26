@@ -101,13 +101,13 @@ byte lastMenuPage = NO_MENU; // последняя отображаемая ст
 bool itemSelected = 0;
 
 #ifdef BATTERY_PIN
-uint8_t menuItemsNum[MENU_PAGES] = {4, 12, 3, 2}; // количество строк на каждой странице
+uint8_t menuItemsNum[MENU_PAGES] = {4, 13, 3, 2}; // количество строк на каждой странице
 #else
-uint8_t menuItemsNum[MENU_PAGES] = {4, 12, 2, 2}; // количество строк на каждой странице
+uint8_t menuItemsNum[MENU_PAGES] = {4, 13, 2, 2}; // количество строк на каждой странице
 #endif
 
 #if(MENU_LANG == 1)
-const char *MenuPages[][13] = {
+const char *MenuPages[][14] = {
   { "#####  Меню  #####",
     "",
     " Настройки",
@@ -127,6 +127,7 @@ const char *MenuPages[][13] = {
     "поддерж. питания",
     "инверсия цвета",
     "цвет лед",
+    "яркость дисп.",
     "Сброс"
   },
 
@@ -168,6 +169,7 @@ const char *MenuPages[][13] = {
     "keep power",
     "invert display",
     "led color",
+    "disp contrast",
     "reset"
   },
 

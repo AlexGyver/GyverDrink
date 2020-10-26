@@ -445,6 +445,8 @@ void settingsMenuHandler(uint8_t _item) {
       printInt(settingsList[parameter], Right);
       lastParameterValue = settingsList[parameter];
 
+      if(parameter == oled_contrast) disp.setContrast(settingsList[oled_contrast]);
+
       timeoutReset();
     }
 
@@ -465,6 +467,7 @@ void settingsMenuHandler(uint8_t _item) {
       EEPROM.update(eeAddress._keep_power, settingsList[keep_power]);
       EEPROM.update(eeAddress._invert_display, settingsList[invert_display]);
       EEPROM.update(eeAddress._leds_color, settingsList[leds_color]);
+      EEPROM.update(eeAddress._oled_contrast, settingsList[oled_contrast]);
 
       if (settingsList[timeout_off] > 0) POWEROFFtimer.setInterval(settingsList[timeout_off] * 60000L);
       if (settingsList[keep_power] > 0) {
@@ -760,7 +763,7 @@ void timeoutReset() {
     if (workMode) disp.scrollByte(64, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64, 50);
     else  disp.scrollByte(0, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 0, 50);
 #elif defined OLED
-    disp.setContrast(OLED_CONTRAST);
+    disp.setContrast(settingsList[oled_contrast]);
     disp.invertDisplay((bool)settingsList[invert_display]);
     if (!POWEROFFtimer.isOn()) {
       disp.setFont(BIG_NUM_FONT); // очищаем большую иконку режима ожидания
