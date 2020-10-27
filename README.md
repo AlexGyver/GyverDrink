@@ -30,14 +30,14 @@
 - Питание помпы от >5В
 ![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/scheme3.png)
 - Схема модификации сенсорной клавиатуры *(по желанию - подключается вместо кнопок/датчиков)*
-![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/TTP229_configuration.jpg)
+![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/TTP229_configuration.png)
 - Схема модификации шагового двигателя для подключения *(по желанию - подключается вместо сервопривода)*
-![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/StepMot_connection.jpg)
+![SCHEME](https://github.com/VICLER/GyverDrink/blob/master/schemes/StepMot_connection.png)
 
 <a id="chapter-2"></a>
 ## Полезная информация
 * [Сайт AlexGyver](http://alexgyver.ru/)
-* [Обсуждение проекта на форуме](https://community.alexgyver.ru/threads/nalivator-obsuzhdenie-proekta.1880/) *(Вопросы задавать тут)*
+* [Обсуждение проекта на форуме](https://community.alexgyver.ru/threads/der-nalivator-modificirovannaja-versija-gyverdrink.4021/) *(Вопросы задавать тут)*
 * [Основной YouTube канал AlexGyver](https://www.youtube.com/channel/UCgtAOyEQdAyjvm9ATCi_Aig?sub_confirmation=1)
 * [YouTube канал про Arduino от AlexGyver](https://www.youtube.com/channel/UC4axiS76D784-ofoTdo5zOA?sub_confirmation=1)
 * [Видеоуроки по пайке](https://www.youtube.com/playlist?list=PLOT_HeyBraBuMIwfSYu7kCKXxQGsUKcqR)
