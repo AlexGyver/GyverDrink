@@ -91,8 +91,8 @@ enum MenuPageName { // типы страниц меню
   NO_MENU = -1,
   MAIN_MENU_PAGE,
   SETTINGS_PAGE,
-  CALIBRATION_PAGE,
-  STATISTICS_PAGE
+  STATISTICS_PAGE,
+  CALIBRATION_PAGE
 };
 
 #define MENU_PAGES 4 // количество страниц
@@ -101,7 +101,7 @@ byte lastMenuPage = NO_MENU; // последняя отображаемая ст
 bool itemSelected = 0;
 
 #ifdef BATTERY_PIN
-uint8_t menuItemsNum[MENU_PAGES] = {4, 13, 3, 2}; // количество строк на каждой странице
+uint8_t menuItemsNum[MENU_PAGES] = {4, 13, 2, 3}; // количество строк на каждой странице
 #else
 uint8_t menuItemsNum[MENU_PAGES] = {4, 13, 2, 2}; // количество строк на каждой странице
 #endif
@@ -111,8 +111,8 @@ const char *MenuPages[][14] = {
   { "#####  Меню  #####",
     "",
     " Настройки",
-    " Сервис",
-    " Статистика"
+    " Статистика",
+    " Сервис"
   },
 
   { "###  Настройки  ###",
@@ -131,6 +131,12 @@ const char *MenuPages[][14] = {
     "Сброс"
   },
 
+  { "### Статистика  ###",
+    " Кол-во рюмок",
+    " Объ@м",
+    ""
+  },
+
   { "##### Сервис #####",
     " Серво",
     " Объ@м",
@@ -139,22 +145,16 @@ const char *MenuPages[][14] = {
 #else
     ""
 #endif
-  },
-
-  { "### Статистика  ###",
-    " Кол-во рюмок",
-    " Объ@м",
-    ""
   }
 };
 
 #else
-const char *MenuPages[][13] = {
+const char *MenuPages[][14] = {
   { "Menu",
     "",
     " Settings",
-    " Calibration",
-    " Statistics"
+    " Statistics",
+    " Calibration"
   },
 
   { "Settings",
@@ -173,6 +173,12 @@ const char *MenuPages[][13] = {
     "reset"
   },
 
+  { "Statistics",
+    " Shots",
+    " Volume",
+    ""
+  },
+
   { "Calibration",
     " Servo",
     " Volume",
@@ -181,12 +187,6 @@ const char *MenuPages[][13] = {
 #else
     ""
 #endif
-  },
-
-  { "Statistics",
-    " Shots",
-    " Volume",
-    ""
   }
 };
 #endif
@@ -227,14 +227,37 @@ void printStr(const char str[], int8_t x = Append, int8_t y = Append) {
 }
 
 void printInt(uint16_t num, int8_t x = Append, int8_t y = Append) {
-  char cstr[10];
+  char cstr[5];
   itoa(num, cstr, 10);
   printStr(cstr, x, y);
 }
 
+void ftoa(float floatVal, char* floatStr, byte dec) { // float to char array
+  byte index = 0;
+
+  float rounding = 0.5;
+  for (uint8_t i = 0; i < dec; ++i) rounding /= 10.0;
+  floatVal += rounding;
+
+  uint16_t int_part = (uint16_t)floatVal;
+  float remainder = floatVal - (float)int_part;
+  floatStr[index++] = int_part + '0';             // warning! prints only one decimal before comma
+
+  if (dec > 0) floatStr[index++] = '.';
+
+  while (dec-- > 0)
+  {
+    remainder *= 10.0;
+    uint16_t toPrint = (uint16_t)remainder;
+    floatStr[index++] = toPrint + '0';
+    remainder -= toPrint;
+  }
+  floatStr[index++] = '\0';
+}
+
 void printFloat(float num, uint8_t decimals, int8_t x = Append, int8_t y = Append) {
-  char cstr[10];
-  dtostrf(num, 4, decimals, cstr);
+  char cstr[5];
+  ftoa(num, cstr, decimals);
   printStr(cstr, x, y);
 }
 

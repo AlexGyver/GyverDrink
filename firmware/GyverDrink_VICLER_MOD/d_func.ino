@@ -393,15 +393,21 @@ void serviceRoutine(serviceStates mode) {
 void settingsMenuHandler(uint8_t _item) {
   bool bypass = false;
   uint8_t parameter = menuItem - 1;
+  byte lastParameterValue = settingsList[parameter];
   if (menuItem == menuItemsNum[menuPage]) { // сброс настроек
     resetEEPROM();
+    readEEPROM();
     bypass = true;
   }
   else {
     if ( (parameter != inverse_servo) && (parameter != auto_parking) && (parameter != rainbow_flow) && (parameter != invert_display) ) { // boolean parameters
       disp.setInvertMode(0);
       printStr(MenuPages[menuPage][menuItem], 0, _item);
+#if (MENU_LANG == 1)
       clearToEOL('\'');
+#else
+      clearToEOL('.');
+#endif
       disp.setInvertMode(1);
       printInt(settingsList[parameter], Right);
     }
@@ -410,7 +416,6 @@ void settingsMenuHandler(uint8_t _item) {
     enc.tick();
 
     if (enc.isTurn()) {
-      static byte lastParameterValue = 0;
       if (enc.isLeft()) {
         settingsList[parameter] += 1;
       }
@@ -433,19 +438,29 @@ void settingsMenuHandler(uint8_t _item) {
 
       if (settingsList[parameter] <= 99 && lastParameterValue >= 100) {
         disp.setInvertMode(0);
-        printStr("  ", disp.displayWidth() - strWidth("000"));
+        disp.setCursor(strWidth(MenuPages[menuPage][menuItem]), _item);
+#if (MENU_LANG == 1)
+        clearToEOL('\'');
+#else
+        clearToEOL('.');//printStr(".", disp.displayWidth() - strWidth("000"));
+#endif
         disp.setInvertMode(1);
       }
       if (settingsList[parameter] <= 9 && lastParameterValue >= 10) {
         disp.setInvertMode(0);
-        printStr("  ", disp.displayWidth() - strWidth("00"));
+        disp.setCursor(strWidth(MenuPages[menuPage][menuItem]), _item);
+#if (MENU_LANG == 1)
+        clearToEOL('\'');
+#else
+        clearToEOL('.');//printStr(".", disp.displayWidth() - strWidth("00"));
+#endif
         disp.setInvertMode(1);
       }
 
       printInt(settingsList[parameter], Right);
       lastParameterValue = settingsList[parameter];
 
-      if(parameter == oled_contrast) disp.setContrast(settingsList[oled_contrast]);
+      if (parameter == oled_contrast) disp.setContrast(settingsList[oled_contrast]);
 
       timeoutReset();
     }

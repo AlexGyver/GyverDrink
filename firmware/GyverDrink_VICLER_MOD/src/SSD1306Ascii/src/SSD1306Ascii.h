@@ -121,9 +121,9 @@ struct TickerState {
  * @brief SSD1306 base class
  */
 
-class SSD1306Ascii : public Print {
+class SSD1306Ascii{// : public Print {
  public:
-  using Print::write;
+  //using Print::write;
   SSD1306Ascii() {}
 #if INCLUDE_SCROLLING
 //------------------------------------------------------------------------------
