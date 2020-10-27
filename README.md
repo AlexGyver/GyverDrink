@@ -45,4 +45,4 @@
 
 <a id="chapter-3"></a>
 ## Поддержка
-* [PayPal](http://paypal.me/vicler) *(viktorglekler@googlemail.com)
+* [PayPal](http://paypal.me/vicler) *(viktorglekler@googlemail.com)*
