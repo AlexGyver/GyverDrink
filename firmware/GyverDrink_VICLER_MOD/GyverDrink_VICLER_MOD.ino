@@ -1,6 +1,6 @@
 //GyverDrink VICLER_MOD
-#define VERSION 6.31
-//27.10.2020
+#define VERSION 6.3
+//28.10.2020
 /*
   ==============================================================================================
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
@@ -239,9 +239,9 @@ struct EEPROMAddress
   const byte _timeout_off = _animCount + sizeof(animCount);
   const byte _stby_time = _timeout_off + sizeof(settingsList[timeout_off]);
   const byte _keep_power = _stby_time + sizeof(settingsList[stby_time]);
-  const byte _inverse_servo = _keep_power + sizeof(keep_power);
+  const byte _inverse_servo = _keep_power + sizeof(settingsList[keep_power]);
   const byte _servo_speed = _inverse_servo + sizeof(settingsList[inverse_servo]);
-  const byte _auto_parking = _servo_speed + sizeof(servo_speed);
+  const byte _auto_parking = _servo_speed + sizeof(settingsList[servo_speed]);
   const byte _max_volume = _auto_parking + sizeof(settingsList[auto_parking]);
   const byte _stby_light = _max_volume + sizeof(settingsList[max_volume]);
   const byte _rainbow_flow = _stby_light + sizeof(settingsList[stby_light]);
