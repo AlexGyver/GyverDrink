@@ -94,23 +94,23 @@ SSD1306AsciiWire disp;
 
 enum MenuPageName { // типы страниц меню
   NO_MENU = -1,
-  MAIN_MENU_PAGE,
-  SETTINGS_PAGE,
-  STATISTICS_PAGE,
-  SERVICE_PAGE,
-  SERVO_CALIBRATION_PAGE
+  MAIN_MENU_PAGE,         // основная страница
+  SETTINGS_PAGE,          // страница настроек
+  STATISTICS_PAGE,        // страница статистики
+  SERVICE_PAGE,           // страница сервисного меню
+  SERVO_CALIBRATION_PAGE  // страница настройки сервопривода
 };
 
 MenuPageName menuPage = MAIN_MENU_PAGE; // актуальная страница
-byte lastMenuPage = NO_MENU; // последняя отображаемая страница
-bool itemSelected = 0;
+byte lastMenuPage = NO_MENU;            // последняя отображаемая страница. Нужна для предотвращения повторного вывода заголовка одной и той же страницы во время прокрутки.
+bool itemSelected = 0;                  // флаг нажатия на пункт меню
 
 uint8_t menuItemsNum[] = {3, 8, 2, 4, 4}; // количество строк на каждой странице без заголовка
 
 #if(MENU_LANG == 1)
 const char *MenuPages[][9] = {
   { "#####  Меню  #####",
-    "",
+    "", // зарезервированно для названия режима
     " Настройки",
     " Статистика",
   },
@@ -127,9 +127,8 @@ const char *MenuPages[][9] = {
   },
 
   { "### Статистика  ###",
-    " Кол-во рюмок",
-    " Объ@м",
-    ""
+    " Рюмок",
+    " Объ@м"
   },
 
   { "##### Сервис #####",
@@ -145,7 +144,7 @@ const char *MenuPages[][9] = {
 
   {
     "#####  Серво  #####",
-    " Калибровка",
+    " Установка позиций",
     " Инверсия",
     " Скорость",
     " Авто парковка"
@@ -198,7 +197,7 @@ const char *MenuPages[][9] = {
 };
 #endif
 
-byte strWidth(const char str[]) {
+byte strWidth(const char str[]) { // расчёт ширины текста в пикселях
   byte _width = 0;
   while (*str) {
 #if(MENU_LANG == 1)
@@ -210,19 +209,19 @@ byte strWidth(const char str[]) {
   return _width;
 }
 
-enum text_position {
-  Append = -4,
-  Left,
-  Center,
-  Right
+enum text_position { // выравнивание текста на дисплее
+  Append = -4,  // к актуальной позиции
+  Left,         // к левому краю
+  Center,       // по центру
+  Right         // к правому краю
 };
 
-void clearToEOL(const char ch = ' ') {
+void clearToEOL(const char ch = ' ') { // заполнение строки от актуальной позиции до правого края дисплея любым символом. По умолчанию используется пробел для очистки
   byte i = 1 + (disp.displayWidth() - disp.col()) / disp.charWidth(ch);
   while (i--) disp.write(ch);
 }
 
-void printStr(const char str[], int8_t x = Append, int8_t y = Append) {
+void printStr(const char str[], int8_t x = Append, int8_t y = Append) { // вывод текста с возможностью выравнивания
   if (x == Left)    disp.setCol(0);
   if (x == Center)  disp.setCol( (disp.displayWidth() - strWidth(str)) / 2);
   if (x == Right)   disp.setCol(disp.displayWidth() - strWidth(str));
@@ -233,13 +232,13 @@ void printStr(const char str[], int8_t x = Append, int8_t y = Append) {
   while (*str) disp.write(*str++);
 }
 
-void printInt(uint16_t num, int8_t x = Append, int8_t y = Append) {
+void printInt(uint16_t num, int8_t x = Append, int8_t y = Append) { // вывод целых чисел с возможностью выравнивания
   char cstr[5];
   itoa(num, cstr, 10);
   printStr(cstr, x, y);
 }
 
-void ftoa(float floatVal, char* floatStr, byte dec) { // float to char array
+void ftoa(float floatVal, char* floatStr, byte dec) { // преобразование реального числа в массив символов
   byte index = 0;
 
   float rounding = 0.5;
@@ -262,31 +261,30 @@ void ftoa(float floatVal, char* floatStr, byte dec) { // float to char array
   floatStr[index++] = '\0';
 }
 
-void printFloat(float num, uint8_t decimals, int8_t x = Append, int8_t y = Append) {
+void printFloat(float num, uint8_t decimals, int8_t x = Append, int8_t y = Append) { // вывод рельных чисел с возможностью выравнивания
   char cstr[5];
   ftoa(num, cstr, decimals);
   printStr(cstr, x, y);
 }
 
-enum { ml = 1, deg };
+enum { ml = 1, deg }; // постфикс для вывода чисел большими цифрами. мл для объёма и ° для градусов
 
-void printNum(uint16_t volume, int8_t postfix = 0) {
-  static uint16_t lastVol = 0;
+void printNum(uint16_t volume, int8_t postfix = 0) { //вывод чисел крупным шрифтом по центру с возможностью вывода дополнительного постфикса (мл или °)
+  static uint16_t lastVol = 0; // переменная для сохранения последнего выводимого числа
 
   byte shiftY = 0;
   disp.setFont(BIG_NUM_FONT);
 
-  if (postfix == 1) shiftY = 1;
+  if (postfix == 1) shiftY = 1; // число объёма выводится на одну строку выше, чем градусы серво и напяжение аккумулятора
 
-  if (volume <= 999 && lastVol >= 1000) printStr("    ", Center, 3 - shiftY); // "/" = space
+  // очистка первой цифры если число уменьшилось с 1000 до 999, 100 до 99 или с 10 до 9
+  if (volume <= 999 && lastVol >= 1000) printStr("    ", Center, 3 - shiftY);
   if (volume <= 99 && lastVol >= 100) {
     printStr(" ", Left, 3 - shiftY);
     printStr(" ", Right, 3 - shiftY);
   }
-  if ( (volume <= 9 && lastVol >= 10) || !timeoutState ) {
+  if ( (volume <= 9 && lastVol >= 10) || !timeoutState )
     printStr("  ", Left, 3 - shiftY);
-    //printStr("  ", Right, 3 - shiftY);
-  }
   lastVol = volume;
 
   if (postfix == 1) { // отображение мл
@@ -301,7 +299,7 @@ void printNum(uint16_t volume, int8_t postfix = 0) {
     else printInt(volume, (disp.displayWidth() - strWidth("0*")) / 2 + 16, 3 - shiftY);
     if (postfix == 2)  printStr("*"); // "°"
   }
-  else printInt(volume, Center, 3 - shiftY);
+  else printInt(volume, Center, 3 - shiftY); // отображение числа без постфикса
 
   disp.setFont(MAIN_FONT);
 #if(MENU_LANG == 1)
@@ -309,24 +307,24 @@ void printNum(uint16_t volume, int8_t postfix = 0) {
 #endif
 }
 
-void progressBar(int16_t value, uint16_t maximum = 50) {
-  disp.setFont(ProgBar);
-  disp.setLetterSpacing(0);
-  static int16_t currX = 0, targetX = 0;
+void progressBar(int16_t value, uint16_t maximum = 50) { // прогресс-бар для визуального отображения объёма
+  disp.setFont(ProgBar);                  // активируем шрифт. Состоит из одного деления прогресс-бара
+  disp.setLetterSpacing(0);               // отключаем пробелы между символами шрифта, т.к. они уже встроенны в шрифт
+  static int16_t currX = 0, targetX = 0;  // актуальная и целевая позиция координаты Х на дисплее
 
-  if (value == -1) {
-    disp.setCursor(0, 7);
+  if (value == -1) { // если параметр -1, сбрасываем бар и рисуем пунктирную линию на всю ширину дисплея
+    disp.setCursor(0, 7); // седьмая строка (самая нижняя)
     for (int i = 0; i < disp.displayWidth(); i++) {
-      if (i % 2 == 0) disp.write('.');
-      else disp.write(' ');
+      if (i % 2 == 0) disp.write('.'); // в каждом чётном пикселе точка
+      else disp.write(' ');            // в нечётном пусто
     }
-    currX = 0;
-    return;
+    currX = 0; // сброс актуальной координаты Х: 0
+    return;    // выходим из функции
   }
 
-  targetX = value * (128.0 / maximum);
+  targetX = value * (128.0 / maximum); // масштабирование параметра на ширину дисплея. Значение -> номер пикселя от 0 до ширины дисплея (127)
 
-  if (targetX > currX) {
+  if (targetX > currX) { // если целевая позиция больше актуальной, заполняем по одному символу до целевого пикселя
     do
     {
       disp.setCursor(currX, 7);
@@ -335,7 +333,7 @@ void progressBar(int16_t value, uint16_t maximum = 50) {
     }
     while (targetX > ++currX);
   }
-  else if (targetX < currX) {
+  else if (targetX < currX) { // целевая позиция меньше актуальной. Заполняем пунктирной линией до целевого пикселя
     do {
       disp.setCursor(min(currX, disp.displayWidth() - 1), 7);
       if (currX % 2 == 0) {
@@ -350,7 +348,7 @@ void progressBar(int16_t value, uint16_t maximum = 50) {
 }
 
 void displayMode(workModes mode);
-void displayMode(workModes mode) {
+void displayMode(workModes mode) { // вывод иконки режима и иконки аккумулятора
   disp.setFont(Mode12x26);
   printInt(mode, 1, 0); // выводим иконку режима
 
@@ -360,13 +358,13 @@ void displayMode(workModes mode) {
 #endif
 }
 
-void displayVolume() {
+void displayVolume() { // вывод объёма крупным шрифтом спостфиксом "мл" и соответствующего ему значения статус-бара
   disp.setFont(BIG_NUM_FONT);
   printNum(thisVolume, ml);
   progressBar(thisVolume, parameterList[max_volume]);
 }
 
-void displayMenu() {
+void displayMenu() { // вывод страниц меню
   static uint8_t firstItem = 1, selectedRow = 0;
 
 #if(MENU_LANG == 1)
@@ -376,7 +374,7 @@ void displayMenu() {
   disp.setFont(MAIN_FONT);
 #endif
 
-  if (itemSelected) {
+  if (itemSelected) { // нажали на пункт в меню
     if (menuPage == MAIN_MENU_PAGE) { // выбор елемента на главной странице Меню
       if (menuItem == 1) { // нажали на режим
         workMode = (workModes)!workMode;
@@ -391,46 +389,49 @@ void displayMenu() {
 #if (SAVE_MODE == 1)
         EEPROM.update(eeAddress._workMode, workMode);
 #endif
-        return;
+        return; // выходим из меню
       }
       else {
         menuPage = (MenuPageName)(menuItem - 1);
         menuItem = 1;
-        //disp.clear();
       }
     }
-    else if (menuPage == SETTINGS_PAGE) {
+    else if (menuPage == SETTINGS_PAGE) { // выбор елемента на странице настройки
       editParameter(menuItem - 1, selectedRow);
       if (!timeoutState) { // произошёл вход в режим ожидания
         itemSelected = 0;
         return;
       }
     }
-    else if (menuPage == SERVICE_PAGE)  {
-      if (menuItem == menuItemsNum[menuPage]) { // сброс настроек
+    else if (menuPage == SERVICE_PAGE)  { // выбор елемента на странице сервисного меню
+      if (menuItem == menuItemsNum[menuPage]) { // последний пункт -> сброс настроек
         resetEEPROM();
         readEEPROM();
       }
-      else if (menuItem == 1) menuPage = SERVO_CALIBRATION_PAGE;
-      else {
+      else if (menuItem == 1) menuPage = SERVO_CALIBRATION_PAGE; // выбор первого пункта -> переходим на страницу серво
+      else { // иначе запускаем обработку выбранного этапа калибровки
         serviceRoutine((serviceStates)(menuItem - 1));
         lastMenuPage = NO_MENU;
       }
     }
-    else if (menuPage == STATISTICS_PAGE) {
-      if (menuItem == 1) shots_overall = 0;
-      else if (menuItem == 2) volume_overall = 0;
+    else if (menuPage == STATISTICS_PAGE) { // выбор елемента на странице статистики
+      if (menuItem == 1) shots_overall = 0; // сбрасываем количетво рюмок
+      else if (menuItem == 2) volume_overall = 0; // сбрасываем объём
     }
-    else if (menuPage == SERVO_CALIBRATION_PAGE) {
-      if (menuItem == 1) {
+    else if (menuPage == SERVO_CALIBRATION_PAGE) { // выбор елемента на странице настройки сервопривода
+      if (menuItem == 1) { // выбрали первый пункт -> начало этапа калибровки серво
         serviceRoutine(SERVO);
         lastMenuPage = NO_MENU;
       }
-      else editParameter(menuItem - 2 + 8, selectedRow);
+      else editParameter(menuItem - 2 + 8, selectedRow); // запускаем обработчик изменения параметра. -2 отступ (заголовок и первый пункт страницы). +8 начало параметров для сервисного меню в массиве parameterList
     }
-    itemSelected = 0;
+    itemSelected = 0; // флаг на успешную обработку нажатия на пункт меню.
   }
 
+  if ( (menuItem < 1) || (menuItem > menuItemsNum[menuPage]) ) { // предотвращение повторного вывода станицы меню если крутим енкодер за пределы пунктов меню.
+    menuItem = constrain(menuItem, 1, menuItemsNum[menuPage]);
+    return;
+  }
   menuItem = constrain(menuItem, 1, menuItemsNum[menuPage]);
 
   if (menuPage != lastMenuPage) {

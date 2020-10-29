@@ -1,5 +1,5 @@
 //GyverDrink VICLER_MOD
-#define VERSION 6.4
+#define VERSION 6.41
 //29.10.2020
 /*
   ==============================================================================================
@@ -192,7 +192,7 @@ bool volumeChanged = false;
 uint8_t parking_pos = PARKING_POS;
 uint8_t animCount = 7;
 bool showMenu = 0;
-uint8_t menuItem = 0;
+uint8_t menuItem = 1;
 byte volumeColor[NUM_SHOTS];
 const int ledsColor = LEDS_COLOR / 360.0 * 255;
 const int manualModeStatusColor = MANUAL_MODE_STATUS_COLOR / 360.0 * 255;

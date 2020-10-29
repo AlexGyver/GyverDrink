@@ -1,14 +1,14 @@
 #if defined TM1637 || defined ANALOG_METER
 #define EEPROM_KEY (VERSION * 10)
 #elif defined OLED
-#define EEPROM_KEY (11 + VERSION * 10)
+#define EEPROM_KEY (VERSION * 10 + 1)
 #endif
 
 
 void readEEPROM() {
 
-  if (EEPROM.read(100) != EEPROM_KEY) {
-    EEPROM.write(100, EEPROM_KEY);
+  if (EEPROM.read(100) != (byte)EEPROM_KEY) {
+    EEPROM.write(100, (byte)EEPROM_KEY);
     resetEEPROM();
     firstStartUp = true;
   }

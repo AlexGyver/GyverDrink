@@ -147,6 +147,7 @@ void serviceRoutine(serviceStates mode) {
         else printNum(servoPos, deg);
       }
       if (btn.pressed()) {
+        workMode = (workModes)workModeTemp;
 #ifdef TM1637
         disp.scrollByte(0, 0, 0, 0, 50);
         mode = VOLUME;
@@ -158,7 +159,6 @@ void serviceRoutine(serviceStates mode) {
         strip.show();
 #endif
         if (shotCount > 0) parking = false;
-        workMode = (workModes)workModeTemp;
         break;
       }
     }
@@ -346,7 +346,7 @@ void serviceRoutine(serviceStates mode) {
 #if(MENU_LANG == 1)
     disp.setLetterSpacing(0);
     clearToEOL();
-    printStr("Калибр. аккум-а", Center, 0);
+    printStr("Напряжение аккум-а", Center, 0);
 #else
     clearToEOL();
     printStr("Battery voltage", Center, 0);
@@ -814,7 +814,7 @@ void timeoutTick() {
     disp.setContrast(1);
     if (showMenu) {
       showMenu = 0;
-      menuItem = 0;
+      menuItem = 1;
       lastMenuPage = NO_MENU;
       menuPage = MAIN_MENU_PAGE;
       disp.setInvertMode(0);
@@ -1023,7 +1023,7 @@ bool battery_watchdog() {
       disp.displayByte(0x00, 0x00, 0x00, 0x00);
 #elif defined OLED
       showMenu = false;
-      menuItem = 0;
+      menuItem = 1;
       lastMenuPage = NO_MENU;
       menuPage = MAIN_MENU_PAGE;
       if (parameterList[invert_display]) disp.invertDisplay(false);

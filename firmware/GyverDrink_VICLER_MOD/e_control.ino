@@ -70,7 +70,6 @@ void btnTick() {
     if (workMode == ManualMode && !showMenu) systemON = true; // система активирована
 #ifdef OLED
     if (showMenu) {
-      //disp.clear();
       if (menuPage != MAIN_MENU_PAGE && menuPage != SERVICE_PAGE) {
         if (menuPage == SERVO_CALIBRATION_PAGE) {
           menuItem = 1;
@@ -85,7 +84,7 @@ void btnTick() {
       else {
         disp.clear();
         showMenu = 0;
-        menuItem = 0;
+        menuItem = 1;
         lastMenuPage = NO_MENU;
         menuPage = MAIN_MENU_PAGE;
         progressBar(-1);
@@ -105,10 +104,10 @@ void btnTick() {
     disp.scrollByte(64 * workMode, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64 * workMode, 50);
 #elif defined OLED
     showMenu = !showMenu;
-    disp.clear();
     if (showMenu) displayMenu();
     else {
-      menuItem = 0;
+      disp.clear();
+      menuItem = 1;
       lastMenuPage = NO_MENU;
       menuPage = MAIN_MENU_PAGE;
       progressBar(-1);
