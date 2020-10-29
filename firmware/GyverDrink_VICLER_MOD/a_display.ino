@@ -471,10 +471,8 @@ void displayMenu() {
     if (menuPage == SETTINGS_PAGE)  {
       printStr(MenuPages[menuPage][currItem]);
       clearToEOL();
-      //if (currItem < menuItemsNum[menuPage]) {
       byte parameter = currItem - 1;
 #if(MENU_LANG == 1)
-      //if ( (parameter == inverse_servo) || (parameter == auto_parking) || (parameter == rainbow_flow) || (parameter == invert_display) ) {
       if ( (parameter == rainbow_flow) || (parameter == invert_display) ) {
         if (parameterList[parameter] == 0) printStr("(", Right);
         else printStr(")", Right);
@@ -483,7 +481,6 @@ void displayMenu() {
 #else
       printInt(parameterList[parameter], Right);
 #endif
-      //}
       disp.write('\n');
     }
     else if (menuPage == STATISTICS_PAGE) {
