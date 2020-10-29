@@ -14,7 +14,7 @@ void serviceRoutine(serviceStates mode) {
   if (mode == SERVO) {
     byte workModeTemp = workMode;
     workMode = AutoMode;
-    for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(settingsList[leds_color], 255, settingsList[stby_light]));
+    for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(parameterList[leds_color], 255, parameterList[stby_light]));
     strip.show();
 #ifdef TM1637
     disp.scrollByte(_dash, _1, _dash, _empty, 50);
@@ -69,7 +69,7 @@ void serviceRoutine(serviceStates mode) {
           break;
         }
         if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  { // убрали рюмку
-          strip.setLED(i, mHSV(settingsList[leds_color], 255, settingsList[stby_light]));
+          strip.setLED(i, mHSV(parameterList[leds_color], 255, parameterList[stby_light]));
           strip.show();
           shotStates[i] = NO_GLASS;
           if (currShot == i)  currShot = -1;
@@ -153,7 +153,7 @@ void serviceRoutine(serviceStates mode) {
 #elif defined OLED
         timeoutReset();
         for (byte i = 0; i < NUM_SHOTS; i++) {
-          if (shotStates[i] == EMPTY) strip.setLED(i, mHSV(settingsList[leds_color], 255, 255));
+          if (shotStates[i] == EMPTY) strip.setLED(i, mHSV(parameterList[leds_color], 255, 255));
         }
         strip.show();
 #endif
@@ -177,7 +177,7 @@ void serviceRoutine(serviceStates mode) {
   if (mode == VOLUME) {
     uint16_t pumpTime = 0;
     bool flag = false;
-    for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(settingsList[leds_color], 255, settingsList[stby_light]));
+    for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(parameterList[leds_color], 255, parameterList[stby_light]));
     strip.show();
 #ifdef TM1637
     while (!digitalRead(BTN_PIN));  // ждём отпускания
@@ -274,7 +274,7 @@ void serviceRoutine(serviceStates mode) {
       }
       if (digitalRead(SW_pins[curPumping]) && (curPumping > -1)) {
         delay(100);
-        strip.setLED(curPumping, mHSV(settingsList[leds_color], 255, settingsList[stby_light]));
+        strip.setLED(curPumping, mHSV(parameterList[leds_color], 255, parameterList[stby_light]));
         strip.show();
         if (pumpTime > 0) EEPROM.put(eeAddress._time50ml, pumpTime);
         pumpTime = 0;
@@ -311,7 +311,7 @@ void serviceRoutine(serviceStates mode) {
         servo.start();
         servoON();
 
-        for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(settingsList[leds_color], 255, settingsList[stby_light]));
+        for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(parameterList[leds_color], 255, parameterList[stby_light]));
         strip.show();
         break;
       }
@@ -333,7 +333,7 @@ void serviceRoutine(serviceStates mode) {
   //==============================================================================
 #ifdef BATTERY_PIN
   if (mode == BATTERY) {
-    for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(settingsList[leds_color], 255, settingsList[stby_light]));
+    for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(parameterList[leds_color], 255, parameterList[stby_light]));
     strip.show();
 #ifdef TM1637
     while (!digitalRead(BTN_PIN));  // ждём отпускания
@@ -390,55 +390,47 @@ void serviceRoutine(serviceStates mode) {
 }
 
 #ifdef OLED
-void settingsMenuHandler(uint8_t _item) {
+void editParameter(byte parameter, byte selectedRow) {
   bool bypass = false;
-  uint8_t parameter = menuItem - 1;
-  byte lastParameterValue = settingsList[parameter];
-  if (menuItem == menuItemsNum[menuPage]) { // сброс настроек
-    resetEEPROM();
-    readEEPROM();
-    bypass = true;
-  }
-  else {
-    if ( (parameter != inverse_servo) && (parameter != auto_parking) && (parameter != rainbow_flow) && (parameter != invert_display) ) { // boolean parameters
-      disp.setInvertMode(0);
-      printStr(MenuPages[menuPage][menuItem], 0, _item);
+  byte lastParameterValue = parameterList[parameter];
+  if ( (parameter != inverse_servo) && (parameter != auto_parking) && (parameter != rainbow_flow) && (parameter != invert_display) ) { // boolean parameters
+    disp.setInvertMode(0);
+    printStr(MenuPages[menuPage][menuItem], 0, selectedRow);
 #if (MENU_LANG == 1)
-      clearToEOL('\'');
+    clearToEOL('\'');
 #else
-      clearToEOL('.');
+    clearToEOL('.');
 #endif
-      disp.setInvertMode(1);
-      printInt(settingsList[parameter], Right);
-    }
+    disp.setInvertMode(1);
+    printInt(parameterList[parameter], Right);
   }
   while (1) {
     enc.tick();
 
     if (enc.isTurn()) {
       if (enc.isLeft()) {
-        settingsList[parameter] += 1;
+        parameterList[parameter] += 1;
       }
       if (enc.isRight()) {
-        settingsList[parameter] -= 1;
+        parameterList[parameter] -= 1;
       }
 
-      if (settingsList[timeout_off] > 15) settingsList[timeout_off] = 0;
+      if (parameterList[timeout_off] > 15) parameterList[timeout_off] = 0;
 
-      if (settingsList[servo_speed] > 100) settingsList[servo_speed] = 0;
+      if (parameterList[servo_speed] > 100) parameterList[servo_speed] = 0;
 
-      if (settingsList[stby_time]) {
-        TIMEOUTtimer.setInterval(settingsList[stby_time] * 1000L); // таймаут режима ожидания
+      if (parameterList[stby_time]) {
+        TIMEOUTtimer.setInterval(parameterList[stby_time] * 1000L); // таймаут режима ожидания
         TIMEOUTtimer.reset();
       }
 
-      if (settingsList[keep_power] > 0)
-        KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
+      if (parameterList[keep_power] > 0)
+        KEEP_POWERtimer.setInterval(parameterList[keep_power] * 1000L);
       else keepPowerState = 0;
 
-      if (settingsList[parameter] <= 99 && lastParameterValue >= 100) {
+      if (parameterList[parameter] <= 99 && lastParameterValue >= 100) {
         disp.setInvertMode(0);
-        disp.setCursor(strWidth(MenuPages[menuPage][menuItem]), _item);
+        disp.setCursor(strWidth(MenuPages[menuPage][menuItem]), selectedRow);
 #if (MENU_LANG == 1)
         clearToEOL('\'');
 #else
@@ -446,9 +438,9 @@ void settingsMenuHandler(uint8_t _item) {
 #endif
         disp.setInvertMode(1);
       }
-      if (settingsList[parameter] <= 9 && lastParameterValue >= 10) {
+      if (parameterList[parameter] <= 9 && lastParameterValue >= 10) {
         disp.setInvertMode(0);
-        disp.setCursor(strWidth(MenuPages[menuPage][menuItem]), _item);
+        disp.setCursor(strWidth(MenuPages[menuPage][menuItem]), selectedRow);
 #if (MENU_LANG == 1)
         clearToEOL('\'');
 #else
@@ -457,59 +449,61 @@ void settingsMenuHandler(uint8_t _item) {
         disp.setInvertMode(1);
       }
 
-      printInt(settingsList[parameter], Right);
-      lastParameterValue = settingsList[parameter];
+      printInt(parameterList[parameter], Right);
+      lastParameterValue = parameterList[parameter];
 
-      if (parameter == oled_contrast) disp.setContrast(settingsList[oled_contrast]);
+      if (parameter == oled_contrast) disp.setContrast(parameterList[oled_contrast]);
 
       timeoutReset();
     }
 
     if ( (parameter == inverse_servo) || (parameter == auto_parking) || (parameter == rainbow_flow) || (parameter == invert_display) ) { // boolean parameters
-      settingsList[parameter] = !settingsList[parameter];
+      parameterList[parameter] = !parameterList[parameter];
       bypass = true;
     }
 
     if (encBtn.pressed() ||  btn.pressed() || bypass) {
-      EEPROM.update(eeAddress._timeout_off, settingsList[timeout_off]);
-      EEPROM.update(eeAddress._inverse_servo, settingsList[inverse_servo]);
-      EEPROM.update(eeAddress._servo_speed, settingsList[servo_speed]);
-      EEPROM.update(eeAddress._auto_parking, settingsList[auto_parking]);
-      EEPROM.update(eeAddress._stby_time, settingsList[stby_time]);
-      EEPROM.update(eeAddress._stby_light, settingsList[stby_light]);
-      EEPROM.update(eeAddress._rainbow_flow, settingsList[rainbow_flow]);
-      EEPROM.update(eeAddress._max_volume, settingsList[max_volume]);
-      EEPROM.update(eeAddress._keep_power, settingsList[keep_power]);
-      EEPROM.update(eeAddress._invert_display, settingsList[invert_display]);
-      EEPROM.update(eeAddress._leds_color, settingsList[leds_color]);
-      EEPROM.update(eeAddress._oled_contrast, settingsList[oled_contrast]);
+      EEPROM.update(eeAddress._timeout_off, parameterList[timeout_off]);
+      EEPROM.update(eeAddress._inverse_servo, parameterList[inverse_servo]);
+      EEPROM.update(eeAddress._servo_speed, parameterList[servo_speed]);
+      EEPROM.update(eeAddress._auto_parking, parameterList[auto_parking]);
+      EEPROM.update(eeAddress._stby_time, parameterList[stby_time]);
+      EEPROM.update(eeAddress._stby_light, parameterList[stby_light]);
+      EEPROM.update(eeAddress._rainbow_flow, parameterList[rainbow_flow]);
+      EEPROM.update(eeAddress._max_volume, parameterList[max_volume]);
+      EEPROM.update(eeAddress._keep_power, parameterList[keep_power]);
+      EEPROM.update(eeAddress._invert_display, parameterList[invert_display]);
+      EEPROM.update(eeAddress._leds_color, parameterList[leds_color]);
+      EEPROM.update(eeAddress._oled_contrast, parameterList[oled_contrast]);
 
-      if (settingsList[timeout_off] > 0) POWEROFFtimer.setInterval(settingsList[timeout_off] * 60000L);
-      if (settingsList[keep_power] > 0) {
-        KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
+      if (parameterList[timeout_off] > 0) POWEROFFtimer.setInterval(parameterList[timeout_off] * 60000L);
+      if (parameterList[keep_power] > 0) {
+        KEEP_POWERtimer.setInterval(parameterList[keep_power] * 1000L);
         KEEP_POWERtimer.start();
       }
       else KEEP_POWERtimer.stop();
 
-      servo.setSpeed(settingsList[servo_speed]);
-      servo.setDirection(settingsList[inverse_servo]);
+      servo.setSpeed(parameterList[servo_speed]);
+      servo.setDirection(parameterList[inverse_servo]);
       servo.start();
       servoON();
       while (!servo.tick());
       servo.stop();
       servoOFF();
 
-      if (thisVolume > settingsList[max_volume]) thisVolume = settingsList[max_volume];
+      if (thisVolume > parameterList[max_volume]) thisVolume = parameterList[max_volume];
       for (byte i = 0; i < NUM_SHOTS; i++) {
-        if (shotStates[i] == NO_GLASS) leds[i] = mHSV(settingsList[leds_color], 255, settingsList[stby_light]);
+        if (shotStates[i] == NO_GLASS) leds[i] = mHSV(parameterList[leds_color], 255, parameterList[stby_light]);
       }
-      disp.invertDisplay(settingsList[invert_display]);
+      disp.invertDisplay(parameterList[invert_display]);
       timeoutReset();
       break;
     }
-    LEDtick();
-    timeoutTick();
-    if (!timeoutState) break;
+    if (menuPage != SERVO_CALIBRATION_PAGE) {
+      LEDtick();
+      timeoutTick();
+      if (!timeoutState) break;
+    }
   }
 }
 #endif
@@ -522,14 +516,14 @@ void flowTick() {
       if (swState && shotStates[i] == NO_GLASS) {  // поставили пустую рюмку
         shotStates[i] = EMPTY;                                      // флаг на заправку
         if (i == curSelected) strip.setLED(curSelected, mHSV(255, 0, 50));
-        else  strip.setLED(i, mHSV(settingsList[leds_color], 255, 255));                      // подсветили
+        else  strip.setLED(i, mHSV(parameterList[leds_color], 255, 255));                      // подсветили
         LEDchanged = true;
         shotCount++;                                                // инкрементировали счётчик поставленных рюмок
         timeoutReset();                                             // сброс таймаута
         if (systemState != PUMPING && !showMenu) {
           printNum(shotVolume[i], ml);
 #ifdef OLED
-          progressBar(shotVolume[i], settingsList[max_volume]);
+          progressBar(shotVolume[i], parameterList[max_volume]);
 #endif
         }
       }
@@ -539,8 +533,8 @@ void flowTick() {
           selectShot = -1;
           curSelected = -1;
         }
-        if (settingsList[stby_light] > 0)
-          strip.setLED(i, mHSV(settingsList[leds_color], 255, settingsList[stby_light]));
+        if (parameterList[stby_light] > 0)
+          strip.setLED(i, mHSV(parameterList[leds_color], 255, parameterList[stby_light]));
         else strip.setLED(i, mRGB(0, 0, 0));  // чёрный
         LEDchanged = true;
         //timeoutReset();                                           // сброс таймаута
@@ -555,7 +549,7 @@ void flowTick() {
         if (systemState != PUMPING && !showMenu) {
           printNum(thisVolume, ml);
 #ifdef OLED
-          progressBar(thisVolume, settingsList[max_volume]);
+          progressBar(thisVolume, parameterList[max_volume]);
 #endif
         }
       }
@@ -618,7 +612,7 @@ void flowRoutine() {
     }
 
     if (noGlass && !parking) {                            // если не нашли ни одной пустой рюмки и не припаркованны
-      if ( (workMode == AutoMode) && settingsList[auto_parking] == 0) {                // если в авто режиме:
+      if ( (workMode == AutoMode) && parameterList[auto_parking] == 0) {                // если в авто режиме:
         systemON = false;                                 // выключили систему
         parking = true;                                   // уже на месте!
 #if(STATUS_LED)
@@ -701,7 +695,7 @@ void flowRoutine() {
 #endif
     }
 
-    strip.setLED(curPumping, mHSV(volumeColor[curPumping] + settingsList[leds_color], 255, 255));
+    strip.setLED(curPumping, mHSV(volumeColor[curPumping] + parameterList[leds_color], 255, 255));
     volumeColor[curPumping]++;
     LEDchanged = true;
 
@@ -760,7 +754,7 @@ void prePump() {
         lastVolumeCount = round(volumeCount);
       }
 
-      strip.setLED(curPumping, mHSV(volumeColor[curPumping] + settingsList[leds_color], 255, 255));
+      strip.setLED(curPumping, mHSV(volumeColor[curPumping] + parameterList[leds_color], 255, 255));
       volumeColor[curPumping]++;
       strip.show();
     }
@@ -778,8 +772,8 @@ void timeoutReset() {
     if (workMode) disp.scrollByte(64, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64, 50);
     else  disp.scrollByte(0, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 0, 50);
 #elif defined OLED
-    disp.setContrast(settingsList[oled_contrast]);
-    disp.invertDisplay((bool)settingsList[invert_display]);
+    disp.setContrast(parameterList[oled_contrast]);
+    disp.invertDisplay((bool)parameterList[invert_display]);
     if (!POWEROFFtimer.isOn()) {
       disp.setFont(BIG_NUM_FONT); // очищаем большую иконку режима ожидания
       printStr("  ", Left, 2);
@@ -789,19 +783,15 @@ void timeoutReset() {
     displayVolume();
     // стираем иконку режима ожидания
     disp.setFont(Mode12x26);
-    //#ifdef BATTERY_PIN
-    //printInt(0, disp.displayWidth() - 52, 0);
     printInt(0, Center, 0);
-    //#else
-    //    printInt(0, Right, 0);
-    //#endif /* BATTERY_PIN*/
 #endif
   }
   TIMEOUTtimer.reset();
+
   if (!keepPowerState) {
     for (byte i = 0; i < NUM_SHOTS; i++) {
       if (i == curSelected) strip.setLED(curSelected, mHSV(255, 0, 50)); // белый
-      else if (shotStates[i] == NO_GLASS) leds[i] = mHSV(settingsList[leds_color], 255, settingsList[stby_light]);
+      else if (shotStates[i] == NO_GLASS) leds[i] = mHSV(parameterList[leds_color], 255, parameterList[stby_light]);
     }
   }
 #if(STATUS_LED)
@@ -835,34 +825,29 @@ void timeoutTick() {
     displayMode(workMode);
     // выводим иконку режима ожидания
     disp.setFont(Mode12x26);
-    //#ifdef BATTERY_PIN
-    //printInt(2, disp.displayWidth() - strWidth("2") - 26, 0);
     printInt(2, Center, 0);
-    //#else
-    //    printInt(2, Right, 0);
-    //#endif /* BATTERY_PIN*/
 #endif
-    if (settingsList[stby_light])
-      for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(settingsList[leds_color], 255, settingsList[stby_light] / 2);
+    if (parameterList[stby_light])
+      for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(parameterList[leds_color], 255, parameterList[stby_light] / 2);
     LEDbreathingState = true;
     LEDchanged = true;
     selectShot = -1;
     curSelected = -1;
     systemON = false;
-    if (settingsList[timeout_off] > 0) POWEROFFtimer.reset();
+    if (parameterList[timeout_off] > 0) POWEROFFtimer.reset();
 #if (SAVE_MODE == 1)
     EEPROM.update(eeAddress._workMode, workMode);
 #endif
   }
 
-  if (settingsList[keep_power]) {
+  if (parameterList[keep_power]) {
     if (KEEP_POWERtimer.isReady() && (shotCount == 0) && (curSelected == -1)) {
       keepPowerState = 1;
       LEDchanged = true;
     }
   }
 
-  if (settingsList[timeout_off]) {
+  if (parameterList[timeout_off]) {
     if (POWEROFFtimer.isReady() && !timeoutState) {
       for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mRGB(0, 0, 0); // black
 #if(STATUS_LED)
@@ -872,8 +857,9 @@ void timeoutTick() {
 #ifdef TM1637
       disp.scrollByte(0, 0, 0, 0, 50);
 #elif defined OLED
-      if (settingsList[invert_display]) disp.invertDisplay(false);
+      if (parameterList[invert_display]) disp.invertDisplay(false);
       disp.clear();
+
       disp.setFont(BigIcon36x40);
       printStr("1", Center, 2);
 #endif
@@ -897,20 +883,20 @@ void LEDtick() {
     ledBreathing(LEDbreathingState);
     ledBlink(LEDblinkState);
 #endif
-    if (settingsList[keep_power] > 0) keepPower();
+    if (parameterList[keep_power] > 0) keepPower();
     strip.show();
   }
 }
 
 // динамическая подсветка светодиодов
 void rainbowFlow(bool _state, uint8_t _shotNum) {
-  if (settingsList[rainbow_flow]) {
+  if (parameterList[rainbow_flow]) {
     static float count[NUM_SHOTS] = {0};
     if (!_state) {
       count[_shotNum] = 0;
       return;
     }
-    leds[_shotNum] = mHSV((int)count[_shotNum] + volumeColor[_shotNum] + settingsList[leds_color], 255, 255);
+    leds[_shotNum] = mHSV((int)count[_shotNum] + volumeColor[_shotNum] + parameterList[leds_color], 255, 255);
     count[_shotNum] += 0.5;
     LEDchanged = true;
   }
@@ -956,10 +942,10 @@ void ledBlink(bool _state) {
 void keepPower() {
   static bool _dir = 1;
   static float _brightness = 1;
-  uint8_t stby_brightness = settingsList[stby_light];
+  uint8_t stby_brightness = parameterList[stby_light];
 
-  if (settingsList[timeout_off] > 0) {
-    stby_brightness = settingsList[stby_light] * (POWEROFFtimer.isOn() || timeoutState);
+  if (parameterList[timeout_off] > 0) {
+    stby_brightness = parameterList[stby_light] * (POWEROFFtimer.isOn() || timeoutState);
   }
   if (!timeoutState) stby_brightness /= 2;
 
@@ -971,7 +957,7 @@ void keepPower() {
   }
 
   for (byte i = NUM_SHOTS - 1; i > 0; i--) leds[i] = leds[i - 1];
-  leds[0] = mHSV(settingsList[leds_color], 255, stby_brightness + (int)_brightness);
+  leds[0] = mHSV(parameterList[leds_color], 255, stby_brightness + (int)_brightness);
 
   if (_dir) _brightness *= 1.5;
   else      _brightness /= 1.5;
@@ -981,7 +967,7 @@ void keepPower() {
     _dir = 1;
     keepPowerState = 0;
     for (byte i = 0; i < NUM_SHOTS; i++)
-      leds[i] = mHSV(settingsList[leds_color], 255, stby_brightness);
+      leds[i] = mHSV(parameterList[leds_color], 255, stby_brightness);
   }
 
   LEDchanged = true;
@@ -1040,7 +1026,7 @@ bool battery_watchdog() {
       menuItem = 0;
       lastMenuPage = NO_MENU;
       menuPage = MAIN_MENU_PAGE;
-      if (settingsList[invert_display]) disp.invertDisplay(false);
+      if (parameterList[invert_display]) disp.invertDisplay(false);
 #endif
     }
     else if (!lastOkStatus) {

@@ -10,6 +10,7 @@ void readEEPROM() {
   if (EEPROM.read(100) != EEPROM_KEY) {
     EEPROM.write(100, EEPROM_KEY);
     resetEEPROM();
+    firstStartUp = true;
   }
 
   // чтение последнего налитого объёма
@@ -44,45 +45,47 @@ void readEEPROM() {
 #endif
 
 #ifdef OLED
-  //╞═════════════════════╡ Чтение параметров меню ╞══════════════════════╡
+  //╞═════════════════════╡ Чтение параметров меню настроек ╞══════════════════════╡
 
   // чтение значения таймаута
-  settingsList[timeout_off] = EEPROM.read(eeAddress._timeout_off);
+  parameterList[timeout_off] = EEPROM.read(eeAddress._timeout_off);
 
   // чтение таймаута режима ожидания
-  settingsList[stby_time] = EEPROM.read(eeAddress._stby_time);
-
-  // функция пинания повербанка
-  settingsList[keep_power] = EEPROM.read(eeAddress._keep_power);
-
-  // чтение установки инверсии серво
-  settingsList[inverse_servo] = EEPROM.read(eeAddress._inverse_servo);
-
-  // скорость сервопривода
-  settingsList[servo_speed] = EEPROM.read(eeAddress._servo_speed);
-
-  // чтение установки автопарковки в авторежиме
-  settingsList[auto_parking] = EEPROM.read(eeAddress._auto_parking);
-
-  // чтение максимального объёма
-  settingsList[max_volume] = EEPROM.read(eeAddress._max_volume);
+  parameterList[stby_time] = EEPROM.read(eeAddress._stby_time);
 
   // чтение яркости подсветки в режиме ожидания
-  settingsList[stby_light] = EEPROM.read(eeAddress._stby_light);
-
-  // чтение установки динамической подсветки
-  settingsList[rainbow_flow] = EEPROM.read(eeAddress._rainbow_flow);
-
-  // инверсия дисплея
-  settingsList[invert_display] = EEPROM.read(eeAddress._invert_display);
-  disp.invertDisplay((bool)settingsList[invert_display]);
+  parameterList[stby_light] = EEPROM.read(eeAddress._stby_light);
 
   // цвет светодиодов
-  settingsList[leds_color] = EEPROM.read(eeAddress._leds_color);
+  parameterList[leds_color] = EEPROM.read(eeAddress._leds_color);
+
+  // чтение установки динамической подсветки
+  parameterList[rainbow_flow] = EEPROM.read(eeAddress._rainbow_flow);
+
+  // инверсия дисплея
+  parameterList[invert_display] = EEPROM.read(eeAddress._invert_display);
+  disp.invertDisplay((bool)parameterList[invert_display]);
 
   // яркость олед дисплея
-  settingsList[oled_contrast] = EEPROM.read(eeAddress._oled_contrast);
-  disp.setContrast(settingsList[oled_contrast]);
+  parameterList[oled_contrast] = EEPROM.read(eeAddress._oled_contrast);
+  disp.setContrast(parameterList[oled_contrast]);
+
+  // чтение максимального объёма
+  parameterList[max_volume] = EEPROM.read(eeAddress._max_volume);
+
+  //╞═══════════════════╡ Чтение параметров сервисного меню ╞═════════════════════╡
+
+  // функция пинания повербанка
+  parameterList[keep_power] = EEPROM.read(eeAddress._keep_power);
+
+  // чтение установки инверсии серво
+  parameterList[inverse_servo] = EEPROM.read(eeAddress._inverse_servo);
+
+  // скорость сервопривода
+  parameterList[servo_speed] = EEPROM.read(eeAddress._servo_speed);
+
+  // чтение установки автопарковки в авторежиме
+  parameterList[auto_parking] = EEPROM.read(eeAddress._auto_parking);
 #endif
 }
 

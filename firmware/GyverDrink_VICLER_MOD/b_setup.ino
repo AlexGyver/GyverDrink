@@ -5,12 +5,16 @@ void setup() {
   disp.clear();
   disp.brightness(7);
 #elif defined OLED
+#if (OLED == 0)
   Wire.begin();
   Wire.setClock(WIRE_SPEED * 1000L);
-#if (OLED == 0)
   disp.begin(&Adafruit128x64, 0x3C);
 #elif (OLED == 1)
+  Wire.begin();
+  Wire.setClock(WIRE_SPEED * 1000L);
   disp.begin(&SH1106_128x64, 0x3C);
+#elif (OLED == 3)
+  disp.begin(&Adafruit128x64, DISP_CS, DISP_DC, DISP_CLK, DISP_MOSI);
 #endif
 #endif
 
@@ -51,12 +55,12 @@ void setup() {
   }
 #endif
 
-  if (settingsList[timeout_off] > 0) {
-    POWEROFFtimer.setInterval(settingsList[timeout_off] * 60000L);
+  if (parameterList[timeout_off] > 0) {
+    POWEROFFtimer.setInterval(parameterList[timeout_off] * 60000L);
     POWEROFFtimer.start();
   }
-  if (settingsList[keep_power] > 0) {
-    KEEP_POWERtimer.setInterval(settingsList[keep_power] * 1000L);
+  if (parameterList[keep_power] > 0) {
+    KEEP_POWERtimer.setInterval(parameterList[keep_power] * 1000L);
     KEEP_POWERtimer.start();
   }
 
@@ -78,10 +82,10 @@ void setup() {
 
   // настройка серво
   servoON();
-  servo.setDirection(settingsList[inverse_servo]);
+  servo.setDirection(parameterList[inverse_servo]);
   servo.attach(SERVO_PIN, parking_pos);
   delay(500);
-  servo.setSpeed(settingsList[servo_speed]);
+  servo.setSpeed(parameterList[servo_speed]);
   servo.stop();
   servoOFF();
 
@@ -150,9 +154,9 @@ void setup() {
 #endif
     }
   }
-  if (settingsList[stby_light] > 0) {
-    for (byte i = 0; i < settingsList[stby_light]; i++) {
-      for (byte j = 0; j < NUM_SHOTS; j++)  leds[j] = mHSV(settingsList[leds_color], 255, i);
+  if (parameterList[stby_light] > 0) {
+    for (byte i = 0; i < parameterList[stby_light]; i++) {
+      for (byte j = 0; j < NUM_SHOTS; j++)  leds[j] = mHSV(parameterList[leds_color], 255, i);
       strip.show();
       delay(10);
     }
@@ -170,14 +174,18 @@ void setup() {
   strip.show();
 #endif
 
-  if (!digitalRead(BTN_PIN))
+  if (!digitalRead(BTN_PIN) || firstStartUp)
 #ifdef TM1637
     serviceRoutine(serviceState);
 #elif defined OLED
   {
+    disp.clear();
+    while (!digitalRead(BTN_PIN));  // ждём отпускания
     showMenu = true;
-    menuPage = CALIBRATION_PAGE;
+    lastMenuPage = NO_MENU;
+    menuPage = SERVICE_PAGE;
     displayMenu();
+    POWEROFFtimer.stop();
   }
 #endif
 

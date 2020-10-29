@@ -30,17 +30,17 @@ void encTick() {
 #endif
 
     if (curSelected >= 0) {
-      shotVolume[(byte)curSelected] = constrain(shotVolume[(byte)curSelected], 1, settingsList[max_volume]);
+      shotVolume[(byte)curSelected] = constrain(shotVolume[(byte)curSelected], 1, parameterList[max_volume]);
       printNum(shotVolume[curSelected], ml);
 #ifdef OLED
-      progressBar(shotVolume[curSelected], settingsList[max_volume]);
+      progressBar(shotVolume[curSelected], parameterList[max_volume]);
 #endif
     }
     else {
-      thisVolume = constrain(thisVolume, 1, settingsList[max_volume]);
+      thisVolume = constrain(thisVolume, 1, parameterList[max_volume]);
       if (timeoutState) printNum(thisVolume, ml);
 #ifdef OLED
-      progressBar(thisVolume, settingsList[max_volume]);
+      progressBar(thisVolume, parameterList[max_volume]);
 #endif
       for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
     }
@@ -70,13 +70,20 @@ void btnTick() {
     if (workMode == ManualMode && !showMenu) systemON = true; // система активирована
 #ifdef OLED
     if (showMenu) {
-      disp.clear();
-      if (menuPage != MAIN_MENU_PAGE) {
-        menuItem = menuPage + 1;
-        menuPage = MAIN_MENU_PAGE;
+      //disp.clear();
+      if (menuPage != MAIN_MENU_PAGE && menuPage != SERVICE_PAGE) {
+        if (menuPage == SERVO_CALIBRATION_PAGE) {
+          menuItem = 1;
+          menuPage = SERVICE_PAGE;
+        }
+        else {
+          menuItem = menuPage + 1;
+          menuPage = MAIN_MENU_PAGE;
+        }
         displayMenu();
       }
       else {
+        disp.clear();
         showMenu = 0;
         menuItem = 0;
         lastMenuPage = NO_MENU;
@@ -84,6 +91,7 @@ void btnTick() {
         progressBar(-1);
         displayMode(workMode);
         displayVolume();
+        timeoutState = true;
       }
     }
 #endif
@@ -150,21 +158,21 @@ void btnTick() {
 
     for (byte i = 0; i < NUM_SHOTS; i++) {
       if (i == curSelected) strip.setLED(curSelected, mRGB(255, 255, 255)); // white
-      else if (shotStates[i] == EMPTY)  strip.setLED(i, mHSV(settingsList[leds_color], 255, 255));
-      //else  strip.setLED(i, mHSV(20, 255, settingsList[stby_light]));
+      else if (shotStates[i] == EMPTY)  strip.setLED(i, mHSV(parameterList[leds_color], 255, 255));
+      //else  strip.setLED(i, mHSV(20, 255, parameterList[stby_light]));
     }
     LEDchanged = true;
 
     if (curSelected >= 0) {
       printNum(shotVolume[curSelected], ml);
 #ifdef OLED
-      progressBar(shotVolume[curSelected], settingsList[max_volume]);
+      progressBar(shotVolume[curSelected], parameterList[max_volume]);
 #endif
     }
     else  {
       printNum(thisVolume, ml);
 #ifdef OLED
-      progressBar(thisVolume, settingsList[max_volume]);
+      progressBar(thisVolume, parameterList[max_volume]);
 #endif
     }
 

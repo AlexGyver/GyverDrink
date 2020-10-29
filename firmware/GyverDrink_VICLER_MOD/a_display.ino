@@ -29,7 +29,7 @@ byte err_vector[256] = {
 
 void printNum(uint16_t num, int8_t mode = 0) {
   static byte lastVal = 255;
-  byte value = round(num * 255.0 / settingsList[max_volume]);
+  byte value = round(num * 255.0 / parameterList[max_volume]);
   Serial.println(num);
 
   if ( (value == 0) && (lastVal > 0) ) {
@@ -73,7 +73,12 @@ enum { ml = 1, deg };
 //==================================================================================================
 
 #elif defined OLED
+
+#if (OLED == 3)
+SSD1306AsciiSoftSpi disp;
+#else
 SSD1306AsciiWire disp;
+#endif
 
 #if (NUM_FONT == 0)
 #define BIG_NUM_FONT FixedNum30x40
@@ -92,43 +97,33 @@ enum MenuPageName { // типы страниц меню
   MAIN_MENU_PAGE,
   SETTINGS_PAGE,
   STATISTICS_PAGE,
-  CALIBRATION_PAGE
+  SERVICE_PAGE,
+  SERVO_CALIBRATION_PAGE
 };
 
-#define MENU_PAGES 4 // количество страниц
 MenuPageName menuPage = MAIN_MENU_PAGE; // актуальная страница
 byte lastMenuPage = NO_MENU; // последняя отображаемая страница
 bool itemSelected = 0;
 
-#ifdef BATTERY_PIN
-uint8_t menuItemsNum[MENU_PAGES] = {4, 13, 2, 3}; // количество строк на каждой странице
-#else
-uint8_t menuItemsNum[MENU_PAGES] = {4, 13, 2, 2}; // количество строк на каждой странице
-#endif
+uint8_t menuItemsNum[] = {3, 8, 2, 4, 4}; // количество строк на каждой странице без заголовка
 
 #if(MENU_LANG == 1)
-const char *MenuPages[][14] = {
+const char *MenuPages[][9] = {
   { "#####  Меню  #####",
     "",
     " Настройки",
     " Статистика",
-    " Сервис"
   },
 
   { "###  Настройки  ###",
     "таймаут выкл.",
-    "инверсия серво",
-    "скорость серво",
-    "авто парковка",
     "режим ожидания",
     "яркость лед",
-    "динам. подсветка",
-    "макс. объeм",
-    "поддерж. питания",
-    "инверсия цвета",
     "цвет лед",
+    "динам. подсветка",
+    "инверсия дисп.",
     "яркость дисп.",
-    "Сброс"
+    "макс. объeм"
   },
 
   { "### Статистика  ###",
@@ -141,36 +136,39 @@ const char *MenuPages[][14] = {
     " Серво",
     " Объ@м",
 #ifdef BATTERY_PIN
-    " Аккумулятор"
+    " Аккумулятор",
 #else
-    ""
+    " Поддерж. питания",
 #endif
+    " Сброс"
+  },
+
+  {
+    "#####  Серво  #####",
+    " Калибровка",
+    " Инверсия",
+    " Скорость",
+    " Авто парковка"
   }
 };
 
 #else
-const char *MenuPages[][14] = {
+const char *MenuPages[][9] = {
   { "Menu",
     "",
     " Settings",
-    " Statistics",
-    " Calibration"
+    " Statistics"
   },
 
   { "Settings",
     "timeout off",
-    "inverse servo",
-    "servo speed",
-    "auto parking",
     "stby time",
     "stby light",
-    "rainbow flow",
-    "max volume",
-    "keep power",
-    "invert display",
     "led color",
+    "rainbow flow",
+    "invert display",
     "disp contrast",
-    "reset"
+    "max volume",
   },
 
   { "Statistics",
@@ -179,14 +177,23 @@ const char *MenuPages[][14] = {
     ""
   },
 
-  { "Calibration",
+  { "Service",
     " Servo",
     " Volume",
 #ifdef BATTERY_PIN
-    " Battery"
+    " Battery",
 #else
-    ""
+    " Keep power",
 #endif
+    " Reset"
+  },
+
+  {
+    " Servo ",
+    " Calibration",
+    " Inverse",
+    " Speed",
+    " Auto parking"
   }
 };
 #endif
@@ -356,11 +363,11 @@ void displayMode(workModes mode) {
 void displayVolume() {
   disp.setFont(BIG_NUM_FONT);
   printNum(thisVolume, ml);
-  progressBar(thisVolume, settingsList[max_volume]);
+  progressBar(thisVolume, parameterList[max_volume]);
 }
 
 void displayMenu() {
-  static uint8_t firstItem = 1, selectedItem = 0;
+  static uint8_t firstItem = 1, selectedRow = 0;
 
 #if(MENU_LANG == 1)
   disp.setFont(MAIN_FONT);
@@ -389,24 +396,37 @@ void displayMenu() {
       else {
         menuPage = (MenuPageName)(menuItem - 1);
         menuItem = 1;
-        disp.clear();
+        //disp.clear();
       }
     }
     else if (menuPage == SETTINGS_PAGE) {
-      settingsMenuHandler(selectedItem);
-      if (!timeoutState) {
+      editParameter(menuItem - 1, selectedRow);
+      if (!timeoutState) { // произошёл вход в режим ожидания
         itemSelected = 0;
-        return; // произошёл вход в режим ожидания
+        return;
       }
     }
-    else if (menuPage == CALIBRATION_PAGE)  {
-      disp.clear();
-      serviceRoutine((serviceStates)(menuItem - 1));
-      lastMenuPage = NO_MENU;
+    else if (menuPage == SERVICE_PAGE)  {
+      if (menuItem == menuItemsNum[menuPage]) { // сброс настроек
+        resetEEPROM();
+        readEEPROM();
+      }
+      else if (menuItem == 1) menuPage = SERVO_CALIBRATION_PAGE;
+      else {
+        serviceRoutine((serviceStates)(menuItem - 1));
+        lastMenuPage = NO_MENU;
+      }
     }
     else if (menuPage == STATISTICS_PAGE) {
       if (menuItem == 1) shots_overall = 0;
       else if (menuItem == 2) volume_overall = 0;
+    }
+    else if (menuPage == SERVO_CALIBRATION_PAGE) {
+      if (menuItem == 1) {
+        serviceRoutine(SERVO);
+        lastMenuPage = NO_MENU;
+      }
+      else editParameter(menuItem - 2 + 8, selectedRow);
     }
     itemSelected = 0;
   }
@@ -418,6 +438,7 @@ void displayMenu() {
     printStr(MenuPages[menuPage][0], Center, 0);
     disp.write('\n');
     lastMenuPage = menuPage;
+    firstItem = 1;
   }
   else disp.setCursor(0, 2);
 
@@ -433,7 +454,7 @@ void displayMenu() {
       disp.setInvertMode(0);
       disp.write('>');
 #endif
-      selectedItem = disp.row();
+      selectedRow = disp.row();
     }
     else  disp.setInvertMode(0);
 
@@ -450,18 +471,19 @@ void displayMenu() {
     if (menuPage == SETTINGS_PAGE)  {
       printStr(MenuPages[menuPage][currItem]);
       clearToEOL();
-      if (currItem < menuItemsNum[menuPage]) {
-        byte parameter = currItem - 1;
+      //if (currItem < menuItemsNum[menuPage]) {
+      byte parameter = currItem - 1;
 #if(MENU_LANG == 1)
-        if ( (parameter == inverse_servo) || (parameter == auto_parking) || (parameter == rainbow_flow) || (parameter == invert_display) ) {
-          if (settingsList[parameter] == 0) printStr("(", Right);
-          else printStr(")", Right);
-        }
-        else printInt(settingsList[parameter], Right);
-#else
-        printInt(settingsList[parameter], Right);
-#endif
+      //if ( (parameter == inverse_servo) || (parameter == auto_parking) || (parameter == rainbow_flow) || (parameter == invert_display) ) {
+      if ( (parameter == rainbow_flow) || (parameter == invert_display) ) {
+        if (parameterList[parameter] == 0) printStr("(", Right);
+        else printStr(")", Right);
       }
+      else printInt(parameterList[parameter], Right);
+#else
+      printInt(parameterList[parameter], Right);
+#endif
+      //}
       disp.write('\n');
     }
     else if (menuPage == STATISTICS_PAGE) {
@@ -491,6 +513,22 @@ void displayMenu() {
         }
 #endif
       }
+      disp.write('\n');
+    }
+    else if (menuPage == SERVO_CALIBRATION_PAGE) {
+      printStr(MenuPages[menuPage][currItem]);
+      clearToEOL();
+      byte parameter = currItem - 2 + 8;
+#if(MENU_LANG == 1)
+      if ( (parameter == inverse_servo) || (parameter == auto_parking) ) {
+        if (parameterList[parameter] == 0) printStr("(", Right);
+        else printStr(")", Right);
+      }
+      if ( (parameter == servo_speed) || (parameter == keep_power) )
+        printInt(parameterList[parameter], Right);
+#else
+      if (currItem > 1) printInt(parameterList[parameter], Right);
+#endif
       disp.write('\n');
     }
     else  {
