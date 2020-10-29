@@ -174,7 +174,7 @@ void setup() {
   strip.show();
 #endif
 
-  if (!digitalRead(BTN_PIN) || firstStartUp)
+  if (!digitalRead(BTN_PIN) || firstStartUp) // вход в сервисное меню
 #ifdef TM1637
     serviceRoutine(serviceState);
 #elif defined OLED
@@ -184,6 +184,8 @@ void setup() {
     showMenu = true;
     lastMenuPage = NO_MENU;
     menuPage = SERVICE_PAGE;
+    timeoutState = true;
+    systemState = WAIT;
     displayMenu();
     POWEROFFtimer.stop();
   }

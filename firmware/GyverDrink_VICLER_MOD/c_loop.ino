@@ -24,5 +24,6 @@ void loop() {
   LEDtick();
   timeoutTick();
   servoTick();
+  keepPowerTick();
   //CPS();
 }

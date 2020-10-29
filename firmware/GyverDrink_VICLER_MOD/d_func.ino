@@ -408,25 +408,22 @@ void editParameter(byte parameter, byte selectedRow) {
     enc.tick();
 
     if (enc.isTurn()) {
-      if (enc.isLeft()) {
-        parameterList[parameter] += 1;
-      }
-      if (enc.isRight()) {
-        parameterList[parameter] -= 1;
-      }
+      if (enc.isLeft())  parameterList[parameter] += 1;
+      if (enc.isRight()) parameterList[parameter] -= 1;
 
       if (parameterList[timeout_off] > 15) parameterList[timeout_off] = 0;
 
       if (parameterList[servo_speed] > 100) parameterList[servo_speed] = 0;
 
-      if (parameterList[stby_time]) {
+      if (parameterList[stby_time] > 0) {
         TIMEOUTtimer.setInterval(parameterList[stby_time] * 1000L); // таймаут режима ожидания
         TIMEOUTtimer.reset();
       }
 
-      if (parameterList[keep_power] > 0)
-        KEEP_POWERtimer.setInterval(parameterList[keep_power] * 1000L);
+      if (parameterList[keep_power] > 0) KEEP_POWERtimer.setInterval(parameterList[keep_power] * 1000L);
       else keepPowerState = 0;
+
+      if (parameter == oled_contrast) disp.setContrast(parameterList[oled_contrast]);
 
       if (parameterList[parameter] <= 99 && lastParameterValue >= 100) {
         disp.setInvertMode(0);
@@ -452,8 +449,6 @@ void editParameter(byte parameter, byte selectedRow) {
       printInt(parameterList[parameter], Right);
       lastParameterValue = parameterList[parameter];
 
-      if (parameter == oled_contrast) disp.setContrast(parameterList[oled_contrast]);
-
       timeoutReset();
     }
 
@@ -477,11 +472,6 @@ void editParameter(byte parameter, byte selectedRow) {
       EEPROM.update(eeAddress._oled_contrast, parameterList[oled_contrast]);
 
       if (parameterList[timeout_off] > 0) POWEROFFtimer.setInterval(parameterList[timeout_off] * 60000L);
-      if (parameterList[keep_power] > 0) {
-        KEEP_POWERtimer.setInterval(parameterList[keep_power] * 1000L);
-        KEEP_POWERtimer.start();
-      }
-      else KEEP_POWERtimer.stop();
 
       servo.setSpeed(parameterList[servo_speed]);
       servo.setDirection(parameterList[inverse_servo]);
@@ -492,6 +482,7 @@ void editParameter(byte parameter, byte selectedRow) {
       servoOFF();
 
       if (thisVolume > parameterList[max_volume]) thisVolume = parameterList[max_volume];
+
       for (byte i = 0; i < NUM_SHOTS; i++) {
         if (shotStates[i] == NO_GLASS) leds[i] = mHSV(parameterList[leds_color], 255, parameterList[stby_light]);
       }
@@ -499,11 +490,12 @@ void editParameter(byte parameter, byte selectedRow) {
       timeoutReset();
       break;
     }
-    if (menuPage != SERVO_CALIBRATION_PAGE) {
-      LEDtick();
-      timeoutTick();
-      if (!timeoutState) break;
-    }
+    keepPowerTick();
+    LEDtick();
+    //if ( (menuPage != SERVO_CALIBRATION_PAGE) && (menuPage != SERVICE_PAGE) ) {
+    timeoutTick();
+    if (!timeoutState) break;
+    //}
   }
 }
 #endif
@@ -514,6 +506,7 @@ void flowTick() {
     for (byte i = 0; i < NUM_SHOTS; i++) {
       bool swState = !digitalRead(SW_pins[i]) ^ SWITCH_LEVEL;
       if (swState && shotStates[i] == NO_GLASS) {  // поставили пустую рюмку
+        if (keepPowerState) keepPowerState = false;
         shotStates[i] = EMPTY;                                      // флаг на заправку
         if (i == curSelected) strip.setLED(curSelected, mHSV(255, 0, 50));
         else  strip.setLED(i, mHSV(parameterList[leds_color], 255, 255));                      // подсветили
@@ -805,7 +798,7 @@ void timeoutReset() {
 
 // сам таймаут
 void timeoutTick() {
-  if (timeoutState && TIMEOUTtimer.isReady() && systemState == SEARCH) {
+  if ( timeoutState && TIMEOUTtimer.isReady() && (systemState == SEARCH) ) {
     timeoutState = false;
 #ifdef TM1637
     disp.brightness(0);
@@ -840,13 +833,6 @@ void timeoutTick() {
 #endif
   }
 
-  if (parameterList[keep_power]) {
-    if (KEEP_POWERtimer.isReady() && (shotCount == 0) && (curSelected == -1)) {
-      keepPowerState = 1;
-      LEDchanged = true;
-    }
-  }
-
   if (parameterList[timeout_off]) {
     if (POWEROFFtimer.isReady() && !timeoutState) {
       for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mRGB(0, 0, 0); // black
@@ -869,6 +855,16 @@ void timeoutTick() {
   }
 }
 
+// обработка поддержания питания
+void keepPowerTick() {
+  if (parameterList[keep_power] > 0) {
+    if (KEEP_POWERtimer.isReady() && (shotCount == 0)) {
+      keepPowerState = 1;
+      LEDchanged = true;
+    }
+  }
+}
+
 // обработка движения серво
 void servoTick() {
   if (servo.tick()) servoOFF();
@@ -883,7 +879,7 @@ void LEDtick() {
     ledBreathing(LEDbreathingState);
     ledBlink(LEDblinkState);
 #endif
-    if (parameterList[keep_power] > 0) keepPower();
+    if (keepPowerState) keepPower();
     strip.show();
   }
 }
@@ -942,14 +938,12 @@ void ledBlink(bool _state) {
 void keepPower() {
   static bool _dir = 1;
   static float _brightness = 1;
-  uint8_t stby_brightness = parameterList[stby_light];
+  uint8_t stby_brightness = 0;
 
-  if (parameterList[timeout_off] > 0) {
-    stby_brightness = parameterList[stby_light] * (POWEROFFtimer.isOn() || timeoutState);
+  if (parameterList[stby_light] > 0) {
+    if (timeoutState) stby_brightness = parameterList[stby_light];
+    else if (POWEROFFtimer.isOn()) stby_brightness = parameterList[stby_light] / 2;
   }
-  if (!timeoutState) stby_brightness /= 2;
-
-  if (!keepPowerState) return;
 
   if (_brightness >= (255 - stby_brightness) ) {
     _brightness = 255 - stby_brightness;
@@ -968,6 +962,7 @@ void keepPower() {
     keepPowerState = 0;
     for (byte i = 0; i < NUM_SHOTS; i++)
       leds[i] = mHSV(parameterList[leds_color], 255, stby_brightness);
+    strip.show();
   }
 
   LEDchanged = true;

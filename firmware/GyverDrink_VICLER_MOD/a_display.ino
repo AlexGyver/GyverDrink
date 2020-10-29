@@ -409,6 +409,9 @@ void displayMenu() { // вывод страниц меню
         readEEPROM();
       }
       else if (menuItem == 1) menuPage = SERVO_CALIBRATION_PAGE; // выбор первого пункта -> переходим на страницу серво
+#ifndef BATTERY_PIN
+      else if (menuItem == 3) editParameter(keep_power, selectedRow); // выбор
+#endif
       else { // иначе запускаем обработку выбранного этапа калибровки
         serviceRoutine((serviceStates)(menuItem - 1));
         lastMenuPage = NO_MENU;
@@ -511,6 +514,15 @@ void displayMenu() { // вывод страниц меню
         }
 #endif
       }
+      disp.write('\n');
+    }
+    else if (menuPage == SERVICE_PAGE) {
+      printStr(MenuPages[menuPage][currItem]);
+      clearToEOL();
+#ifndef BATTERY_PIN
+      if (currItem == 3) // пункт Поддержание питания
+        printInt(parameterList[keep_power], Right); // вывод значения таймера для поддержания питания
+#endif
       disp.write('\n');
     }
     else if (menuPage == SERVO_CALIBRATION_PAGE) {
