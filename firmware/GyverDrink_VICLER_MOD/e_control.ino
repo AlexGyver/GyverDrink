@@ -7,7 +7,7 @@ void encTick() {
       if (showMenu) menuItem++;
       else {
         if (curSelected >= 0) shotVolume[curSelected] += 1;
-        else thisVolume += 1;
+        else if (thisVolume < 255) thisVolume += 1;
         volumeChanged = true;
       }
     }
@@ -101,7 +101,13 @@ void btnTick() {
     if (systemState == PUMPING) return;
 #ifdef TM1637
     workMode = (workModes)!workMode;
-    disp.scrollByte(64 * workMode, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64 * workMode, 50);
+    if (thisVolume < 100) {                                // объём меньше 100
+      if (thisVolume < 10)
+        disp.scrollByte(workMode * _dash, 0, digToHEX(thisVolume % 10), workMode * _dash, 50);  // число меньше 10 - второй индикатор пуст
+      else
+        disp.scrollByte(workMode * _dash, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), workMode * _dash, 50);     // иначе статичное изменение
+    }
+    else disp.scrollByte(digToHEX(thisVolume / 100), digToHEX((thisVolume % 100) / 10), digToHEX(thisVolume % 10), workMode * _dash, 50); // объём больше 99
 #elif defined OLED
     showMenu = !showMenu;
     if (showMenu) displayMenu();

@@ -229,7 +229,7 @@ void printNum(uint16_t num, int8_t mode) {
     else
       disp.displayByte(workMode * _dash, digToHEX(num / 10), digToHEX(num % 10), workMode * _dash);     // иначе статичное изменение
   }
-  else if (num < 1000) { // число >= 100 и < 1000
+  else if (num < 1000) { // число > 99 и < 1000
     disp.displayByte(digToHEX(num / 100), digToHEX((num % 100) / 10), digToHEX(num % 10), workMode * _dash);
   }
   else if (mode == 0) {

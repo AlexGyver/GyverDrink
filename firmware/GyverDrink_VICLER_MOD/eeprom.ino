@@ -14,7 +14,7 @@ void readEEPROM() {
   }
 
   // чтение последнего налитого объёма
-  thisVolume = EEPROM.read(eeAddress._thisVolume);
+  thisVolume = min(EEPROM.read(eeAddress._thisVolume), parameterList[max_volume]);
   for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
 
   // чтение значения таймера для 50мл
