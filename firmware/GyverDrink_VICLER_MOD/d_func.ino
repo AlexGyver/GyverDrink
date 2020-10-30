@@ -132,7 +132,7 @@ void serviceRoutine(serviceStates mode) {
       if (enc.isTurn()) {   // крутим серво от энкодера
         if (enc.isLeft()) servoPos += 1;
         if (enc.isRight() && servoPos > 0)  servoPos -= 1;
-        servoPos = min(servoPos, 180);
+        //servoPos = min(servoPos, 180);
         servoON();
         servo.attach(SERVO_PIN, servoPos);
         if (shotCount == 0) parking_pos = servoPos;
@@ -410,6 +410,8 @@ void editParameter(byte parameter, byte selectedRow) {
     if (enc.isTurn()) {
       if (enc.isLeft())  parameterList[parameter] += 1;
       if (enc.isRight()) parameterList[parameter] -= 1;
+      if (enc.isLeftH()) parameterList[parameter] += 5;
+      if (enc.isRightH()) parameterList[parameter] -= 5;
 
       if (parameterList[timeout_off] > 15) parameterList[timeout_off] = 0;
 
@@ -761,9 +763,14 @@ void timeoutReset() {
     timeoutState = true;
 #ifdef TM1637
     disp.brightness(7);
-    if (!volumeChanged) disp.displayByte(0x00, 0x00, 0x00, 0x00);
-    if (workMode) disp.scrollByte(64, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 64, 50);
-    else  disp.scrollByte(0, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), 0, 50);
+    disp.displayByte(0x00, 0x00, 0x00, 0x00);
+    if (thisVolume < 100) {                                // объём меньше 100
+      if (thisVolume < 10)
+        disp.scrollByte(workMode * _dash, 0, digToHEX(thisVolume % 10), workMode * _dash, 30);  // число меньше 10 - второй индикатор пуст
+      else
+        disp.scrollByte(workMode * _dash, digToHEX(thisVolume / 10), digToHEX(thisVolume % 10), workMode * _dash, 30);     // число больше 9
+    }
+    else disp.scrollByte(digToHEX(thisVolume / 100), digToHEX((thisVolume % 100) / 10), digToHEX(thisVolume % 10), workMode * _dash, 30); // объём больше 99
 #elif defined OLED
     disp.setContrast(parameterList[oled_contrast]);
     disp.invertDisplay((bool)parameterList[invert_display]);

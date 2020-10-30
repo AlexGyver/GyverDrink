@@ -16,7 +16,7 @@ class ServoSmoothMinim
 {
 public:
     void write(byte angle);                 // аналог метода из библиотеки Servo
-    void attach(byte pin, byte target = 0); // аналог метода из библиотеки Servo
+    void attach(byte pin, byte target = 0, uint16_t min_us = 544, uint16_t max_us = 2400); // аналог метода из библиотеки Servo
     void detach();                          // аналог метода из библиотеки Servo
     void start();                           // attach + разрешает работу tick
     void stop();                            // detach + запрещает работу tick
@@ -46,18 +46,21 @@ private:
     bool _servoState = true;
     bool _autoDetach = false;
     bool _dir = 0;
+    uint16_t _min_us, _max_us;
 };
 
 void ServoSmoothMinim::write(byte angle)
 {
-    if(_dir) _servo.writeMicroseconds(2944 - angleToUs(angle)); // 2400 - 544
+    if(_dir) _servo.writeMicroseconds(_min_us + _max_us - angleToUs(angle)); // 2400 - 544
     else _servo.writeMicroseconds(angleToUs(angle)); // 544 - 2400
 }
 
-void ServoSmoothMinim::attach(byte pin, byte target)
+void ServoSmoothMinim::attach(byte pin, byte target, uint16_t min_us, uint16_t max_us)
 {
     _pin = pin;
-    _servo.attach(_pin, 544, 2400);
+    _min_us = min_us;
+    _max_us = max_us;
+    _servo.attach(_pin, _min_us, _max_us);
     write(target);
     _servoTargetPos = angleToUs(target);
     _servoCurrentPos = _servoTargetPos;
@@ -70,7 +73,7 @@ void ServoSmoothMinim::detach()
 
 void ServoSmoothMinim::start()
 {
-    _servo.attach(_pin, 544, 2400);
+    _servo.attach(_pin, _min_us, _max_us);
     _servoState = true;
 }
 

@@ -3,6 +3,16 @@ void encTick() {
   enc.tick();
   if (systemState == PUMPING) return;
   if (enc.isTurn()) {
+    if (enc.isLeftH()) {
+      if (curSelected >= 0 && shotVolume[curSelected] < 246) shotVolume[curSelected] += 10;
+      else if (thisVolume < 246) thisVolume += 10;
+      volumeChanged = true;
+    }
+    if (enc.isRightH()) {
+      if (curSelected >= 0 && shotVolume[curSelected] > 10) shotVolume[curSelected] -= 10;
+      else if (thisVolume > 10) thisVolume -= 10;
+      volumeChanged = true;
+    }
     if (enc.isLeft()) {
       if (showMenu) menuItem++;
       else {
@@ -127,7 +137,7 @@ void btnTick() {
   }
 
   // промывка
-  if (encBtn.holding()) {
+  if (encBtn.holding() && (shotCount == 1) ) {
     if (workMode == AutoMode) return;
 #ifdef OLED
     printNum(volumeCount, ml);
@@ -136,15 +146,22 @@ void btnTick() {
     prePump();
   }
 
-  // выбор рюмки
-  if (encBtn.pressed()) {
 #ifdef OLED
-    if (showMenu) {
-      itemSelected = 1;
-      displayMenu();
-      return;
-    }
+  if (encBtn.pressed() && showMenu) {
+    itemSelected = 1;
+    displayMenu();
+  }
 #endif
+
+  // выбор рюмки
+  if (encBtn.clicked()) {
+    //#ifdef OLED
+    //    if (showMenu) {
+    //      itemSelected = 1;
+    //      displayMenu();
+    //      return;
+    //    }
+    //#endif
 
     if (shotCount < 2) return;
 

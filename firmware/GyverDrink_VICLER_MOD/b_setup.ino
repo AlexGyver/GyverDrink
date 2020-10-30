@@ -83,7 +83,7 @@ void setup() {
   // настройка серво
   servoON();
   servo.setDirection(parameterList[inverse_servo]);
-  servo.attach(SERVO_PIN, parking_pos);
+  servo.attach(SERVO_PIN, parking_pos, 544, 2500);
   delay(500);
   servo.setSpeed(parameterList[servo_speed]);
   servo.stop();
