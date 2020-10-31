@@ -19,11 +19,13 @@ class buttonMinim {
     boolean holding();
     boolean holded();
     boolean holdedFor(uint8_t sec);
+    bool clicks(byte n);
   private:
     buttonMinimFlags flags;
     void tick();
     uint32_t _btnTimer;
     byte _pin;
+    byte _clickCounter = 0;
 };
 
 buttonMinim::buttonMinim(uint8_t pin) {
@@ -55,11 +57,14 @@ void buttonMinim::tick() {
       _btnTimer = millis();
     }
   }
+  if (!flags.btnFlag && ((uint32_t)millis() - _btnTimer > 500))
+    _clickCounter = 0;
 }
 
 boolean buttonMinim::pressed() {
   buttonMinim::tick();
   if (flags.pressF) {
+    _clickCounter++;
     flags.pressF = false;
     return true;
   }
@@ -100,4 +105,13 @@ boolean buttonMinim::holdedFor(uint8_t sec) {
     return true;
   }
   else return false;
+}
+
+bool buttonMinim::clicks(byte n){
+  buttonMinim::tick();
+  if(_clickCounter == n) {
+    _clickCounter = 0;
+    return 1;
+  }
+  return 0;
 }

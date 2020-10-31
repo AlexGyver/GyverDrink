@@ -77,7 +77,7 @@ void btnTick() {
       systemState = WAIT; // режим работы - ждать
       WAITtimer.reset();
     }
-    if (workMode == ManualMode && !showMenu) systemON = true; // система активирована
+    if ((workMode == ManualMode) && !showMenu) systemON = true; // система активирована
 #ifdef OLED
     if (showMenu) {
       if (menuPage != MAIN_MENU_PAGE && menuPage != SERVICE_PAGE) {
@@ -146,6 +146,7 @@ void btnTick() {
     prePump();
   }
 
+  // выбор елемента меню
 #ifdef OLED
   if (encBtn.pressed() && showMenu) {
     itemSelected = 1;
@@ -200,6 +201,13 @@ void btnTick() {
 
     timeoutReset();
   }
+
+#ifdef OLED
+  if (btn.clicks(2)) {
+    workMode = (workModes)!workMode;
+    displayMode(workMode);
+  }
+#endif
 
 #ifdef TM1637
   // сброс настроек

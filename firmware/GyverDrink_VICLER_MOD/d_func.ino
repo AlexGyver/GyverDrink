@@ -711,9 +711,9 @@ void flowRoutine() {
     }
   } else if (systemState == WAIT) {
     volumeCount = 0;
-#ifdef TM1637
+    //#ifdef TM1637
     if (WAITtimer.isReady())
-#endif
+      //#endif
       systemState = SEARCH;
   }
 }
