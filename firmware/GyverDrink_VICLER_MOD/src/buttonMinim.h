@@ -57,7 +57,7 @@ void buttonMinim::tick() {
       _btnTimer = millis();
     }
   }
-  if (!flags.btnFlag && ((uint32_t)millis() - _btnTimer > 500))
+  if (!flags.btnFlag && ((uint32_t)millis() - _btnTimer > 400))
     _clickCounter = 0;
 }
 

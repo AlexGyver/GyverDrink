@@ -349,8 +349,31 @@ void progressBar(int16_t value, uint16_t maximum = 50) { // прогресс-б�
 
 void displayMode(workModes mode);
 void displayMode(workModes mode) { // вывод иконки режима и иконки аккумулятора
+  if (!timeoutState) return;
+
   disp.setFont(Mode12x26);
-  printInt(mode, 1, 0); // выводим иконку режима
+  disp.setLetterSpacing(0);
+
+#ifdef BATTERY_PIN
+  if (mode == AutoMode) {
+    byte x = 79;
+    do {
+      x -= 2;
+      printInt(mode, x, 0); // выводим иконку режима
+    } while (x > 1);
+  }
+  else printInt(mode, 1, 0); // выводим иконку режима
+
+#else
+  if (mode == AutoMode) {
+    byte x = 129;
+    do {
+      x -= 2;
+      printInt(mode, x, 0); // выводим иконку режима
+    } while (x > 1);
+  }
+  else printInt(mode, 1, 0); // выводим иконку режима
+#endif
 
 #ifdef BATTERY_PIN // выводим иконку батареи
   disp.setFont(Battery12x22);

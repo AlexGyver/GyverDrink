@@ -57,7 +57,7 @@ void setup() {
 
   if (parameterList[timeout_off] > 0) {
     POWEROFFtimer.setInterval(parameterList[timeout_off] * 60000L);
-    POWEROFFtimer.start();
+    POWEROFFtimer.stop();
   }
   if (parameterList[keep_power] > 0) {
     KEEP_POWERtimer.setInterval(parameterList[keep_power] * 1000L);

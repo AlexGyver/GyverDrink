@@ -778,9 +778,9 @@ void timeoutReset() {
       disp.setFont(BIG_NUM_FONT); // очищаем большую иконку режима ожидания
       printStr("  ", Left, 2);
       progressBar(-1);
+      displayMode(workMode);
+      displayVolume();
     }
-    displayMode(workMode);
-    displayVolume();
     // стираем иконку режима ожидания
     disp.setFont(Mode12x26);
     printInt(0, Center, 0);
