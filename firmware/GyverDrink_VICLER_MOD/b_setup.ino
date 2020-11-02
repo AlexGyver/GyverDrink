@@ -168,7 +168,7 @@ void setup() {
   printNum(thisVolume);
 #endif
 
-#if (STATUS_LED)
+#ifdef STATUS_LED
   if (workMode == ManualMode) LED = mHSV(manualModeStatusColor, 255, STATUS_LED);
   else LED = mHSV(autoModeStatusColor, 255, STATUS_LED);
   strip.show();

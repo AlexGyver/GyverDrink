@@ -1,5 +1,6 @@
 
 timerMinim timer100(100);
+// обработка функций сервисного режима
 void serviceRoutine(serviceStates mode) {
 #ifdef TM1637
   byte serviceText[] = {_S, _E, _r, _U, _i, _C, _E};
@@ -390,6 +391,7 @@ void serviceRoutine(serviceStates mode) {
 }
 
 #ifdef OLED
+// обработка изменения параметра меню
 void editParameter(byte parameter, byte selectedRow) {
   bool bypass = false;
   byte lastParameterValue = parameterList[parameter];
@@ -584,11 +586,9 @@ void flowRoutine() {
           servo.start();
           servoON();                                      // вкл питание серво
           parking = false;
-#if(STATUS_LED)
-          //LED = mHSV(11, 255, STATUS_LED); // orange
+#ifdef STATUS_LED
           LEDblinkState = true;
           LEDchanged = true;
-          //strip.show();
 #endif
         }
         else if (shotPos[i] == parking_pos) {             // если положение рюмки совпадает с парковочным
@@ -610,7 +610,7 @@ void flowRoutine() {
       if ( (workMode == AutoMode) && parameterList[auto_parking] == 0) {                // если в авто режиме:
         systemON = false;                                 // выключили систему
         parking = true;                                   // уже на месте!
-#if(STATUS_LED)
+#ifdef STATUS_LED
         if (workMode == ManualMode) LED = mHSV(manualModeStatusColor, 255, STATUS_LED);
         else LED = mHSV(autoModeStatusColor, 255, STATUS_LED);
 #endif
@@ -620,8 +620,7 @@ void flowRoutine() {
           servo.setTargetDeg(parking_pos);
           servo.start();
           servoON();                                        // включаем серво и паркуемся
-#if(STATUS_LED)
-          //LED = mHSV(11, 255, STATUS_LED); // orange
+#ifdef STATUS_LED
           LEDblinkState = true;
           LEDchanged = true;
 #endif
@@ -633,7 +632,7 @@ void flowRoutine() {
           servo.stop();
           systemON = false;                               // выключили систему
           parking = true;                                 // на месте!
-#if(STATUS_LED)
+#ifdef STATUS_LED
           LEDblinkState = false;
           if (workMode == ManualMode) LED = mHSV(manualModeStatusColor, 255, STATUS_LED);
           else LED = mHSV(autoModeStatusColor, 255, STATUS_LED);
@@ -646,7 +645,7 @@ void flowRoutine() {
   }
   else if (systemState == MOVING) {                     // движение к рюмке
     if (servo.tick()) {                                   // если приехали
-#if(STATUS_LED)
+#ifdef STATUS_LED
       LEDblinkState = false;
       if (workMode == ManualMode) LED = mHSV(manualModeStatusColor, 255, STATUS_LED);
       else LED = mHSV(autoModeStatusColor, 255, STATUS_LED);
@@ -794,7 +793,7 @@ void timeoutReset() {
       else if (shotStates[i] == NO_GLASS) leds[i] = mHSV(parameterList[leds_color], 255, parameterList[stby_light]);
     }
   }
-#if(STATUS_LED)
+#ifdef STATUS_LED
   if (workMode == ManualMode) LED = mHSV(manualModeStatusColor, 255, STATUS_LED);
   else LED = mHSV(autoModeStatusColor, 255, STATUS_LED);
   LEDbreathingState = false;
@@ -843,7 +842,7 @@ void timeoutTick() {
   if (parameterList[timeout_off]) {
     if (POWEROFFtimer.isReady() && !timeoutState) {
       for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mRGB(0, 0, 0); // black
-#if(STATUS_LED)
+#ifdef STATUS_LED
       LED = mHSV(0, 0, 0);  // off
       LEDbreathingState = false;
 #endif
@@ -882,7 +881,7 @@ void servoTick() {
 void LEDtick() {
   if (LEDchanged && LEDtimer.isReady()) {
     LEDchanged = false;
-#if(STATUS_LED)
+#ifdef STATUS_LED
     ledBreathing(LEDbreathingState);
     ledBlink(LEDblinkState);
 #endif
@@ -905,7 +904,8 @@ void rainbowFlow(bool _state, uint8_t _shotNum) {
   }
 }
 
-#if(STATUS_LED)
+#ifdef STATUS_LED
+// еффект дыхания светодиода
 void ledBreathing(bool _state) {
   static float _brightness = STATUS_LED;
   static int8_t _dir = -1;
@@ -929,6 +929,7 @@ void ledBreathing(bool _state) {
   LEDchanged = true;
 }
 
+// моргание светодиода
 void ledBlink(bool _state) {
   if (!_state) return;
 
@@ -940,8 +941,9 @@ void ledBlink(bool _state) {
 
   LEDchanged = true;
 }
-#endif
+#endif /* STATUS_LED */
 
+// поддержание питания от повербанка
 void keepPower() {
   static bool _dir = 1;
   static float _brightness = 1;
@@ -975,7 +977,9 @@ void keepPower() {
   LEDchanged = true;
 }
 
+// функции для работы с акб
 #ifdef BATTERY_PIN
+// фильтрация показаний напряжения
 float filter(float value) {
   static float k = 1.0, filteredValue = 4.0;
   if (battery_voltage < (BATTERY_LOW)) k = 1.0;
@@ -983,10 +987,21 @@ float filter(float value) {
   filteredValue = (1.0 - k) * filteredValue + k * value;
   return filteredValue;
 }
+
+// проверка статуса зарядки
+#ifdef CHARGER_PIN
+bool charging() {
+  return ( (analogRead(CHARGER_PIN) * 4.7 / 1023) >= 4.0) ? 1 : 0; // зарядка подключена, если напряжение > 4.0 вольт
+}
+#endif
+
+// получение напряжения с ацп
 float get_battery_voltage() {
-  battery_voltage = filter(analogRead(BATTERY_PIN) * (4.7 * battery_cal) / 1023.f);
+  battery_voltage = filter(analogRead(BATTERY_PIN) * (4.7 * battery_cal) / 1023);
   return battery_voltage;
 }
+
+// преобразование напряжение в процент заряда акб
 uint8_t get_battery_percent() {
   static uint8_t percent = 0;
   if (battery_voltage >= 4.00) percent = 5;
@@ -997,11 +1012,15 @@ uint8_t get_battery_percent() {
   else percent = 0;
   return percent;
 }
+
+// мониторинг напряжения
 bool battery_watchdog() {
   static uint32_t lastMillis = 0;
   static bool batOk, lastOkStatus = 1;
+
   if (millis() - lastMillis >= 1000) {
     lastMillis = millis();
+
     batOk = (get_battery_voltage() < (float)BATTERY_LOW) ? 0 : 1;
     if (!batOk) {
       if (systemState == PUMPING) {
@@ -1013,7 +1032,7 @@ bool battery_watchdog() {
         systemON = false;
       }
       for (byte i = 0; i < NUM_SHOTS; i++) leds[i] = mHSV(20, 255, 0);
-#if(STATUS_LED)
+#ifdef STATUS_LED
       LED = mHSV(0, 0, 0);
 #endif
       strip.show();
@@ -1046,6 +1065,7 @@ bool battery_watchdog() {
 }
 
 #ifdef OLED
+// функция вывода иконки акб
 void displayBattery(bool batOk) {
   if ( batOk && showMenu ) return;
 
@@ -1056,7 +1076,18 @@ void displayBattery(bool batOk) {
 
   if ( (currentMillis - lastDisplay >= 1000) && batOk) {
     lastDisplay = currentMillis;
-    printInt(get_battery_percent(), Right, 0);
+
+#ifdef CHARGER_PIN
+    if (charging()) {
+      static byte index = 0;
+      if (index == 6) index = 0;
+      printInt(index, Right, 0);
+      index++;
+      lastDisplay -= 250;
+    }
+    else
+#endif
+      printInt(get_battery_percent(), Right, 0);
   }
   else if ( (currentMillis - lastBlink >= 500) && !batOk) {
     lastBlink = currentMillis;
@@ -1065,5 +1096,5 @@ void displayBattery(bool batOk) {
     else disp.clear();
   }
 }
-#endif
-#endif
+#endif /* OLED */
+#endif /* BATTERY_PIN */

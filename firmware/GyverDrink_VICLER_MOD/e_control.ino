@@ -206,6 +206,7 @@ void btnTick() {
   if (btn.clicks(2)) {
     workMode = (workModes)!workMode;
     displayMode(workMode);
+    timeoutReset();
   }
 #endif
 

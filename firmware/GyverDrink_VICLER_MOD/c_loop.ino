@@ -5,7 +5,7 @@
 //  cnt_loop++;
 //  if ((millis() - tm_m) >= 500)
 //  {
-//    //Serial.println(cnt_loop / 1000.0);
+////    Serial.println(cnt_loop / 1000.0);
 //    disp.setFont(MAIN_FONT);
 //    printStr("    ", Left, 0);
 //    printInt(cnt_loop / 500.0, Left, 0);
