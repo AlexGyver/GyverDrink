@@ -773,13 +773,14 @@ void timeoutReset() {
 #elif defined OLED
     disp.setContrast(parameterList[oled_contrast]);
     disp.invertDisplay((bool)parameterList[invert_display]);
-    if (!POWEROFFtimer.isOn()) {
+    if ( (parameterList[timeout_off] > 0) && !POWEROFFtimer.isOn() ) {
       disp.setFont(BIG_NUM_FONT); // очищаем большую иконку режима ожидания
       printStr("  ", Left, 2);
       progressBar(-1);
       displayMode(workMode);
-      displayVolume();
+      //displayVolume();
     }
+    if (volumeChanged) displayVolume(); // выход из режима ожидания прокруткой энкодера - обновляем значение объёма
     // стираем иконку режима ожидания
     disp.setFont(Mode12x26);
     printInt(0, Center, 0);
@@ -873,8 +874,14 @@ void keepPowerTick() {
 
 // обработка движения серво
 void servoTick() {
-  if (servo.tick()) servoOFF();
-  else servoON();
+  if (servo.tick()) {
+    servoOFF();
+    //servo.stop();
+  }
+  else {
+    servoON();
+    //servo.start();
+  }
 }
 
 // отрисовка светодиодов по флагу (50мс)

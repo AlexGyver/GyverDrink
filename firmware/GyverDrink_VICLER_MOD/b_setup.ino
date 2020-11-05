@@ -55,10 +55,9 @@ void setup() {
   }
 #endif
 
-  if (parameterList[timeout_off] > 0) {
-    POWEROFFtimer.setInterval(parameterList[timeout_off] * 60000L);
-    POWEROFFtimer.stop();
-  }
+  if (parameterList[timeout_off] > 0) POWEROFFtimer.setInterval(parameterList[timeout_off] * 60000L);
+  POWEROFFtimer.stop();
+
   if (parameterList[keep_power] > 0) {
     KEEP_POWERtimer.setInterval(parameterList[keep_power] * 1000L);
     KEEP_POWERtimer.start();
@@ -161,12 +160,6 @@ void setup() {
       delay(10);
     }
   }
-#ifdef OLED
-  disp.clear();
-  progressBar(-1);
-#elif defined ANALOG_METER
-  printNum(thisVolume);
-#endif
 
 #ifdef STATUS_LED
   if (workMode == ManualMode) LED = mHSV(manualModeStatusColor, 255, STATUS_LED);
@@ -174,11 +167,11 @@ void setup() {
   strip.show();
 #endif
 
-  if (!digitalRead(BTN_PIN) || firstStartUp) // вход в сервисное меню
+  if (!digitalRead(BTN_PIN) || firstStartUp) { // вход в сервисное меню
 #ifdef TM1637
     serviceRoutine(serviceState);
+  }
 #elif defined OLED
-  {
     disp.clear();
     while (!digitalRead(BTN_PIN));  // ждём отпускания
     showMenu = true;
@@ -190,6 +183,18 @@ void setup() {
     POWEROFFtimer.stop();
   }
 #endif
+  else { // пропустили вход в сервис режим
+#ifdef OLED
+    disp.clear();
+    if (parameterList[timeout_off] == 0) {
+      progressBar(-1);
+      displayMode(workMode);
+      displayVolume();
+    }
+#elif defined ANALOG_METER
+    printNum(thisVolume);
+#endif
+  }
 
   timeoutReset();   // сброс таймаута
   TIMEOUTtimer.start();

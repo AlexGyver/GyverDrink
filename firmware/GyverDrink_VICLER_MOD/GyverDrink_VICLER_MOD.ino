@@ -1,6 +1,6 @@
 //GyverDrink VICLER_MOD
-#define VERSION 6.7
-//02.11.2020
+#define VERSION 6.8
+//05.11.2020
 /*
   ==============================================================================================
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
@@ -130,6 +130,8 @@
 #include "src/SSD1306Ascii/src/SSD1306Ascii.h"
 #include "src/SSD1306Ascii/src/SSD1306AsciiWire.h"
 #endif
+#else
+#error "No diplay selected!"
 #endif
 #include "src/ServoSmoothMinim.h"
 #include "src/microLED/microLED.h"
@@ -189,7 +191,7 @@ bool LEDblinkState = false;
 float battery_voltage = 4.2;
 float battery_cal = 1.0;
 bool keepPowerState = false;
-bool volumeChanged = false;
+bool volumeChanged = true;
 uint8_t parking_pos = PARKING_POS;
 uint8_t animCount = 7;
 bool showMenu = 0;
