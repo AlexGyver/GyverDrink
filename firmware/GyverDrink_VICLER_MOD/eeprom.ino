@@ -13,33 +13,26 @@ void readEEPROM() {
     firstStartUp = true;
   }
 
-  // чтение последнего налитого объёма
-  thisVolume = min(EEPROM.read(eeAddress._thisVolume), parameterList[max_volume]);
+  thisVolume = min(EEPROM.read(eeAddress._thisVolume), parameterList[max_volume]);  // чтение последнего налитого объёма
   for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
 
-  // чтение значения таймера для 50мл
-  EEPROM.get(eeAddress._time50ml, time50ml);
+  EEPROM.get(eeAddress._time50ml, time50ml);  // чтение значения таймера для 50мл
   volumeTick = 15.0f * 50.0f / time50ml;
 
-  // чтение позиций серво над рюмками
-  for (byte i = 0; i < NUM_SHOTS; i++) shotPos[i] = EEPROM.read(eeAddress._shotPos + i);
+  for (byte i = 0; i < NUM_SHOTS; i++) shotPos[i] = EEPROM.read(eeAddress._shotPos + i);  // чтение позиций серво над рюмками
 
-  // чтение парковочной позиции
-  parking_pos = EEPROM.read(eeAddress._parking_pos);
+  parking_pos = EEPROM.read(eeAddress._parking_pos);  // чтение парковочной позиции
 
 #if(SAVE_MODE == 1)
-  // режим
-  workMode = (workModes)EEPROM.read(eeAddress._workMode);
+  workMode = (workModes)EEPROM.read(eeAddress._workMode); // режим
 #endif
 
 #ifdef BATTERY_PIN
-  // чтение калибровки аккумулятора
-  EEPROM.get(eeAddress._battery_cal, battery_cal);
+  EEPROM.get(eeAddress._battery_cal, battery_cal);  // чтение калибровки аккумулятора
 #endif
 
 #ifdef TM1637
-  // чтение текущей анимации
-  animCount = EEPROM.read(eeAddress._animCount);
+  animCount = EEPROM.read(eeAddress._animCount);  // чтение текущей анимации
   if (animCount > 7) animCount = 0;
   EEPROM.update(eeAddress._animCount, animCount + 1);
 #endif
@@ -47,113 +40,84 @@ void readEEPROM() {
 #ifdef OLED
   //╞═════════════════════╡ Чтение параметров меню настроек ╞══════════════════════╡
 
-  // чтение значения таймаута
-  parameterList[timeout_off] = EEPROM.read(eeAddress._timeout_off);
+  parameterList[timeout_off] = EEPROM.read(eeAddress._timeout_off); // чтение значения таймаута
 
-  // чтение таймаута режима ожидания
-  parameterList[stby_time] = EEPROM.read(eeAddress._stby_time);
+  parameterList[stby_time] = EEPROM.read(eeAddress._stby_time); // чтение таймаута режима ожидания
 
-  // чтение яркости подсветки в режиме ожидания
-  parameterList[stby_light] = EEPROM.read(eeAddress._stby_light);
+  parameterList[stby_light] = EEPROM.read(eeAddress._stby_light); // чтение яркости подсветки в режиме ожидания
 
-  // цвет светодиодов
-  parameterList[leds_color] = EEPROM.read(eeAddress._leds_color);
+  parameterList[leds_color] = EEPROM.read(eeAddress._leds_color); // цвет светодиодов
 
-  // чтение установки динамической подсветки
-  parameterList[rainbow_flow] = EEPROM.read(eeAddress._rainbow_flow);
+  parameterList[rainbow_flow] = EEPROM.read(eeAddress._rainbow_flow); // чтение установки динамической подсветки
 
-  // инверсия дисплея
-  parameterList[invert_display] = EEPROM.read(eeAddress._invert_display);
+  parameterList[invert_display] = EEPROM.read(eeAddress._invert_display); // инверсия дисплея
   disp.invertDisplay((bool)parameterList[invert_display]);
 
-  // яркость олед дисплея
-  parameterList[oled_contrast] = EEPROM.read(eeAddress._oled_contrast);
+  parameterList[oled_contrast] = EEPROM.read(eeAddress._oled_contrast); // яркость олед дисплея
   disp.setContrast(parameterList[oled_contrast]);
 
-  // чтение максимального объёма
-  parameterList[max_volume] = EEPROM.read(eeAddress._max_volume);
+  parameterList[max_volume] = EEPROM.read(eeAddress._max_volume); // чтение максимального объёма
 
   //╞═══════════════════╡ Чтение параметров сервисного меню ╞═════════════════════╡
 
-  // функция пинания повербанка
-  parameterList[keep_power] = EEPROM.read(eeAddress._keep_power);
+  parameterList[keep_power] = EEPROM.read(eeAddress._keep_power); // функция пинания повербанка
 
-  // чтение установки инверсии серво
-  parameterList[inverse_servo] = EEPROM.read(eeAddress._inverse_servo);
+  parameterList[inverse_servo] = EEPROM.read(eeAddress._inverse_servo); // чтение установки инверсии серво
 
-  // скорость сервопривода
-  parameterList[servo_speed] = EEPROM.read(eeAddress._servo_speed);
+  parameterList[servo_speed] = EEPROM.read(eeAddress._servo_speed); // скорость сервопривода
 
-  // чтение установки автопарковки в авторежиме
-  parameterList[auto_parking] = EEPROM.read(eeAddress._auto_parking);
+  parameterList[auto_parking] = EEPROM.read(eeAddress._auto_parking); // чтение установки автопарковки в авторежиме
+
+  //╞═══════════════════════════╡ Чтение статистики ╞═════════════════════════════╡
+
+  EEPROM.get(eeAddress._volume_overall, volume_overall); // общий объём после сброса
 #endif
 }
 
 void resetEEPROM() {
+  EEPROM.update(100, EEPROM_KEY); // флаг сброса памяти
 
-  // флаг сброса памяти
-  EEPROM.update(100, EEPROM_KEY);
+  EEPROM.update(eeAddress._thisVolume, INIT_VOLUME);  // сброс последнего значения объёма
 
-  // сброс последнего значения объёма
-  EEPROM.update(eeAddress._thisVolume, INIT_VOLUME);
+  EEPROM.put(eeAddress._time50ml, TIME_50ML); // сброс калибровки времени на 50мл
 
-  // сброс калибровки времени на 50мл
-  EEPROM.put(eeAddress._time50ml, TIME_50ML);
-
-  // сброс позиций серво над рюмками
-  for (byte i = 0; i < NUM_SHOTS; i++) {
+  for (byte i = 0; i < NUM_SHOTS; i++) {  // сброс позиций серво над рюмками
     EEPROM.update(eeAddress._shotPos + i, initShotPos[i]);
     shotPos[i] = initShotPos[i];
   }
 
-  // сброс парковочной позиции
-  EEPROM.update(eeAddress._parking_pos, PARKING_POS);
+  EEPROM.update(eeAddress._parking_pos, PARKING_POS); // сброс парковочной позиции
 
-  // сброс режима
-  EEPROM.update(eeAddress._workMode, ManualMode);
+  EEPROM.update(eeAddress._workMode, ManualMode); // сброс режима
   workMode = ManualMode;
 
 #ifdef BATTERY_PIN
-  //сброс калибровки аккумулятора
-  EEPROM.put(eeAddress._battery_cal, 1.0);
+  EEPROM.put(eeAddress._battery_cal, BATTERY_CAL);  //сброс калибровки аккумулятора
 #endif
 
 #ifdef OLED
-  // сброс значения таймаута
-  EEPROM.update(eeAddress._timeout_off, TIMEOUT_OFF);
+  EEPROM.update(eeAddress._timeout_off, TIMEOUT_OFF); // сброс значения таймаута
 
-  // сброс таймаута режима ожидания
-  EEPROM.update(eeAddress._stby_time, TIMEOUT_STBY);
+  EEPROM.update(eeAddress._stby_time, TIMEOUT_STBY);  // сброс таймаута режима ожидания
 
-  // сброс функции поддержания питания от повербанка
-  EEPROM.update(eeAddress._keep_power, KEEP_POWER);
+  EEPROM.update(eeAddress._keep_power, KEEP_POWER); // сброс функции поддержания питания от повербанка
 
-  // сброс инверсии серво
-  EEPROM.update(eeAddress._inverse_servo, INVERSE_SERVO);
+  EEPROM.update(eeAddress._inverse_servo, INVERSE_SERVO); // сброс инверсии серво
 
-  // сброс скорости сервопривода
-  EEPROM.update(eeAddress._servo_speed, SERVO_SPEED);
+  EEPROM.update(eeAddress._servo_speed, SERVO_SPEED); // сброс скорости сервопривода
 
-  // сброс установки автопарковки в авторежиме
-  EEPROM.update(eeAddress._auto_parking, AUTO_PARKING);
+  EEPROM.update(eeAddress._auto_parking, AUTO_PARKING); // сброс установки автопарковки в авторежиме
 
-  // сброс максимального объёма
-  EEPROM.update(eeAddress._max_volume, MAX_VOLUME);
+  EEPROM.update(eeAddress._max_volume, MAX_VOLUME); // сброс максимального объёма
 
-  // сброс яркости подсветки в режиме ожидания
-  EEPROM.update(eeAddress._stby_light, STBY_LIGHT);
+  EEPROM.update(eeAddress._stby_light, STBY_LIGHT); // сброс яркости подсветки в режиме ожидания
 
-  // сброс установки динамической подсветки
-  EEPROM.update(eeAddress._rainbow_flow, RAINBOW_FLOW);
+  EEPROM.update(eeAddress._rainbow_flow, RAINBOW_FLOW); // сброс установки динамической подсветки
 
-  // сброс инвертирования дисплея
-  EEPROM.update(eeAddress._invert_display, INVERT_DISPLAY);
+  EEPROM.update(eeAddress._invert_display, INVERT_DISPLAY); // сброс инвертирования дисплея
 
-  // сброс цвета светодиодов
-  EEPROM.update(eeAddress._leds_color, ledsColor);
+  EEPROM.update(eeAddress._leds_color, ledsColor);  // сброс цвета светодиодов
 
-  //сброс яркости олед дисплея
-  EEPROM.update(eeAddress._oled_contrast, OLED_CONTRAST);
-
+  EEPROM.update(eeAddress._oled_contrast, OLED_CONTRAST); // сброс яркости олед дисплея
 #endif
 }

@@ -1,5 +1,5 @@
 //GyverDrink VICLER_MOD
-#define VERSION 6.8
+#define VERSION 6.9
 //05.11.2020
 /*
   ==============================================================================================
@@ -189,7 +189,7 @@ bool parking = true;
 bool LEDbreathingState = false;
 bool LEDblinkState = false;
 float battery_voltage = 4.2;
-float battery_cal = 1.0;
+float battery_cal = BATTERY_CAL;
 bool keepPowerState = false;
 bool volumeChanged = true;
 uint8_t parking_pos = PARKING_POS;
@@ -204,7 +204,7 @@ bool firstStartUp = false;
 
 
 #ifdef OLED
-uint16_t shots_overall = 0, volume_overall = 0;
+uint16_t shots_session = 0, volume_session = 0, volume_overall = 0;
 char bootscreen[] = {BOOTSCREEN};
 #endif
 
@@ -266,6 +266,7 @@ struct EEPROMAddress
   const byte _invert_display = _rainbow_flow + sizeof(parameterList[rainbow_flow]);
   const byte _leds_color = _invert_display + sizeof(parameterList[invert_display]);
   const byte _oled_contrast = _leds_color + sizeof(parameterList[leds_color]);
+  const byte _volume_overall = _oled_contrast + sizeof(parameterList[oled_contrast]);
 #endif
 } eeAddress;
 

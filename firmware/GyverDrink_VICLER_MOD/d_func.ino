@@ -344,31 +344,53 @@ void serviceRoutine(serviceStates mode) {
     disp.clear();
     disp.setInvertMode(1);
     disp.setFont(MAIN_FONT);
+    static byte text_offset = (disp.displayWidth() - strWidth("Фактор: 0.000")) / 2;
 #if(MENU_LANG == 1)
     disp.setLetterSpacing(0);
     clearToEOL();
-    printStr("Напряжение аккум-а", Center, 0);
+    //    printStr("Напряжение аккум-а", Center, 0);
+    printStr("Фактор: ", text_offset, 0);
+    printFloat(battery_cal, 3);
 #else
     clearToEOL();
-    printStr("Battery voltage", Center, 0);
-#endif
-    disp.setFont(BIG_NUM_FONT);
+    //    printStr("Battery voltage", Center, 0);
+    printStr("Factor: ", text_offset, 0);
+    printFloat(battery_cal, 3);
+#endif /* MENU_LANG*/
+    //    disp.setFont(BIG_NUM_FONT);
     disp.setInvertMode(0);
-#endif
+#endif /* OLED*/
     while (1) {
       enc.tick();
 
-      if (timer100.isReady())
+      if (timer100.isReady()) {
 #ifdef TM1637
         printNum(get_battery_voltage() * 1000);
 #elif defined OLED
+        disp.setFont(BIG_NUM_FONT);
         printFloat(get_battery_voltage(), 2, Center, 3);
 #endif
+      }
 
       if (enc.isTurn()) {
-        if (enc.isLeft())  battery_cal += 0.005;
-        if (enc.isRight()) battery_cal -= 0.005;
+        if (enc.isLeft())  battery_cal += 0.002;
+        if (enc.isRight()) battery_cal -= 0.002;
         battery_cal = constrain(battery_cal, 0, 3.0);
+
+#ifdef OLED
+        disp.setInvertMode(1);
+        disp.setFont(MAIN_FONT);
+#if(MENU_LANG == 1)
+        disp.setLetterSpacing(0);
+        printStr("Фактор: ", text_offset, 0);
+        printFloat(battery_cal, 3);
+#else
+        printStr("Factor: ", text_offset, 0);
+        printFloat(battery_cal, 3);
+#endif /* MENU_LANG */
+        disp.setInvertMode(0);
+#endif /* OLED */
+
       }
 
       if (btn.pressed()) {
@@ -520,6 +542,9 @@ void flowTick() {
         if (systemState != PUMPING && !showMenu) {
           printNum(shotVolume[i], ml);
 #ifdef OLED
+          displayVolumeSession(1);
+#endif
+#ifdef OLED
           progressBar(shotVolume[i], parameterList[max_volume]);
 #endif
         }
@@ -545,6 +570,9 @@ void flowTick() {
         shotCount--;
         if (systemState != PUMPING && !showMenu) {
           printNum(thisVolume, ml);
+#ifdef OLED
+          displayVolumeSession(1);
+#endif
 #ifdef OLED
           progressBar(thisVolume, parameterList[max_volume]);
 #endif
@@ -598,6 +626,7 @@ void flowRoutine() {
         }
 #ifdef OLED
         printNum(shotVolume[curPumping], ml);
+        displayVolumeSession(1);
         progressBar(0);
 #elif defined ANALOG_METER
         printNum(0);
@@ -625,7 +654,10 @@ void flowRoutine() {
           LEDchanged = true;
 #endif
 #ifdef OLED
-          displayVolume();
+          //displayVolume();
+          progressBar(thisVolume, parameterList[max_volume]);
+          displayVolumeSession(1);
+
 #endif
         }
         if (servo.tick()) {                               // едем до упора
@@ -697,8 +729,11 @@ void flowRoutine() {
       pumpOFF();                                          // помпа выкл
       shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
 #ifdef OLED
-      shots_overall++;
+      shots_session++;
+      volume_session += volumeCount;
       volume_overall += volumeCount;
+      displayVolumeSession(1);
+      EEPROM.put(eeAddress._volume_overall, volume_overall);
 #endif
       curPumping = -1;                                    // снимаем выбор рюмки
       systemState = WAIT;                                 // режим работы - ждать
@@ -774,8 +809,10 @@ void timeoutReset() {
     disp.setContrast(parameterList[oled_contrast]);
     disp.invertDisplay((bool)parameterList[invert_display]);
     if ( (parameterList[timeout_off] > 0) && !POWEROFFtimer.isOn() ) {
-      disp.setFont(BIG_NUM_FONT); // очищаем большую иконку режима ожидания
-      printStr("  ", Left, 2);
+      if (thisVolume < 10) {
+        disp.setFont(BIG_NUM_FONT); // очищаем большую иконку режима ожидания
+        printStr("  ", Left, 2);
+      }
       progressBar(-1);
       displayMode(workMode);
       //displayVolume();
@@ -784,6 +821,7 @@ void timeoutReset() {
     // стираем иконку режима ожидания
     disp.setFont(Mode12x26);
     printInt(0, Center, 0);
+    displayVolumeSession(1);
 #endif
   }
   TIMEOUTtimer.reset();
@@ -823,6 +861,8 @@ void timeoutTick() {
       displayVolume();
     }
     displayMode(workMode);
+
+    displayVolumeSession(0);
     // выводим иконку режима ожидания
     disp.setFont(Mode12x26);
     printInt(2, Center, 0);
@@ -876,11 +916,11 @@ void keepPowerTick() {
 void servoTick() {
   if (servo.tick()) {
     servoOFF();
-    //servo.stop();
+    servo.stop();
   }
   else {
     servoON();
-    //servo.start();
+    servo.start();
   }
 }
 
@@ -990,7 +1030,7 @@ void keepPower() {
 float filter(float value) {
   static float k = 1.0, filteredValue = 4.0;
   if (battery_voltage < (BATTERY_LOW)) k = 1.0;
-  else k = 0.05;
+  else k = 0.1;
   filteredValue = (1.0 - k) * filteredValue + k * value;
   return filteredValue;
 }

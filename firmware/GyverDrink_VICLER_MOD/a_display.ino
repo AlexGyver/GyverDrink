@@ -105,7 +105,7 @@ MenuPageName menuPage = MAIN_MENU_PAGE; // актуальная страница
 byte lastMenuPage = NO_MENU;            // последняя отображаемая страница. Нужна для предотвращения повторного вывода заголовка одной и той же страницы во время прокрутки.
 bool itemSelected = 0;                  // флаг нажатия на пункт меню
 
-uint8_t menuItemsNum[] = {3, 8, 2, 4, 4}; // количество строк на каждой странице без заголовка
+uint8_t menuItemsNum[] = {3, 8, 3, 4, 4}; // количество строк на каждой странице без заголовка
 
 #if(MENU_LANG == 1)
 const char *MenuPages[][9] = {
@@ -128,7 +128,8 @@ const char *MenuPages[][9] = {
 
   { "### Статистика  ###",
     " Рюмок",
-    " Объ@м"
+    " Объ@м/сессия",
+    " Общий объ@м"
   },
 
   { "##### Сервис #####",
@@ -172,8 +173,8 @@ const char *MenuPages[][9] = {
 
   { "Statistics",
     " Shots",
-    " Volume",
-    ""
+    " Volume session",
+    " Volume overall"
   },
 
   { "Service",
@@ -262,7 +263,7 @@ void ftoa(float floatVal, char* floatStr, byte dec) { // преобразова�
 }
 
 void printFloat(float num, uint8_t decimals, int8_t x = Append, int8_t y = Append) { // вывод рельных чисел с возможностью выравнивания
-  char cstr[5];
+  char cstr[6];
   ftoa(num, cstr, decimals);
   printStr(cstr, x, y);
 }
@@ -347,6 +348,40 @@ void progressBar(int16_t value, uint16_t maximum = 50) { // прогресс-б�
   }
 }
 
+void displayVolumeSession(bool _show) {
+  disp.setFont(MAIN_FONT);
+  disp.setLetterSpacing(0);
+  if (_show) {
+    if (volume_session < 100.0) {
+      if (volume_session < 10) printInt(volume_session, (disp.displayWidth() - strWidth("0мл")) - 1, 2);
+      else printInt(volume_session, (disp.displayWidth() - strWidth("00мл")) - 1, 2);
+      printStr("мл");
+    }
+    else {
+      printFloat(volume_session / 1000.0, 2, (disp.displayWidth() - strWidth("0.00л")) - 1, 2);
+      printStr("л");
+    }
+  }
+  else {
+    printStr("         ", Right, 2);
+  }
+  //  if (_show) {
+  //    if (volume_session < 100.0) {
+  //      if (volume_session < 10) printInt(volume_session, (disp.displayWidth() - strWidth("0мл")) / 2, 0);
+  //      else printInt(volume_session, (disp.displayWidth() - strWidth("00мл")) / 2, 0);
+  //      printStr("мл");
+  //    }
+  //    else {
+  //      printFloat(volume_session / 1000.0, 2, (disp.displayWidth() - strWidth("0.00л")) / 2, 0);
+  //      printStr("л");
+  //    }
+  //  }
+  //  else {
+  //    printStr("         ", Center, 0);
+  //  }
+
+}
+
 void displayMode(workModes mode);
 void displayMode(workModes mode) { // вывод иконки режима и иконки аккумулятора
   if (!timeoutState) return;
@@ -361,6 +396,7 @@ void displayMode(workModes mode) { // вывод иконки режима и и
       x -= 2;
       printInt(mode, x, 0); // выводим иконку режима
     } while (x > 1);
+    displayVolumeSession(1);
   }
   else printInt(mode, 1, 0); // выводим иконку режима
 
@@ -371,6 +407,7 @@ void displayMode(workModes mode) { // вывод иконки режима и и
       x -= 2;
       printInt(mode, x, 0); // выводим иконку режима
     } while (x > 1);
+    displayVolumeSession(1);
   }
   else printInt(mode, 1, 0); // выводим иконку режима
 #endif
@@ -381,7 +418,7 @@ void displayMode(workModes mode) { // вывод иконки режима и и
 #endif
 }
 
-void displayVolume() { // вывод объёма крупным шрифтом спостфиксом "мл" и соответствующего ему значения статус-бара
+void displayVolume() { // вывод объёма крупным шрифтом с постфиксом "мл" и соответствующего ему значения статус-бара
   disp.setFont(BIG_NUM_FONT);
   printNum(thisVolume, ml);
   progressBar(thisVolume, parameterList[max_volume]);
@@ -441,8 +478,12 @@ void displayMenu() { // вывод страниц меню
       }
     }
     else if (menuPage == STATISTICS_PAGE) { // выбор елемента на странице статистики
-      if (menuItem == 1) shots_overall = 0; // сбрасываем количетво рюмок
-      else if (menuItem == 2) volume_overall = 0; // сбрасываем объём
+      if (menuItem == 1) shots_session = 0; // сбрасываем количетво рюмок
+      else if (menuItem == 2) volume_session = 0; // сбрасываем объём
+      else if (menuItem == 3) {
+        volume_overall = 0;
+        EEPROM.put(eeAddress._volume_overall, 0);
+      }
     }
     else if (menuPage == SERVO_CALIBRATION_PAGE) { // выбор елемента на странице настройки сервопривода
       if (menuItem == 1) { // выбрали первый пункт -> начало этапа калибровки серво
@@ -513,26 +554,27 @@ void displayMenu() { // вывод страниц меню
     else if (menuPage == STATISTICS_PAGE) {
       printStr(MenuPages[menuPage][currItem]);
       clearToEOL();
-      if (currItem == 1)  printInt(shots_overall, Right);
-      if (currItem == 2)  {
+      if (currItem == 1)  printInt(shots_session, Right);
+      else  {
+        float currValue = (currItem == 2) ? volume_session : volume_overall;
 #if(MENU_LANG == 1)
-        if (volume_overall < 100.0) {
-          if (volume_overall < 10) printInt(volume_overall, disp.displayWidth() - strWidth("0мл") - 1);
-          else printInt(volume_overall, disp.displayWidth() - strWidth("00мл") - 1);
+        if (currValue < 100.0) {
+          if (currValue < 10) printInt(currValue, disp.displayWidth() - strWidth("0мл") - 1);
+          else printInt(currValue, disp.displayWidth() - strWidth("00мл") - 1);
           printStr("мл");
         }
         else {
-          printFloat(volume_overall / 1000.0, 2, disp.displayWidth() - strWidth("0.00л") - 1);
+          printFloat(currValue / 1000.0, 2, disp.displayWidth() - strWidth("0.00л") - 1);
           printStr("л");
         }
 #else
-        if (volume_overall < 100.0) {
-          if (volume_overall < 10) printInt(volume_overall, disp.displayWidth() - strWidth("0ml") - 1);
-          else printInt(volume_overall, disp.displayWidth() - strWidth("00ml") - 1);
+        if (currValue < 100.0) {
+          if (currValue < 10) printInt(currValue, disp.displayWidth() - strWidth("0ml") - 1);
+          else printInt(currValue, disp.displayWidth() - strWidth("00ml") - 1);
           printStr("ml");
         }
         else {
-          printFloat(volume_overall / 1000.0, 2, disp.displayWidth() - strWidth("0.00l"));
+          printFloat(currValue / 1000.0, 2, disp.displayWidth() - strWidth("0.00l"));
           printStr("l");
         }
 #endif

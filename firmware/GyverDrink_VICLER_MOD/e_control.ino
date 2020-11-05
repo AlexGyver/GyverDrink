@@ -48,7 +48,12 @@ void encTick() {
     }
     else {
       thisVolume = constrain(thisVolume, 1, parameterList[max_volume]);
-      if (timeoutState) printNum(thisVolume, ml);
+      if (timeoutState) {
+        printNum(thisVolume, ml);
+#ifdef OLED
+        displayVolumeSession(1);
+#endif
+      }
 #ifdef OLED
       progressBar(thisVolume, parameterList[max_volume]);
 #endif
@@ -61,6 +66,11 @@ void encTick() {
 
 // активация/остановка налива
 void btnTick() {
+#ifdef OLED
+  static byte pressCount = 1; // счётчик нажатий
+  static long lastPressedMillis = 0; // время последнего нажатия на кнопку
+#endif
+
   if (btn.pressed()) { // нажатие на основную кнопку
     timeoutReset(); // таймаут сброшен
 
@@ -69,13 +79,17 @@ void btnTick() {
       shotStates[curPumping] = READY; // налитая рюмка, статус: готов
       curPumping = -1;                // снимаем выбор рюмки
 #ifdef OLED
-      shots_overall++;
+      shots_session++;
+      volume_session += volumeCount;
       volume_overall += volumeCount;
-      //      EEPROM.put(eeAddress._shots_overall, shots_overall);
-      //      EEPROM.put(eeAddress._volume_overall, volume_overall);
+      displayVolumeSession(1);
+      EEPROM.put(eeAddress._volume_overall, volume_overall);
+      //      EEPROM.put(eeAddress._shots_session, shots_session);
+      //      EEPROM.put(eeAddress._volume_session, volume_session);
 #endif
       systemState = WAIT; // режим работы - ждать
       WAITtimer.reset();
+      return;
     }
     if ((workMode == ManualMode) && !showMenu) systemON = true; // система активирована
 #ifdef OLED
@@ -101,8 +115,15 @@ void btnTick() {
         displayMode(workMode);
         displayVolume();
         timeoutState = true;
+        displayVolumeSession(1);
       }
     }
+    else {  // считаем количество нажатий только на основном экране. Максимальное время между кликами 500мс
+      if (millis() - lastPressedMillis < 500) pressCount++;
+      else pressCount = 1;
+      lastPressedMillis = millis();
+    }
+
 #endif
   }
 
@@ -155,14 +176,7 @@ void btnTick() {
 #endif
 
   // выбор рюмки
-  if (encBtn.clicked()) {
-    //#ifdef OLED
-    //    if (showMenu) {
-    //      itemSelected = 1;
-    //      displayMenu();
-    //      return;
-    //    }
-    //#endif
+  if (encBtn.clicked() && !showMenu) {
 
     if (shotCount < 2) return;
 
@@ -203,10 +217,11 @@ void btnTick() {
   }
 
 #ifdef OLED
-  if (btn.clicks(2)) {
+  if (pressCount == 2) {
     workMode = (workModes)!workMode;
     displayMode(workMode);
     timeoutReset();
+    pressCount = 0;
   }
 #endif
 
