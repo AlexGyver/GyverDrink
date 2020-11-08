@@ -107,7 +107,7 @@ void setup() {
 #elif defined OLED
   timerMinim nextSym(10);
   disp.setFont(MAIN_FONT);
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
   disp.setLetterSpacing(0);
 #endif // MENU_LANG
   static byte targetX = (disp.displayWidth() - strWidth(bootscreen)) / 2;
@@ -138,7 +138,7 @@ void setup() {
       static byte currX = 128;
       if (currX > targetX) {
         disp.setFont(MAIN_FONT);
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
         disp.setLetterSpacing(0);
 #endif
         printStr(bootscreen, currX, 3);

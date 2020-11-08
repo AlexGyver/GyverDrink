@@ -55,6 +55,8 @@
 // any other value means variable width font in FontCreator2 (thiele)
 // format with pixel padding
 
+#include "BigPostfix30x16_2.h"
+#include "BigPostfix30x16.h"
 #include "BigIcon36x40.h"
 #include "FixedNum30x40_2.h"
 #include "ProgBar.h"

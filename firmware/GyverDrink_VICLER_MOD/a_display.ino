@@ -86,7 +86,7 @@ SSD1306AsciiWire disp;
 #define BIG_NUM_FONT FixedNum30x40_2
 #endif
 
-#if (MENU_LANG == 1)
+#if (MENU_LANG == 0)
 #define MAIN_FONT Vicler8x16
 #else
 #define MAIN_FONT ZevvPeep8x16
@@ -107,7 +107,7 @@ bool itemSelected = 0;                  // флаг нажатия на пунк
 
 uint8_t menuItemsNum[] = {3, 8, 3, 4, 4}; // количество строк на каждой странице без заголовка
 
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
 const char *MenuPages[][9] = {
   { "#####  Меню  #####",
     "", // зарезервированно для названия режима
@@ -128,8 +128,8 @@ const char *MenuPages[][9] = {
 
   { "### Статистика  ###",
     " Рюмок",
-    " Объ@м/сессия",
-    " Общий объ@м"
+    " Объ@м / сеанс",
+    " Объ@м всего"
   },
 
   { "##### Сервис #####",
@@ -201,7 +201,7 @@ const char *MenuPages[][9] = {
 byte strWidth(const char str[]) { // расчёт ширины текста в пикселях
   byte _width = 0;
   while (*str) {
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
     _width += disp.charWidth(*str++);
 #else
     _width += disp.charSpacing(*str++);
@@ -272,9 +272,8 @@ enum { ml = 1, deg }; // постфикс для вывода чисел бол�
 
 void printNum(uint16_t volume, int8_t postfix = 0) { //вывод чисел крупным шрифтом по центру с возможностью вывода дополнительного постфикса (мл или °)
   static uint16_t lastVol = 0; // переменная для сохранения последнего выводимого числа
-
-  byte shiftY = 0;
   disp.setFont(BIG_NUM_FONT);
+  byte shiftY = 0;
 
   if (postfix == 1) shiftY = 1; // число объёма выводится на одну строку выше, чем градусы серво и напяжение аккумулятора
 
@@ -282,7 +281,11 @@ void printNum(uint16_t volume, int8_t postfix = 0) { //вывод чисел к�
   if (volume <= 999 && lastVol >= 1000) printStr("    ", Center, 3 - shiftY);
   if (volume <= 99 && lastVol >= 100) {
     printStr(" ", Left, 3 - shiftY);
-    printStr(" ", Right, 3 - shiftY);
+    printStr("  ", Right, 3 - shiftY);
+    if (!showMenu) {
+      displayVolumeSession();
+      disp.setFont(BIG_NUM_FONT);
+    }
   }
   if ( (volume <= 9 && lastVol >= 10) || !timeoutState )
     printStr("  ", Left, 3 - shiftY);
@@ -290,25 +293,35 @@ void printNum(uint16_t volume, int8_t postfix = 0) { //вывод чисел к�
 
   if (postfix == 1) { // отображение мл
     if (volume > 99) printInt(volume, Left, 3 - shiftY);
-    else if (volume > 9) printInt(volume, (disp.displayWidth() - strWidth("00%")) / 2, 3 - shiftY);
-    else printInt(volume, (disp.displayWidth() - strWidth("0%")) / 2 + 16, 3 - shiftY);
-    printStr("%"); // "ml"
+    else if (volume > 9) printInt(volume, (disp.displayWidth() - strWidth("000")) / 2, 3 - shiftY);
+    else printInt(volume, (disp.displayWidth() - strWidth("00")) / 2 + 16, 3 - shiftY);
+#if(NUM_FONT == 0)
+    disp.setFont(BigPostfix30x16);
+#else
+    disp.setFont(BigPostfix30x16_2);
+#endif
+    printStr("%", Append, 5); // "ml"
   }
   else if (postfix == 2) { // отображение угла
-    if (volume > 99) printInt(volume, (disp.displayWidth() - strWidth("000*")) / 2, 3 - shiftY);
-    else if (volume > 9) printInt(volume, (disp.displayWidth() - strWidth("00*")) / 2, 3 - shiftY);
-    else printInt(volume, (disp.displayWidth() - strWidth("0*")) / 2 + 16, 3 - shiftY);
-    if (postfix == 2)  printStr("*"); // "°"
+    if (volume > 99) printInt(volume, (disp.displayWidth() - strWidth("0000")) / 2, 3 - shiftY);
+    else if (volume > 9) printInt(volume, (disp.displayWidth() - strWidth("000")) / 2, 3 - shiftY);
+    else printInt(volume, (disp.displayWidth() - strWidth("00")) / 2 + 16, 3 - shiftY);
+#if(NUM_FONT == 0)
+    disp.setFont(BigPostfix30x16);
+#else
+    disp.setFont(BigPostfix30x16_2);
+#endif
+    printStr("&", Append, 3); // "°"
   }
   else printInt(volume, Center, 3 - shiftY); // отображение числа без постфикса
 
   disp.setFont(MAIN_FONT);
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
   disp.setLetterSpacing(0);
 #endif
 }
 
-void progressBar(int16_t value, uint16_t maximum = 50) { // прогресс-бар для визуального отображения объёма
+void progressBar(int16_t value, uint16_t maximum = MAX_VOLUME) { // прогресс-бар для визуального отображения объёма
   disp.setFont(ProgBar);                  // активируем шрифт. Состоит из одного деления прогресс-бара
   disp.setLetterSpacing(0);               // отключаем пробелы между символами шрифта, т.к. они уже встроенны в шрифт
   static int16_t currX = 0, targetX = 0;  // актуальная и целевая позиция координаты Х на дисплее
@@ -348,38 +361,23 @@ void progressBar(int16_t value, uint16_t maximum = 50) { // прогресс-б�
   }
 }
 
-void displayVolumeSession(bool _show) {
+void displayVolumeSession() {
   disp.setFont(MAIN_FONT);
+#if(MENU_LANG == 0)
+  const byte offsetX = disp.displayWidth() - strWidth("0.00л") - 1;
+#else
+  const byte offsetX = disp.displayWidth() - strWidth("0.00l") + 5;
+#endif
   disp.setLetterSpacing(0);
-  if (_show) {
-    if (volume_session < 100.0) {
-      if (volume_session < 10) printInt(volume_session, (disp.displayWidth() - strWidth("0мл")) - 1, 2);
-      else printInt(volume_session, (disp.displayWidth() - strWidth("00мл")) - 1, 2);
-      printStr("мл");
-    }
-    else {
-      printFloat(volume_session / 1000.0, 2, (disp.displayWidth() - strWidth("0.00л")) - 1, 2);
-      printStr("л");
-    }
+  if (volume_session > 0) {
+    printFloat(volume_session / 1000.0, 2, offsetX, 2);
+#if(MENU_LANG == 0)
+    printStr("л");
+#else
+    printStr("l");
+#endif
   }
-  else {
-    printStr("         ", Right, 2);
-  }
-  //  if (_show) {
-  //    if (volume_session < 100.0) {
-  //      if (volume_session < 10) printInt(volume_session, (disp.displayWidth() - strWidth("0мл")) / 2, 0);
-  //      else printInt(volume_session, (disp.displayWidth() - strWidth("00мл")) / 2, 0);
-  //      printStr("мл");
-  //    }
-  //    else {
-  //      printFloat(volume_session / 1000.0, 2, (disp.displayWidth() - strWidth("0.00л")) / 2, 0);
-  //      printStr("л");
-  //    }
-  //  }
-  //  else {
-  //    printStr("         ", Center, 0);
-  //  }
-
+  else printStr("         ", Right, 2);
 }
 
 void displayMode(workModes mode);
@@ -396,7 +394,6 @@ void displayMode(workModes mode) { // вывод иконки режима и и
       x -= 2;
       printInt(mode, x, 0); // выводим иконку режима
     } while (x > 1);
-    displayVolumeSession(1);
   }
   else printInt(mode, 1, 0); // выводим иконку режима
 
@@ -407,7 +404,6 @@ void displayMode(workModes mode) { // вывод иконки режима и и
       x -= 2;
       printInt(mode, x, 0); // выводим иконку режима
     } while (x > 1);
-    displayVolumeSession(1);
   }
   else printInt(mode, 1, 0); // выводим иконку режима
 #endif
@@ -419,7 +415,7 @@ void displayMode(workModes mode) { // вывод иконки режима и и
 }
 
 void displayVolume() { // вывод объёма крупным шрифтом с постфиксом "мл" и соответствующего ему значения статус-бара
-  disp.setFont(BIG_NUM_FONT);
+  displayVolumeSession();
   printNum(thisVolume, ml);
   progressBar(thisVolume, parameterList[max_volume]);
 }
@@ -427,7 +423,7 @@ void displayVolume() { // вывод объёма крупным шрифтом 
 void displayMenu() { // вывод страниц меню
   static uint8_t firstItem = 1, selectedRow = 0;
 
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
   disp.setFont(MAIN_FONT);
   disp.setLetterSpacing(0);
 #else
@@ -516,7 +512,7 @@ void displayMenu() { // вывод страниц меню
 
   for (byte currItem = firstItem; currItem < (firstItem + 3); currItem++) {// отображаем три строки из страницы меню, начиная с firstitem
     if (currItem == menuItem) { // инвертируем текущую строку
-#if(MENU_SELECT == 1)
+#if(MENU_SELECT == 0)
       disp.setInvertMode(1);
 #else
       disp.setInvertMode(0);
@@ -527,7 +523,7 @@ void displayMenu() { // вывод страниц меню
     else  disp.setInvertMode(0);
 
     if (menuPage == MAIN_MENU_PAGE && currItem == 1)  {
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
       if (workMode == ManualMode) MenuPages[menuPage][currItem] = " Авто режим";
       else  MenuPages[menuPage][currItem] = " Ручной режим";
 #else
@@ -540,7 +536,7 @@ void displayMenu() { // вывод страниц меню
       printStr(MenuPages[menuPage][currItem]);
       clearToEOL();
       byte parameter = currItem - 1;
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
       if ( (parameter == rainbow_flow) || (parameter == invert_display) ) {
         if (parameterList[parameter] == 0) printStr("(", Right);
         else printStr(")", Right);
@@ -557,7 +553,7 @@ void displayMenu() { // вывод страниц меню
       if (currItem == 1)  printInt(shots_session, Right);
       else  {
         float currValue = (currItem == 2) ? volume_session : volume_overall;
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
         if (currValue < 100.0) {
           if (currValue < 10) printInt(currValue, disp.displayWidth() - strWidth("0мл") - 1);
           else printInt(currValue, disp.displayWidth() - strWidth("00мл") - 1);
@@ -594,7 +590,7 @@ void displayMenu() { // вывод страниц меню
       printStr(MenuPages[menuPage][currItem]);
       clearToEOL();
       byte parameter = currItem - 2 + 8;
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
       if ( (parameter == inverse_servo) || (parameter == auto_parking) ) {
         if (parameterList[parameter] == 0) printStr("(", Right);
         else printStr(")", Right);

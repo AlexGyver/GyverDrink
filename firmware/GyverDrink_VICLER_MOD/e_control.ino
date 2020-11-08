@@ -50,9 +50,6 @@ void encTick() {
       thisVolume = constrain(thisVolume, 1, parameterList[max_volume]);
       if (timeoutState) {
         printNum(thisVolume, ml);
-#ifdef OLED
-        displayVolumeSession(1);
-#endif
       }
 #ifdef OLED
       progressBar(thisVolume, parameterList[max_volume]);
@@ -80,9 +77,7 @@ void btnTick() {
       curPumping = -1;                // снимаем выбор рюмки
 #ifdef OLED
       shots_session++;
-      volume_session += volumeCount;
       volume_overall += volumeCount;
-      displayVolumeSession(1);
       EEPROM.put(eeAddress._volume_overall, volume_overall);
       //      EEPROM.put(eeAddress._shots_session, shots_session);
       //      EEPROM.put(eeAddress._volume_session, volume_session);
@@ -115,7 +110,6 @@ void btnTick() {
         displayMode(workMode);
         displayVolume();
         timeoutState = true;
-        displayVolumeSession(1);
       }
     }
     else {  // считаем количество нажатий только на основном экране. Максимальное время между кликами 500мс

@@ -24,7 +24,7 @@ void serviceRoutine(serviceStates mode) {
     disp.clear();
     disp.setInvertMode(1);
     clearToEOL();
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
     printStr("Парковка", Center, 0);
 #else
     printStr("Parking", Center, 0);
@@ -51,7 +51,7 @@ void serviceRoutine(serviceStates mode) {
           disp.home();
           disp.setInvertMode(1);
           clearToEOL();
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
           printStr("Рюмка ", Center, 0);
 #else
           printStr("Shot ", Center, 0);
@@ -81,7 +81,7 @@ void serviceRoutine(serviceStates mode) {
             disp.home();
             disp.setInvertMode(1);
             clearToEOL();
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
             printStr("Парковка", Center, 0);
 #else
             printStr("Parking", Center, 0);
@@ -110,7 +110,7 @@ void serviceRoutine(serviceStates mode) {
           disp.home();
           disp.setInvertMode(1);
           clearToEOL();
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
           printStr("Рюмка ", Center, 0);
 #else
           printStr("Shot ", Center, 0);
@@ -195,7 +195,7 @@ void serviceRoutine(serviceStates mode) {
       systemState = SEARCH;
       curPumping = -1;
 #ifdef OLED
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
       disp.home();
       disp.setInvertMode(1);
       clearToEOL();
@@ -211,7 +211,7 @@ void serviceRoutine(serviceStates mode) {
       disp.home();
       disp.setInvertMode(1);
       clearToEOL();
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
       printStr("Поставьте рюмку", Center, 0);
 #else
       printStr("Place shot", Center, 0);
@@ -230,7 +230,7 @@ void serviceRoutine(serviceStates mode) {
             disp.home();
             disp.setInvertMode(1);
             clearToEOL();
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
             printStr("   Налейте 50мл   ", Center, 0);
 #else
             printStr("   Fill 50ml   ", Center, 0);
@@ -264,7 +264,7 @@ void serviceRoutine(serviceStates mode) {
           disp.home();
           disp.setInvertMode(1);
           clearToEOL();
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
           printStr("Зажмите энкодер", Center, 0);
 #else
           printStr("Press encoder", Center, 0);
@@ -285,7 +285,7 @@ void serviceRoutine(serviceStates mode) {
         disp.home();
         disp.setInvertMode(1);
         clearToEOL();
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
         printStr("Поставьте рюмку", Center, 0);
 #else
         printStr("  Place shot  ", Center, 0);
@@ -345,7 +345,7 @@ void serviceRoutine(serviceStates mode) {
     disp.setInvertMode(1);
     disp.setFont(MAIN_FONT);
     static byte text_offset = (disp.displayWidth() - strWidth("Фактор: 0.000")) / 2;
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
     disp.setLetterSpacing(0);
     clearToEOL();
     //    printStr("Напряжение аккум-а", Center, 0);
@@ -380,7 +380,7 @@ void serviceRoutine(serviceStates mode) {
 #ifdef OLED
         disp.setInvertMode(1);
         disp.setFont(MAIN_FONT);
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
         disp.setLetterSpacing(0);
         printStr("Фактор: ", text_offset, 0);
         printFloat(battery_cal, 3);
@@ -398,7 +398,7 @@ void serviceRoutine(serviceStates mode) {
         disp.scrollByte(0, 0, 0, 0, 50);
 #elif defined OLED
         disp.setFont(MAIN_FONT);
-#if(MENU_LANG == 1)
+#if(MENU_LANG == 0)
         disp.setLetterSpacing(0);
 #endif
         disp.clear();
@@ -420,7 +420,7 @@ void editParameter(byte parameter, byte selectedRow) {
   if ( (parameter != inverse_servo) && (parameter != auto_parking) && (parameter != rainbow_flow) && (parameter != invert_display) ) { // boolean parameters
     disp.setInvertMode(0);
     printStr(MenuPages[menuPage][menuItem], 0, selectedRow);
-#if (MENU_LANG == 1)
+#if (MENU_LANG == 0)
     clearToEOL('\'');
 #else
     clearToEOL('.');
@@ -454,7 +454,7 @@ void editParameter(byte parameter, byte selectedRow) {
       if (parameterList[parameter] <= 99 && lastParameterValue >= 100) {
         disp.setInvertMode(0);
         disp.setCursor(strWidth(MenuPages[menuPage][menuItem]), selectedRow);
-#if (MENU_LANG == 1)
+#if (MENU_LANG == 0)
         clearToEOL('\'');
 #else
         clearToEOL('.');//printStr(".", disp.displayWidth() - strWidth("000"));
@@ -464,7 +464,7 @@ void editParameter(byte parameter, byte selectedRow) {
       if (parameterList[parameter] <= 9 && lastParameterValue >= 10) {
         disp.setInvertMode(0);
         disp.setCursor(strWidth(MenuPages[menuPage][menuItem]), selectedRow);
-#if (MENU_LANG == 1)
+#if (MENU_LANG == 0)
         clearToEOL('\'');
 #else
         clearToEOL('.');//printStr(".", disp.displayWidth() - strWidth("00"));
@@ -542,9 +542,6 @@ void flowTick() {
         if (systemState != PUMPING && !showMenu) {
           printNum(shotVolume[i], ml);
 #ifdef OLED
-          displayVolumeSession(1);
-#endif
-#ifdef OLED
           progressBar(shotVolume[i], parameterList[max_volume]);
 #endif
         }
@@ -570,9 +567,6 @@ void flowTick() {
         shotCount--;
         if (systemState != PUMPING && !showMenu) {
           printNum(thisVolume, ml);
-#ifdef OLED
-          displayVolumeSession(1);
-#endif
 #ifdef OLED
           progressBar(thisVolume, parameterList[max_volume]);
 #endif
@@ -626,7 +620,6 @@ void flowRoutine() {
         }
 #ifdef OLED
         printNum(shotVolume[curPumping], ml);
-        displayVolumeSession(1);
         progressBar(0);
 #elif defined ANALOG_METER
         printNum(0);
@@ -656,7 +649,7 @@ void flowRoutine() {
 #ifdef OLED
           //displayVolume();
           progressBar(thisVolume, parameterList[max_volume]);
-          displayVolumeSession(1);
+          displayVolumeSession();
 
 #endif
         }
@@ -688,13 +681,22 @@ void flowRoutine() {
       disp.setFont(BIG_NUM_FONT);
       disp.setCursor(0, 2);
       clearToEOL();
-      byte targetX = (disp.displayWidth() - strWidth("0%")) / 2 + 16;
+      byte targetX = (disp.displayWidth() - strWidth("00")) / 2 + 17;
       byte currX = 128;
       while (currX > targetX) {
         currX -= 3;
-        printStr("0%", max(currX, targetX), 2);
-        disp.write(' ');
+        currX = max(currX - 3, targetX);
+        printStr("0 ", currX, 2);
+        disp.setCursor(currX + strWidth("0"), 5);
+#if(NUM_FONT == 0)
+        disp.setFont(BigPostfix30x16);
+#else
+        disp.setFont(BigPostfix30x16_2);
+#endif
+        disp.write('%');
+        disp.setFont(BIG_NUM_FONT);
       }
+      displayVolumeSession();
 #endif
 
       systemState = PUMPING;                              // режим - наливание
@@ -712,11 +714,16 @@ void flowRoutine() {
   } else if (systemState == PUMPING) {                    // если качаем
     static byte lastVolumeCount = 0, tempVolume = 0;
     volumeCount += volumeTick;
+#ifdef OLED
+    volume_session += volumeTick;
+#endif
     tempVolume = round(volumeCount);
     if (tempVolume != lastVolumeCount) {
       printNum(tempVolume, ml);               // выводим текущий объём на дисплей
       lastVolumeCount = tempVolume;
 #ifdef OLED
+      volume_session = round(volume_session);
+      displayVolumeSession();
       progressBar(tempVolume, shotVolume[curPumping]);
 #endif
     }
@@ -730,9 +737,7 @@ void flowRoutine() {
       shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
 #ifdef OLED
       shots_session++;
-      volume_session += volumeCount;
       volume_overall += volumeCount;
-      displayVolumeSession(1);
       EEPROM.put(eeAddress._volume_overall, volume_overall);
 #endif
       curPumping = -1;                                    // снимаем выбор рюмки
@@ -809,19 +814,18 @@ void timeoutReset() {
     disp.setContrast(parameterList[oled_contrast]);
     disp.invertDisplay((bool)parameterList[invert_display]);
     if ( (parameterList[timeout_off] > 0) && !POWEROFFtimer.isOn() ) {
-      if (thisVolume < 10) {
+      if (thisVolume < 100) {
         disp.setFont(BIG_NUM_FONT); // очищаем большую иконку режима ожидания
-        printStr("  ", Left, 2);
+        printStr("  ", Center, 2);
       }
-      progressBar(-1);
       displayMode(workMode);
-      //displayVolume();
+      progressBar(-1);
+      if (!volumeChanged) displayVolume();
     }
     if (volumeChanged) displayVolume(); // выход из режима ожидания прокруткой энкодера - обновляем значение объёма
     // стираем иконку режима ожидания
     disp.setFont(Mode12x26);
     printInt(0, Center, 0);
-    displayVolumeSession(1);
 #endif
   }
   TIMEOUTtimer.reset();
@@ -862,7 +866,6 @@ void timeoutTick() {
     }
     displayMode(workMode);
 
-    displayVolumeSession(0);
     // выводим иконку режима ожидания
     disp.setFont(Mode12x26);
     printInt(2, Center, 0);
@@ -916,11 +919,11 @@ void keepPowerTick() {
 void servoTick() {
   if (servo.tick()) {
     servoOFF();
-    servo.stop();
+    //servo.stop();
   }
   else {
     servoON();
-    servo.start();
+    //servo.start();
   }
 }
 

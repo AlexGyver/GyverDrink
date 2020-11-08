@@ -1,6 +1,6 @@
 //GyverDrink VICLER_MOD
 #define VERSION 6.9
-//05.11.2020
+//08.11.2020
 /*
   ==============================================================================================
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
@@ -204,7 +204,8 @@ bool firstStartUp = false;
 
 
 #ifdef OLED
-uint16_t shots_session = 0, volume_session = 0, volume_overall = 0;
+int16_t shots_session = 0, volume_overall = 0;
+float volume_session = 0;
 char bootscreen[] = {BOOTSCREEN};
 #endif
 

@@ -13,7 +13,11 @@ void readEEPROM() {
     firstStartUp = true;
   }
 
-  thisVolume = min(EEPROM.read(eeAddress._thisVolume), parameterList[max_volume]);  // чтение последнего налитого объёма
+#ifdef TM1637
+  thisVolume = min(EEPROM.read(eeAddress._thisVolume), MAX_VOLUME);  // чтение последнего налитого объёма
+#elif defined OLED
+  thisVolume = min(EEPROM.read(eeAddress._thisVolume), EEPROM.read(eeAddress._max_volume));  // чтение последнего налитого объёма
+#endif
   for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
 
   EEPROM.get(eeAddress._time50ml, time50ml);  // чтение значения таймера для 50мл
