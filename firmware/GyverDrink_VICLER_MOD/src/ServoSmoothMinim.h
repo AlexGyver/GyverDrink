@@ -44,7 +44,6 @@ private:
     int _servoMaxSpeed = 25;
     int _newSpeed = 0;
     bool _servoState = true;
-    bool _autoDetach = false;
     bool _dir = 0;
     uint16_t _min_us, _max_us;
 };
@@ -96,7 +95,7 @@ void ServoSmoothMinim::setTargetDeg(byte target)
 
 void ServoSmoothMinim::setDirection(bool dir)
 {
-    if(_dir != dir) _servoCurrentPos = 2944 - _servoCurrentPos;
+    if(_dir != dir) _servoCurrentPos = _min_us + _max_us - _servoCurrentPos;
     _dir = dir;
 }
 
@@ -118,30 +117,13 @@ boolean ServoSmoothMinim::tickManual()
         _newSpeed = constrain(_newSpeed, -_servoMaxSpeed, _servoMaxSpeed); // ограничиваем по макс.
         _servoCurrentPos += _newSpeed;
 
-        if(_dir) _servo.writeMicroseconds(2944 - _servoCurrentPos);
+        if(_dir) _servo.writeMicroseconds(_min_us + _max_us - _servoCurrentPos);
         else _servo.writeMicroseconds(_servoCurrentPos);
     }
-    if (_servoCurrentPos == _servoTargetPos)
-    {
-        if (_autoDetach && _servoState)
-        {
-            _servoState = false;
-            _servo.detach();
-        }
-        else _servoState = false;
+    if (_servoCurrentPos == _servoTargetPos) _servoState = false;
+    else _servoState = true;
 
-        return !_servoState; // приехали
-    }
-    else
-    {
-        if (_autoDetach && !_servoState)
-        {
-            _servoState = true;
-            _servo.attach(_pin);
-        }
-        else _servoState = true;
-    }
-    return false;
+    return !_servoState;
 }
 
 boolean ServoSmoothMinim::tick()

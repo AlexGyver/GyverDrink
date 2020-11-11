@@ -919,11 +919,15 @@ void keepPowerTick() {
 void servoTick() {
   if (servo.tick()) {
     servoOFF();
-    //servo.stop();
+#if(SERVO_AUTO_POWER)
+    servo.stop();
+#endif
   }
   else {
     servoON();
-    //servo.start();
+#if(SERVO_AUTO_POWER)
+    servo.start();
+#endif
   }
 }
 
