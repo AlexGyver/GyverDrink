@@ -325,6 +325,7 @@ void progressBar(int16_t value, uint16_t maximum = MAX_VOLUME) { // прогре
   disp.setFont(ProgBar);                  // активируем шрифт. Состоит из одного деления прогресс-бара
   disp.setLetterSpacing(0);               // отключаем пробелы между символами шрифта, т.к. они уже встроенны в шрифт
   static int16_t currX = 0, targetX = 0;  // актуальная и целевая позиция координаты Х на дисплее
+  static bool reseted = 1;
 
   if (value == -1) { // если параметр -1, сбрасываем бар и рисуем пунктирную линию на всю ширину дисплея
     disp.setCursor(0, 7); // седьмая строка (самая нижняя)
@@ -333,6 +334,7 @@ void progressBar(int16_t value, uint16_t maximum = MAX_VOLUME) { // прогре
       else disp.write(' ');            // в нечётном пусто
     }
     currX = 0; // сброс актуальной координаты Х: 0
+    reseted = 1;
     return;    // выходим из функции
   }
 
@@ -343,9 +345,10 @@ void progressBar(int16_t value, uint16_t maximum = MAX_VOLUME) { // прогре
     {
       disp.setCursor(currX, 7);
       disp.write('-');
-      if (value == thisVolume && systemState != PUMPING) delay(2);
+      if (value == thisVolume && systemState != PUMPING ) delay(5 * !reseted);
     }
     while (targetX > ++currX);
+    reseted = 0;
   }
   else if (targetX < currX) { // целевая позиция меньше актуальной. Заполняем пунктирной линией до целевого пикселя
     do {
@@ -440,8 +443,9 @@ void displayMenu() { // вывод страниц меню
         disp.clear();
         lastMenuPage = NO_MENU;
         progressBar(-1);
-        displayMode(workMode);
         displayVolume();
+        displayMode(workMode);
+
 #if (SAVE_MODE == 1)
         EEPROM.update(eeAddress._workMode, workMode);
 #endif

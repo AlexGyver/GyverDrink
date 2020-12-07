@@ -73,8 +73,9 @@ void setup() {
 #ifdef ANALOG_METER
   pinMode(ANALOG_METER_PIN, OUTPUT);
 #endif
-  for (byte i = 0; i < NUM_SHOTS; i++)
+  for (byte i = 0; i < NUM_SHOTS; i++) {
     if (SWITCH_LEVEL == 0) pinMode(SW_pins[i], INPUT_PULLUP);
+  }
 #ifdef BATTERY_PIN
   pinMode(BATTERY_PIN, INPUT);
 #endif

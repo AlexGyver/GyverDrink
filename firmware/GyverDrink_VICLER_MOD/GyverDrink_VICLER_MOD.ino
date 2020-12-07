@@ -1,6 +1,6 @@
 //GyverDrink VICLER_MOD
 #define VERSION 6.9
-//11.11.2020
+//07.12.2020
 /*
   ==============================================================================================
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
@@ -155,7 +155,7 @@ encMinim enc(ENC_CLK, ENC_DT, ENC_SW, ENCODER_DIR, ENCODER_TYPE); // пин clk,
 buttonMinim btn(BTN_PIN);
 buttonMinim encBtn(ENC_SW);
 timerMinim LEDtimer(30);
-timerMinim FLOWdebounce(15);
+timerMinim FLOWdebounce(10);
 timerMinim FLOWtimer(2000);
 timerMinim WAITtimer(500);
 timerMinim TIMEOUTtimer(TIMEOUT_STBY * 1000L); // таймаут режима ожидания
@@ -181,7 +181,7 @@ uint8_t shotVolume[NUM_SHOTS];
 uint8_t initShotPos[] = {SHOT_POSITIONS};
 uint8_t shotPos[] = {SHOT_POSITIONS};
 const byte SW_pins[] = {SW_PINS};
-float volumeTick = 15.0f * 50.0f / time50ml;
+float volumeTick = 10.0f * 50.0f / time50ml;
 float volumeCount = 0.0f;
 bool systemON = false;
 bool timeoutState = false;

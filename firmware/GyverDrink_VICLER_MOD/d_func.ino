@@ -324,7 +324,7 @@ void serviceRoutine(serviceStates mode) {
     // сохраняем настройки таймера налива
     if (pumpTime > 0) {
       time50ml = pumpTime;
-      volumeTick = 15.0f * 50.0f / time50ml;
+      volumeTick = 10.0f * 50.0f / time50ml;
       EEPROM.put(eeAddress._time50ml, pumpTime);
     }
   }
@@ -531,6 +531,7 @@ void flowTick() {
   if (FLOWdebounce.isReady()) {
     for (byte i = 0; i < NUM_SHOTS; i++) {
       bool swState = !digitalRead(SW_pins[i]) ^ SWITCH_LEVEL;
+      //bool swState = (bool)(analogRead(SW_pins[i]) < 512) ^ SWITCH_LEVEL;
       if (swState && shotStates[i] == NO_GLASS) {  // поставили пустую рюмку
         if (keepPowerState) keepPowerState = false;
         shotStates[i] = EMPTY;                                      // флаг на заправку
@@ -562,6 +563,10 @@ void flowTick() {
           systemState = WAIT;                                       // режим работы - ждать
           WAITtimer.reset();
           pumpOFF();                                                // помпу выкл
+#ifdef OLED
+          volume_overall += volumeCount;
+          EEPROM.put(eeAddress._volume_overall, volume_overall);
+#endif
           volumeCount = 0;
         }
         shotCount--;
@@ -646,11 +651,13 @@ void flowRoutine() {
           LEDblinkState = true;
           LEDchanged = true;
 #endif
+#ifdef TM1637
+          printNum(thisVolume);
+#endif
 #ifdef OLED
-          //displayVolume();
+
           progressBar(thisVolume, parameterList[max_volume]);
           displayVolumeSession();
-
 #endif
         }
         if (servo.tick()) {                               // едем до упора
