@@ -282,10 +282,6 @@ void printNum(uint16_t volume, int8_t postfix = 0) { //вывод чисел к�
   if (volume <= 99 && lastVol >= 100) {
     printStr(" ", Left, 3 - shiftY);
     printStr("  ", Right, 3 - shiftY);
-    if (!showMenu) {
-      displayVolumeSession();
-      disp.setFont(BIG_NUM_FONT);
-    }
   }
   if ( (volume <= 9 && lastVol >= 10) || !timeoutState )
     printStr("  ", Left, 3 - shiftY);
@@ -301,11 +297,13 @@ void printNum(uint16_t volume, int8_t postfix = 0) { //вывод чисел к�
     disp.setFont(BigPostfix30x16_2);
 #endif
     printStr("%", Append, 5); // "ml"
+
+    if (!showMenu) displayVolumeSession();
   }
   else if (postfix == 2) { // отображение угла
-    if (volume > 99) printInt(volume, (disp.displayWidth() - strWidth("0000")) / 2, 3 - shiftY);
-    else if (volume > 9) printInt(volume, (disp.displayWidth() - strWidth("000")) / 2, 3 - shiftY);
-    else printInt(volume, (disp.displayWidth() - strWidth("00")) / 2 + 16, 3 - shiftY);
+    if (volume > 99) printInt(volume, (disp.displayWidth() - strWidth("000")) / 2 - 16, 3 - shiftY);
+    else if (volume > 9) printInt(volume, (disp.displayWidth() - strWidth("00")) / 2, 3 - shiftY);
+    else printInt(volume, (disp.displayWidth() - strWidth("0")) / 2 + 16, 3 - shiftY);
 #if(NUM_FONT == 0)
     disp.setFont(BigPostfix30x16);
 #else
@@ -315,7 +313,7 @@ void printNum(uint16_t volume, int8_t postfix = 0) { //вывод чисел к�
   }
   else printInt(volume, Center, 3 - shiftY); // отображение числа без постфикса
 
-  disp.setFont(MAIN_FONT);
+  //disp.setFont(MAIN_FONT);
 #if(MENU_LANG == 0)
   disp.setLetterSpacing(0);
 #endif
@@ -365,6 +363,7 @@ void progressBar(int16_t value, uint16_t maximum = MAX_VOLUME) { // прогре
 }
 
 void displayVolumeSession() {
+#if DISPLAY_SESSION_VOLUME
   disp.setFont(MAIN_FONT);
 #if(MENU_LANG == 0)
   const byte offsetX = disp.displayWidth() - strWidth("0.00л") - 1;
@@ -380,7 +379,7 @@ void displayVolumeSession() {
     printStr("l");
 #endif
   }
-  else printStr("         ", Right, 2);
+#endif
 }
 
 void displayMode(workModes mode);
