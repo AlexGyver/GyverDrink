@@ -1,5 +1,17 @@
 void serviceRoutine(serviceStates mode);
 
+#if (DISPLAY_TYPE == 0)
+#define OLED 0
+#elif (DISPLAY_TYPE == 1)
+#define OLED 1
+#elif (DISPLAY_TYPE == 2)
+#define OLED 2
+#elif (DISPLAY_TYPE == 3)
+#define TM1637
+#elif (DISPLAY_TYPE == 4)
+#define ANALOG_METER
+#endif
+
 #ifdef TM1637
 GyverTM1637 disp(DISP_CLK, DISP_DIO);
 enum { ml = 1, deg };
@@ -74,7 +86,7 @@ enum { ml = 1, deg };
 
 #elif defined OLED
 
-#if (OLED == 3)
+#if (OLED == 2)
 SSD1306AsciiSoftSpi disp;
 #else
 SSD1306AsciiWire disp;

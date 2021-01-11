@@ -662,6 +662,7 @@ void flowRoutine() {
         }
         if (servo.tick()) {                               // едем до упора
           servo.stop();
+          servoOFF();
           systemON = false;                               // выключили систему
           parking = true;                                 // на месте!
 #ifdef STATUS_LED
@@ -925,14 +926,14 @@ void keepPowerTick() {
 // обработка движения серво
 void servoTick() {
   if (servo.tick()) {
-    servoOFF();
 #if(SERVO_AUTO_POWER)
+    servoOFF();
     servo.stop();
 #endif
   }
   else {
-    servoON();
 #if(SERVO_AUTO_POWER)
+    servoON();
     servo.start();
 #endif
   }

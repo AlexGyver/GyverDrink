@@ -1,6 +1,6 @@
 //GyverDrink VICLER_MOD
-#define VERSION 7.0
-//21.12.2020
+#define VERSION 7.1
+//11.01.2021
 /*
   ==============================================================================================
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
@@ -118,21 +118,18 @@
 //#define USE_TICOSERVO   // использование библиотеки Adafruit_TiCoServo вместо стандартной Servo. При использовании серводвигатель подключать к пину 9 или 10!
 
 #include "Config.h"
-#ifdef TM1637
-#include "src/GyverTM1637/GyverTM1637.h"
-#elif defined OLED
-#if (OLED == 3)
-#include <SPI.h>
-#include "src/SSD1306Ascii/src/SSD1306Ascii.h"
-#include "src/SSD1306Ascii/src/SSD1306AsciiSoftSpi.h"
-#else
+#if (DISPLAY_TYPE < 2)
 #include "src/microWire/microWire.h"
 #include "src/SSD1306Ascii/src/SSD1306Ascii.h"
 #include "src/SSD1306Ascii/src/SSD1306AsciiWire.h"
+#elif (DISPLAY_TYPE == 2)
+#include <SPI.h>
+#include "src/SSD1306Ascii/src/SSD1306Ascii.h"
+#include "src/SSD1306Ascii/src/SSD1306AsciiSoftSpi.h"
+#elif (DISPLAY_TYPE == 3)
+#include "src/GyverTM1637/GyverTM1637.h"
 #endif
-#else
-#error "No diplay selected!"
-#endif
+
 #include "src/ServoSmoothMinim.h"
 #include "src/microLED/microLED.h"
 #include "src/encUniversalMinim.h"
@@ -162,7 +159,7 @@ timerMinim TIMEOUTtimer(TIMEOUT_STBY * 1000L); // таймаут режима о
 timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
 timerMinim KEEP_POWERtimer(KEEP_POWER * 1000L);
 
-#define BATTERY_LOW    3.3   // минимальное напряжение аккумулятора
+#define BATTERY_LOW    3.0   // минимальное напряжение аккумулятора
 
 #define INIT_VOLUME 25
 bool LEDchanged = false;
@@ -203,7 +200,7 @@ const int autoModeStatusColor = AUTO_MODE_STATUS_COLOR / 360.0 * 255;
 bool firstStartUp = false;
 
 
-#ifdef OLED
+#if(DISPLAY_TYPE < 3) // OLED
 int16_t shots_session = 0, volume_overall = 0;
 float volume_session = 0;
 char bootscreen[] = {BOOTSCREEN};
@@ -254,7 +251,7 @@ struct EEPROMAddress
   const byte _workMode = _parking_pos + sizeof(parking_pos);
   const byte _battery_cal = _workMode + sizeof(byte);
   const byte _animCount = _battery_cal + sizeof(battery_cal);
-#ifdef OLED
+#if(DISPLAY_TYPE < 3) // OLED
   const byte _timeout_off = _animCount + sizeof(animCount);
   const byte _stby_time = _timeout_off + sizeof(parameterList[timeout_off]);
   const byte _keep_power = _stby_time + sizeof(parameterList[stby_time]);

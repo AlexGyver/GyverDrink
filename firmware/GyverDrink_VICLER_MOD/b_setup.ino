@@ -13,7 +13,7 @@ void setup() {
   Wire.begin();
   Wire.setClock(WIRE_SPEED * 1000L);
   disp.begin(&SH1106_128x64, 0x3C);
-#elif (OLED == 3)
+#elif (OLED == 2)
   disp.begin(&Adafruit128x64, DISP_CS, DISP_DC, DISP_CLK, DISP_MOSI);
 #endif
 #endif
