@@ -325,7 +325,7 @@ void printNum(uint16_t volume, int8_t postfix = 0) { //вывод чисел к�
   }
   else printInt(volume, Center, 3 - shiftY); // отображение числа без постфикса
 
-  //disp.setFont(MAIN_FONT);
+  disp.setFont(MAIN_FONT);
 #if(MENU_LANG == 0)
   disp.setLetterSpacing(0);
 #endif
@@ -437,11 +437,9 @@ void displayVolume() { // вывод объёма крупным шрифтом 
 void displayMenu() { // вывод страниц меню
   static uint8_t firstItem = 1, selectedRow = 0;
 
+  disp.setFont(MAIN_FONT);
 #if(MENU_LANG == 0)
-  disp.setFont(MAIN_FONT);
   disp.setLetterSpacing(0);
-#else
-  disp.setFont(MAIN_FONT);
 #endif
 
   if (itemSelected) { // нажали на пункт в меню

@@ -188,6 +188,7 @@ void serviceRoutine(serviceStates mode) {
 #elif defined OLED
     disp.clear();
     printNum(pumpTime);
+
 #endif
     if (curPumping != -1) {   // если уже стоит рюмка
       shotStates[curPumping] = EMPTY;
@@ -195,10 +196,10 @@ void serviceRoutine(serviceStates mode) {
       systemState = SEARCH;
       curPumping = -1;
 #ifdef OLED
-#if(MENU_LANG == 0)
       disp.home();
       disp.setInvertMode(1);
       clearToEOL();
+#if(MENU_LANG == 0)
       printStr("Зажмите энкодер", Center, 0);
 #else
       printStr("Press encoder", Center, 0);
@@ -251,8 +252,8 @@ void serviceRoutine(serviceStates mode) {
         }
       }
 
-      for (byte i = 0; i < NUM_SHOTS; i++) {
-        if (!digitalRead(SW_pins[i]) && curPumping == -1) {
+      for (byte i = 0; i < NUM_SHOTS; i++) { // поиск рюмки
+        if (!digitalRead(SW_pins[i]) && curPumping == -1) { // нашли
           delay(100);
           strip.setLED(i, mHSV(255, 0, 50));
           strip.show();
