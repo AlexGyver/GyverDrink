@@ -146,7 +146,7 @@ const char *MenuPages[][9] = {
 
   { "##### Сервис #####",
     " Серво",
-    " Объ@м",
+    " Помпа",
 #ifdef BATTERY_PIN
     " Аккумулятор",
 #else
@@ -191,7 +191,7 @@ const char *MenuPages[][9] = {
 
   { "Service",
     " Servo",
-    " Volume",
+    " Pump",
 #ifdef BATTERY_PIN
     " Battery",
 #else
