@@ -531,8 +531,17 @@ void editParameter(byte parameter, byte selectedRow) {
 void flowTick() {
   if (FLOWdebounce.isReady()) {
     for (byte i = 0; i < NUM_SHOTS; i++) {
-      bool swState = !digitalRead(SW_pins[i]) ^ SWITCH_LEVEL;
-      //bool swState = (bool)(analogRead(SW_pins[i]) < 512) ^ SWITCH_LEVEL;
+      /* антидребезг датчиков с цифровым выходом
+      static bool wait[NUM_SHOTS], swPreState[NUM_SHOTS], swState;
+      static long stateDebounce[NUM_SHOTS];
+      swPreState[i] = !digitalRead(SW_pins[i]) ^ SWITCH_LEVEL;
+      if(swPreState[i] && !wait[i]) stateDebounce[i] = millis();
+      wait[i] = swPreState[i];
+      swState = (swPreState[i] && (millis() - stateDebounce[i] > 1000)) ? true : false;
+      */
+      //bool swState = (bool)(analogRead(SW_pins[i]) < 512) ^ SWITCH_LEVEL;   // для датчиков с аналоговым выходом
+      bool swState = !digitalRead(SW_pins[i]) ^ SWITCH_LEVEL;                 // для датчиков с цифровым выходом
+      
       if (swState && shotStates[i] == NO_GLASS) {  // поставили пустую рюмку
         if (keepPowerState) keepPowerState = false;
         shotStates[i] = EMPTY;                                      // флаг на заправку
