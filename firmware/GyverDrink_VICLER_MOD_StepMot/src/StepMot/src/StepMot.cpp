@@ -123,7 +123,7 @@ float StepMot::getAngle() {
   return _currentAngle;
 }
 
-void StepMot::resetPos(float pos = 0.0) {
+void StepMot::resetPos(float pos) {
   _currentAngle = pos;
   _currentSteps = pos * _stepsPerAngle;
   _targetSteps = 0;
