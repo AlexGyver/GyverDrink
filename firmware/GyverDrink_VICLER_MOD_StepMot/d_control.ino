@@ -46,7 +46,7 @@ void btnTick() {
     }
     if (!workMode) systemON = true;           // система активирована
   }
-  
+
   if (btn.holded()) {
     timeoutReset();
     workMode = !workMode;

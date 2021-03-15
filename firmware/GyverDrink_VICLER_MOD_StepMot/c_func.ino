@@ -201,13 +201,12 @@ void flowRoutine() {
         LED = mHSV(11, 255, STATUS_LED); // orange
         LEDchanged = true;
 #endif
-
-#ifdef STEPPER_ENDSTOP
-        if (PARKING_POS == 0) homing();                     // если есть концевик и он в парковочном положении -> едем до концевика
-        else stepper.setAngle(PARKING_POS);                 // иначе едем до парковочной позиции
-#endif
         stepper.setAngle(PARKING_POS);
       }
+
+#ifdef STEPPER_ENDSTOP
+      if (PARKING_POS == 0) homing();
+#endif
 
       if (stepper.ready()) {                              // приехали
         stepper.disable();                                // выключили шаговик
@@ -356,7 +355,8 @@ bool homing() {
   stepper.enable();
   stepper.setRPM(-STEPPER_HOMING_SPEED);
   stepper.rotate();
-  //stepper.update();
+
+  DEBUGln("Homing..");
   return 1;
 }
 #endif
