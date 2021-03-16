@@ -550,7 +550,7 @@ void flowTick() {
         LEDchanged = true;
         shotCount++;                                                // инкрементировали счётчик поставленных рюмок
         timeoutReset();                                             // сброс таймаута
-        if (systemState != PUMPING && !showMenu) {
+        if (systemState != PUMPING && systemState != MOVING && !showMenu) {
           printNum(shotVolume[i], ml);
 #ifdef OLED
           progressBar(shotVolume[i], parameterList[max_volume]);
@@ -580,7 +580,7 @@ void flowTick() {
           volumeCount = 0;
         }
         shotCount--;
-        if (systemState != PUMPING && !showMenu) {
+        if (systemState != PUMPING && systemState != MOVING && !showMenu) {
           printNum(thisVolume, ml);
 #ifdef OLED
           progressBar(thisVolume, parameterList[max_volume]);
