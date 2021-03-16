@@ -146,6 +146,11 @@ void setup() {
         clearToEOL();
         currX -= 5;
       }
+      else if (DISPLAY_VERSION){
+        disp.setFont(MAIN_FONT);
+        printFloat(VERSION, 1, Center, 5);
+      }
+      
       progressBar(RAINBOW_START_BRIGHTNESS - startBrightness, RAINBOW_START_BRIGHTNESS - 2);
 #elif defined ANALOG_METER
       static byte i = 0;
