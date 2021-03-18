@@ -130,10 +130,10 @@
 #elif (DISPLAY_TYPE == 3)
 #include "src/GyverTM1637/GyverTM1637.h"
 #endif
-
 #if (MOTOR_TYPE == 0)
 #include "src/ServoSmoothMinim.h"
 #elif (MOTOR_TYPE == 1)
+
 #include "src/GyverStepper.h"
 #include "src/GyverTimers/GyverTimers.h"
 #endif

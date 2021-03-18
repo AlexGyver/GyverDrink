@@ -1043,6 +1043,8 @@ void motorTick() {
     servo.start();
 #endif
   }
+#elif (MOTOR_TYPE == 1)
+    //stepper.tick();
 #endif
 }
 
