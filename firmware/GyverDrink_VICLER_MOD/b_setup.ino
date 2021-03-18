@@ -80,14 +80,26 @@ void setup() {
   pinMode(BATTERY_PIN, INPUT);
 #endif
 
-  // настройка серво
+#if (MOTOR_TYPE == 0)  // настройка серво
   servoON();
-  servo.setDirection(parameterList[inverse_servo]);
+  servo.setDirection(parameterList[motor_reverse]);
   servo.attach(SERVO_PIN, parking_pos, 544, 2400);
   delay(500);
-  servo.setSpeed(parameterList[servo_speed]);
+  servo.setSpeed(parameterList[motor_speed]);
   servo.stop();
   servoOFF();
+#elif (MOTOR_TYPE == 1) // настройка шаговика
+  stepper.setRunMode(FOLLOW_POS);
+  stepper.setMaxSpeedDeg(parameterList[motor_speed]);
+  stepper.setAccelerationDeg(STEPPER_ACCELERATION);
+  stepper.reverse(parameterList[motor_reverse]);
+  stepper.setCurrentDeg(parking_pos);
+  stepper.autoPower(MOTOR_AUTO_POWER);
+  stepper.disable();
+
+  Timer2.setPeriod(stepper.getMinPeriod() / 2);
+  Timer2.enableISR();
+#endif
 
   /* - Стартовая анимация. Значение ANIMATION_FPS задаёт количество кадров в секунду (чем больше - тем быстрее анимация)
         Всего доступно 8 видов анимации. Выбирается в ANIMATION_NUM от 0 до 7.
@@ -146,11 +158,11 @@ void setup() {
         clearToEOL();
         currX -= 5;
       }
-      else if (DISPLAY_VERSION){
+      else if (DISPLAY_VERSION) {
         disp.setFont(MAIN_FONT);
         printFloat(VERSION, 1, Center, 5);
       }
-      
+
       progressBar(RAINBOW_START_BRIGHTNESS - startBrightness, RAINBOW_START_BRIGHTNESS - 2);
 #elif defined ANALOG_METER
       static byte i = 0;
@@ -205,3 +217,9 @@ void setup() {
   timeoutReset();   // сброс таймаута
   TIMEOUTtimer.start();
 }
+
+#if (MOTOR_TYPE == 1)
+ISR(TIMER2_A) {
+  stepper.tick(); // тикаем тут
+}
+#endif

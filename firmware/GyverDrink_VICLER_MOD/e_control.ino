@@ -229,10 +229,15 @@ void btnTick() {
     resetEEPROM();
     readEEPROM();
     printNum(thisVolume, ml);
+#if (MOTOR_TYPE == 0)
     servoON();
     servo.attach(SERVO_PIN, parking_pos);
     delay(500);
     servoOFF();
+#elif (MOTOR_TYPE == 1)
+    stepper.setTargetDeg(parking_pos);
+    while (stepper.getState());
+#endif
   }
 #endif
 }

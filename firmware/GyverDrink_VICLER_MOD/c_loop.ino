@@ -23,7 +23,7 @@ void loop() {
   flowTick();
   LEDtick();
   timeoutTick();
-  servoTick();
+  motorTick();
   keepPowerTick();
   //CPS();
 }

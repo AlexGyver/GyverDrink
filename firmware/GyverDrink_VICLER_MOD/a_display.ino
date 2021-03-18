@@ -145,7 +145,7 @@ const char *MenuPages[][9] = {
   },
 
   { "##### Сервис #####",
-    " Серво",
+    " Двигатель",
     " Помпа",
 #ifdef BATTERY_PIN
     " Аккумулятор",
@@ -496,7 +496,7 @@ void displayMenu() { // вывод страниц меню
     }
     else if (menuPage == SERVO_CALIBRATION_PAGE) { // выбор елемента на странице настройки сервопривода
       if (menuItem == 1) { // выбрали первый пункт -> начало этапа калибровки серво
-        serviceRoutine(SERVO);
+        serviceRoutine(POSITION);
         lastMenuPage = NO_MENU;
       }
       else editParameter(menuItem - 2 + 8, selectedRow); // запускаем обработчик изменения параметра. -2 отступ (заголовок и первый пункт страницы). +8 начало параметров для сервисного меню в массиве parameterList
@@ -604,11 +604,11 @@ void displayMenu() { // вывод страниц меню
       clearToEOL();
       byte parameter = currItem - 2 + 8;
 #if(MENU_LANG == 0)
-      if ( (parameter == inverse_servo) || (parameter == auto_parking) ) {
+      if ( (parameter == motor_reverse) || (parameter == auto_parking) ) {
         if (parameterList[parameter] == 0) printStr("(", Right);
         else printStr(")", Right);
       }
-      if ( (parameter == servo_speed) || (parameter == keep_power) )
+      if ( (parameter == motor_speed) || (parameter == keep_power) )
         printInt(parameterList[parameter], Right);
 #else
       if (currItem > 1) printInt(parameterList[parameter], Right);

@@ -9,10 +9,13 @@ void serviceRoutine(serviceStates mode) {
 #endif
 
   //==============================================================================
-  //                       настройка серводвигателя
+  //                       настройка позиций двигателя
   //==============================================================================
 
-  if (mode == SERVO) {
+  if (mode == POSITION) {
+#if (MOTOR_TYPE == 1)
+    stepper.autoPower(false);
+#endif
     byte workModeTemp = workMode;
     workMode = AutoMode;
     for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(parameterList[leds_color], 255, parameterList[stby_light]));
@@ -62,12 +65,19 @@ void serviceRoutine(serviceStates mode) {
           disp.setInvertMode(0);
           printNum(servoPos, deg);
 #endif
+
+#if (MOTOR_TYPE == 0)
           servo.setTargetDeg(servoPos);
           servo.start();
           servoON();
           while (!servo.tick());
           servoOFF();
           break;
+#elif (MOTOR_TYPE == 1)
+          stepper.setTargetDeg(servoPos);
+          while (stepper.tick());
+          break;
+#endif
         }
         if (digitalRead(SW_pins[i]) && shotStates[i] == EMPTY)  { // убрали рюмку
           strip.setLED(i, mHSV(parameterList[leds_color], 255, parameterList[stby_light]));
@@ -91,6 +101,7 @@ void serviceRoutine(serviceStates mode) {
             disp.setInvertMode(0);
 #endif
             printNum(servoPos, deg);
+#if (MOTOR_TYPE == 0)
             servo.setTargetDeg(servoPos);
             servo.start();
             servoON();
@@ -98,6 +109,11 @@ void serviceRoutine(serviceStates mode) {
             servo.stop();
             servoOFF();
             break;
+#elif (MOTOR_TYPE == 1)
+            stepper.setTargetDeg(servoPos);
+            while (stepper.tick());
+            break;
+#endif
           }
           else continue;  // если ещё есть поставленные рюмки -> ищем заново и попадаем в следующий блок
         }
@@ -121,12 +137,18 @@ void serviceRoutine(serviceStates mode) {
           disp.setInvertMode(0);
           printNum(servoPos, deg);
 #endif
+#if (MOTOR_TYPE == 0)
           servo.setTargetDeg(servoPos);
           servo.start();
           servoON();
           while (!servo.tick());
           servoOFF();
           break;
+#elif (MOTOR_TYPE == 1)
+          stepper.setTargetDeg(servoPos);
+          while (stepper.tick());
+          break;
+#endif
         }
       }
 
@@ -134,8 +156,17 @@ void serviceRoutine(serviceStates mode) {
         if (enc.isLeft()) servoPos += 1;
         if (enc.isRight() && servoPos > 0)  servoPos -= 1;
         //servoPos = min(servoPos, 180);
+#if (MOTOR_TYPE == 0)
         servoON();
         servo.attach(SERVO_PIN, servoPos);
+#elif (MOTOR_TYPE == 1)
+        stepper.setAccelerationDeg(0);
+        stepper.setMaxSpeedDeg(60);
+        stepper.setTargetDeg(servoPos);
+        while (stepper.tick());
+        stepper.setAccelerationDeg(STEPPER_ACCELERATION);
+        stepper.setMaxSpeedDeg(parameterList[motor_speed]);
+#endif
         if (shotCount == 0) parking_pos = servoPos;
         if (shotStates[currShot] == EMPTY) {
           shotPos[currShot] = servoPos;
@@ -163,9 +194,16 @@ void serviceRoutine(serviceStates mode) {
         break;
       }
     }
+
+    disp.clear();
+
+#if (MOTOR_TYPE == 0)
     servo.stop();
     servoOFF();
-    disp.clear();
+#elif (MOTOR_TYPE == 1)
+    stepper.autoPower(MOTOR_AUTO_POWER);
+#endif
+
     // сохраняем значения углов в память
     for (byte i = 0; i < NUM_SHOTS; i++) EEPROM.update(eeAddress._shotPos + i, shotPos[i]);
     EEPROM.update(eeAddress._parking_pos, parking_pos);
@@ -258,9 +296,13 @@ void serviceRoutine(serviceStates mode) {
           strip.setLED(i, mHSV(255, 0, 50));
           strip.show();
           curPumping = i;
+#if (MOTOR_TYPE == 0)
           servo.setTargetDeg(shotPos[i]);
           servo.start();
           servoON();
+#elif (MOTOR_TYPE == 1)
+          stepper.setTargetDeg(shotPos[i]);
+#endif
 #ifdef OLED
           disp.home();
           disp.setInvertMode(1);
@@ -295,8 +337,12 @@ void serviceRoutine(serviceStates mode) {
 #endif
       }
 
+#if (MOTOR_TYPE == 0)
       if (servo.tick()) servoOFF();
       else servoON();
+#elif (MOTOR_TYPE == 1)
+      stepper.tick();
+#endif
 
       if (btn.pressed()) {
 #ifdef TM1637
@@ -309,9 +355,13 @@ void serviceRoutine(serviceStates mode) {
 #endif
 
         curPumping = -1;
+#if (MOTOR_TYPE == 0)
         servo.setTargetDeg(parking_pos);
         servo.start();
         servoON();
+#elif (MOTOR_TYPE == 1)
+        stepper.setTargetDeg(parking_pos);
+#endif
 
         for (byte i = 0; i < NUM_SHOTS; i++) strip.setLED(i, mHSV(parameterList[leds_color], 255, parameterList[stby_light]));
         strip.show();
@@ -319,8 +369,12 @@ void serviceRoutine(serviceStates mode) {
       }
 
     }
+#if (MOTOR_TYPE == 0)
     while (!servo.tick());
     servoOFF();
+#elif (MOTOR_TYPE == 1)
+    while (stepper.tick());
+#endif
     disp.clear();
     // сохраняем настройки таймера налива
     if (pumpTime > 0) {
@@ -418,7 +472,7 @@ void serviceRoutine(serviceStates mode) {
 void editParameter(byte parameter, byte selectedRow) {
   bool bypass = false;
   byte lastParameterValue = parameterList[parameter];
-  if ( (parameter != inverse_servo) && (parameter != auto_parking) && (parameter != rainbow_flow) && (parameter != invert_display) ) { // boolean parameters
+  if ( (parameter != motor_reverse) && (parameter != auto_parking) && (parameter != rainbow_flow) && (parameter != invert_display) ) { // boolean parameters
     disp.setInvertMode(0);
     printStr(MenuPages[menuPage][menuItem], 0, selectedRow);
 #if (MENU_LANG == 0)
@@ -439,8 +493,9 @@ void editParameter(byte parameter, byte selectedRow) {
       if (enc.isRightH()) parameterList[parameter] -= 5;
 
       if (parameterList[timeout_off] > 15) parameterList[timeout_off] = 0;
-
-      if (parameterList[servo_speed] > 100) parameterList[servo_speed] = 0;
+#if (MOTOR_TYPE == 0)
+      if (parameterList[motor_speed] > 100) parameterList[motor_speed] = 0;
+#endif
 
       if (parameterList[stby_time] > 0) {
         TIMEOUTtimer.setInterval(parameterList[stby_time] * 1000L); // таймаут режима ожидания
@@ -479,15 +534,15 @@ void editParameter(byte parameter, byte selectedRow) {
       timeoutReset();
     }
 
-    if ( (parameter == inverse_servo) || (parameter == auto_parking) || (parameter == rainbow_flow) || (parameter == invert_display) ) { // boolean parameters
+    if ( (parameter == motor_reverse) || (parameter == auto_parking) || (parameter == rainbow_flow) || (parameter == invert_display) ) { // boolean parameters
       parameterList[parameter] = !parameterList[parameter];
       bypass = true;
     }
 
     if (encBtn.pressed() ||  btn.pressed() || bypass) {
       EEPROM.update(eeAddress._timeout_off, parameterList[timeout_off]);
-      EEPROM.update(eeAddress._inverse_servo, parameterList[inverse_servo]);
-      EEPROM.update(eeAddress._servo_speed, parameterList[servo_speed]);
+      EEPROM.update(eeAddress._motor_reverse, parameterList[motor_reverse]);
+      EEPROM.update(eeAddress._motor_speed, parameterList[motor_speed]);
       EEPROM.update(eeAddress._auto_parking, parameterList[auto_parking]);
       EEPROM.update(eeAddress._stby_time, parameterList[stby_time]);
       EEPROM.update(eeAddress._stby_light, parameterList[stby_light]);
@@ -500,13 +555,21 @@ void editParameter(byte parameter, byte selectedRow) {
 
       if (parameterList[timeout_off] > 0) POWEROFFtimer.setInterval(parameterList[timeout_off] * 60000L);
 
-      servo.setSpeed(parameterList[servo_speed]);
-      servo.setDirection(parameterList[inverse_servo]);
+#if (MOTOR_TYPE == 0)
+      servo.setSpeed(parameterList[motor_speed]);
+      servo.setDirection(parameterList[motor_reverse]);
       servo.start();
       servoON();
       while (!servo.tick());
       servo.stop();
       servoOFF();
+#elif (MOTOR_TYPE == 1)
+      stepper.setMaxSpeedDeg(parameterList[motor_speed]);
+      stepper.reverse(parameterList[motor_reverse]);
+      //stepper.setTargetDeg(parking_pos - 180);
+      while (stepper.getState());
+      //stepper.setCurrentDeg(parking_pos);
+#endif
 
       if (thisVolume > parameterList[max_volume]) thisVolume = parameterList[max_volume];
 
@@ -532,16 +595,16 @@ void flowTick() {
   if (FLOWdebounce.isReady()) {
     for (byte i = 0; i < NUM_SHOTS; i++) {
       /* антидребезг датчиков с цифровым выходом
-      static bool wait[NUM_SHOTS], swPreState[NUM_SHOTS], swState;
-      static long stateDebounce[NUM_SHOTS];
-      swPreState[i] = !digitalRead(SW_pins[i]) ^ SWITCH_LEVEL;
-      if(swPreState[i] && !wait[i]) stateDebounce[i] = millis();
-      wait[i] = swPreState[i];
-      swState = (swPreState[i] && (millis() - stateDebounce[i] > 1000)) ? true : false;
+        static bool wait[NUM_SHOTS], swPreState[NUM_SHOTS], swState;
+        static long stateDebounce[NUM_SHOTS];
+        swPreState[i] = !digitalRead(SW_pins[i]) ^ SWITCH_LEVEL;
+        if(swPreState[i] && !wait[i]) stateDebounce[i] = millis();
+        wait[i] = swPreState[i];
+        swState = (swPreState[i] && (millis() - stateDebounce[i] > 1000)) ? true : false;
       */
       //bool swState = (bool)(analogRead(SW_pins[i]) < 512) ^ SWITCH_LEVEL;   // для датчиков с аналоговым выходом
       bool swState = !digitalRead(SW_pins[i]) ^ SWITCH_LEVEL;                 // для датчиков с цифровым выходом
-      
+
       if (swState && shotStates[i] == NO_GLASS) {  // поставили пустую рюмку
         if (keepPowerState) keepPowerState = false;
         shotStates[i] = EMPTY;                                      // флаг на заправку
@@ -618,10 +681,15 @@ void flowRoutine() {
         shotStates[curPumping] = IN_PROCESS;              // стакан в режиме заполнения
 
         // включаем серво только если целевая позиция не совпадает с текущей
+#if (MOTOR_TYPE == 0)
         if (servo.getCurrentDeg() != shotPos[i]) {
           servo.setTargetDeg(shotPos[curPumping]);        // задаём цель
           servo.start();
           servoON();                                      // вкл питание серво
+#elif (MOTOR_TYPE == 1)
+        if (stepper.getCurrentDeg() != shotPos[i]) {
+          stepper.setTargetDeg(shotPos[curPumping]);
+#endif
           parking = false;
 #ifdef STATUS_LED
           LEDblinkState = true;
@@ -629,9 +697,13 @@ void flowRoutine() {
 #endif
         }
         else if (shotPos[i] == parking_pos) {             // если положение рюмки совпадает с парковочным
+#if (MOTOR_TYPE == 0)
           servoON();                                      // вкл питание серво
           servo.attach(SERVO_PIN, parking_pos);
           delay(500);
+#elif (MOTOR_TYPE == 1)
+          stepper.setTargetDeg(parking_pos);
+#endif
         }
 #ifdef OLED
         printNum(shotVolume[curPumping], ml);
@@ -653,10 +725,15 @@ void flowRoutine() {
 #endif
       }
       else {                                              // если же в ручном режиме:
+#if (MOTOR_TYPE == 0)
         if (servo.getTargetDeg() != parking_pos) {
           servo.setTargetDeg(parking_pos);
           servo.start();
           servoON();                                        // включаем серво и паркуемся
+#elif (MOTOR_TYPE == 1)
+        if (stepper.getTargetDeg() != parking_pos) {
+          stepper.setTargetDeg(parking_pos);
+#endif
 #ifdef STATUS_LED
           LEDblinkState = true;
           LEDchanged = true;
@@ -670,9 +747,13 @@ void flowRoutine() {
           displayVolumeSession();
 #endif
         }
+#if (MOTOR_TYPE == 0)
         if (servo.tick()) {                               // едем до упора
           servo.stop();
           servoOFF();
+#elif (MOTOR_TYPE == 1)
+        if (!stepper.getState()) {
+#endif
           systemON = false;                               // выключили систему
           parking = true;                                 // на месте!
 #ifdef STATUS_LED
@@ -687,7 +768,12 @@ void flowRoutine() {
     else if ( (workMode == ManualMode) && noGlass) systemON = false;     // если в ручном режиме, припаркованны и нет рюмок - отключаемся нахрен
   }
   else if (systemState == MOVING) {                     // движение к рюмке
+
+#if (MOTOR_TYPE == 0)
     if (servo.tick()) {                                   // если приехали
+#elif (MOTOR_TYPE == 1)
+    if (!stepper.getState()) {
+#endif
 #ifdef STATUS_LED
       LEDblinkState = false;
       if (workMode == ManualMode) LED = mHSV(manualModeStatusColor, 255, STATUS_LED);
@@ -781,17 +867,26 @@ void prePump() {
   for (byte i = 0; i < NUM_SHOTS; i++) {    // поиск наличия рюмки
     if (!digitalRead(SW_pins[i])) {        // нашли рюмку
       curPumping = i;
+#if (MOTOR_TYPE == 0)
       if (abs(servo.getCurrentDeg() - shotPos[i]) <= 3) break;
       servo.setTargetDeg(shotPos[curPumping]);
       servo.start();
       servoON();
+#elif (MOTOR_TYPE == 1)
+      if (abs(stepper.getCurrentDeg() - shotPos[i]) <= 3) break;
+      stepper.setTargetDeg(shotPos[curPumping]);
+#endif
       parking = false;
       break;
     }
   }
   if (curPumping == -1) return; // нет рюмок -> нет прокачки, ищем заново ^
+#if (MOTOR_TYPE == 0)
   while (!servo.tick()); // едем к рюмке
   servoOFF();
+#elif (MOTOR_TYPE == 1)
+  while (stepper.getState());
+#endif
   delay(300); // небольшая задержка перед наливом
 
   pumpON(); // включаем помпу
@@ -933,21 +1028,24 @@ void keepPowerTick() {
   }
 }
 
-// обработка движения серво
-void servoTick() {
+// обработка движения двигателя
+void motorTick() {
+#if (MOTOR_TYPE == 0)
   if (servo.tick()) {
-#if(SERVO_AUTO_POWER)
+#if(MOTOR_AUTO_POWER)
     servoOFF();
     servo.stop();
 #endif
   }
   else {
-#if(SERVO_AUTO_POWER)
+#if(MOTOR_AUTO_POWER)
     servoON();
     servo.start();
 #endif
   }
+#endif
 }
+
 
 // отрисовка светодиодов по флагу (50мс)
 void LEDtick() {
