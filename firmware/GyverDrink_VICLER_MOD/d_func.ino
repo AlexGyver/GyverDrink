@@ -380,6 +380,7 @@ void serviceRoutine(serviceStates mode) {
     if (pumpTime > 0) {
       time50ml = pumpTime;
       volumeTick = 10.0f * 50.0f / time50ml;
+      volumeDivider = 1.0 / volumeTick;
       EEPROM.put(eeAddress._time50ml, pumpTime);
     }
   }
@@ -808,6 +809,7 @@ void flowRoutine() {
       FLOWtimer.setInterval((long)shotVolume[curPumping] * time50ml / 50);  // перенастроили таймер
       FLOWtimer.reset();                                  // сброс таймера
       volumeCount = 0;
+      flowDebounceTick = 0;
       volumeColor[curPumping] = 0;
 #ifdef OLED
       progressBar(-1);
@@ -816,19 +818,16 @@ void flowRoutine() {
     }
 
   } else if (systemState == PUMPING) {                    // если качаем
-    static byte lastVolumeCount = 0, tempVolume = 0;
-    volumeCount += volumeTick;
+    flowDebounceTick++;
+
+    if (flowDebounceTick % volumeDivider == 0) { // ёмкость увеличилась на 1мл
+      volumeCount++;
+      printNum(volumeCount, ml);
+
 #ifdef OLED
-    volume_session += volumeTick;
-#endif
-    tempVolume = round(volumeCount);
-    if (tempVolume != lastVolumeCount) {
-      printNum(tempVolume, ml);               // выводим текущий объём на дисплей
-      lastVolumeCount = tempVolume;
-#ifdef OLED
-      volume_session = round(volume_session);
+      volume_session++;
       displayVolumeSession();
-      progressBar(tempVolume, shotVolume[curPumping]);
+      progressBar(volumeCount, shotVolume[curPumping]);
 #endif
     }
 
@@ -836,7 +835,8 @@ void flowRoutine() {
     volumeColor[curPumping]++;
     LEDchanged = true;
 
-    if (FLOWtimer.isReady()) {                            // если налили (таймер)
+    //if (FLOWtimer.isReady()) {                            // если налили (таймер)
+    if (volumeCount == shotVolume[curPumping]) {        // если налили (счётчик)
       pumpOFF();                                          // помпа выкл
       shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
 #ifdef OLED
@@ -891,14 +891,15 @@ void prePump() {
 
   pumpON(); // включаем помпу
   FLOWdebounce.reset();
+  flowDebounceTick = 0;
   while (!digitalRead(SW_pins[curPumping]) && !digitalRead(ENC_SW)) // пока стоит рюмка и зажат энкодер, продолжаем наливать
   {
     if (FLOWdebounce.isReady()) {
-      static byte lastVolumeCount = 0;
-      volumeCount += volumeTick;
-      if (round(volumeCount) != lastVolumeCount) {
-        printNum(round(volumeCount), ml);
-        lastVolumeCount = round(volumeCount);
+      flowDebounceTick++;
+
+      if (flowDebounceTick % volumeDivider == 0) { // ёмкость увеличилась на 1мл
+        volumeCount++;
+        printNum(volumeCount, ml);
       }
 
       strip.setLED(curPumping, mHSV(volumeColor[curPumping] + parameterList[leds_color], 255, 255));
