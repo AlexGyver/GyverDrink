@@ -231,7 +231,7 @@ void btnTick() {
     printNum(thisVolume, ml);
 #if (MOTOR_TYPE == 0)
     servoON();
-    servo.attach(SERVO_PIN, parking_pos);
+    servo.attach(SERVO_PIN, parking_pos, SERVO_MIN_US, SERVO_MAX_US);
     delay(500);
     servoOFF();
 #elif (MOTOR_TYPE == 1)

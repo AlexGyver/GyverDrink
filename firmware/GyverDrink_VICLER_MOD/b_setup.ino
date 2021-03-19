@@ -83,7 +83,7 @@ void setup() {
 #if (MOTOR_TYPE == 0)  // настройка серво
   servoON();
   servo.setDirection(parameterList[motor_reverse]);
-  servo.attach(SERVO_PIN, parking_pos, 544, 2400);
+  servo.attach(SERVO_PIN, parking_pos, SERVO_MIN_US, SERVO_MAX_US);
   delay(500);
   servo.setSpeed(parameterList[motor_speed]);
   servo.stop();

@@ -158,7 +158,7 @@ void serviceRoutine(serviceStates mode) {
         //servoPos = min(servoPos, 180);
 #if (MOTOR_TYPE == 0)
         servoON();
-        servo.attach(SERVO_PIN, servoPos);
+        servo.attach(SERVO_PIN, servoPos, SERVO_MIN_US, SERVO_MAX_US);
 #elif (MOTOR_TYPE == 1)
         stepper.setAccelerationDeg(0);
         stepper.setMaxSpeedDeg(60);
@@ -699,7 +699,7 @@ void flowRoutine() {
         else if (shotPos[i] == parking_pos) {             // если положение рюмки совпадает с парковочным
 #if (MOTOR_TYPE == 0)
           servoON();                                      // вкл питание серво
-          servo.attach(SERVO_PIN, parking_pos);
+          servo.attach(SERVO_PIN, parking_pos, SERVO_MIN_US, SERVO_MAX_US);
           delay(500);
 #elif (MOTOR_TYPE == 1)
           stepper.setTargetDeg(parking_pos);
@@ -1044,7 +1044,7 @@ void motorTick() {
 #endif
   }
 #elif (MOTOR_TYPE == 1)
-    //stepper.tick();
+  //stepper.tick();
 #endif
 }
 
