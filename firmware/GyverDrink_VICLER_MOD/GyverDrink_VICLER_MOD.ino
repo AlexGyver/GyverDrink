@@ -1,7 +1,7 @@
 //GyverDrink VICLER_MOD
-#define VERSION 7.3
+#define VERSION 7.4
 #define DISPLAY_VERSION 1
-//18.03.2021
+//20.03.2021
 /*
   ==============================================================================================
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
@@ -162,7 +162,7 @@ encMinim enc(ENC_CLK, ENC_DT, ENC_SW, ENCODER_DIR, ENCODER_TYPE); // пин clk,
 buttonMinim btn(BTN_PIN);
 buttonMinim encBtn(ENC_SW);
 timerMinim LEDtimer(30);
-timerMinim FLOWdebounce(10);
+timerMinim FLOWdebounce(20);
 timerMinim FLOWtimer(2000);
 timerMinim WAITtimer(500);
 timerMinim TIMEOUTtimer(TIMEOUT_STBY * 1000L); // таймаут режима ожидания
@@ -188,8 +188,9 @@ uint8_t shotVolume[NUM_SHOTS];
 uint8_t initShotPos[] = {SHOT_POSITIONS};
 uint8_t shotPos[] = {SHOT_POSITIONS};
 const byte SW_pins[] = {SW_PINS};
-float volumeTick = 10.0f * 50.0f / time50ml;
-float volumeCount = 0.0f;
+byte ticks_ml = time50ml / 20.0 / 50.0;  // time50ml / flowDebounce / 50ml. Количество тиков FlowDebounce за 1мл
+uint16_t flowDebounceTick = 0;
+uint8_t volumeCount = 0;
 bool systemON = false;
 bool timeoutState = false;
 bool parking = true;
