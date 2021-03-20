@@ -379,8 +379,7 @@ void serviceRoutine(serviceStates mode) {
     // сохраняем настройки таймера налива
     if (pumpTime > 0) {
       time50ml = pumpTime;
-      volumeTick = 10.0f * 50.0f / time50ml;
-      volumeDivider = 1.0 / volumeTick;
+      ticks_ml = time50ml / 20.0 / 50.0;
       EEPROM.put(eeAddress._time50ml, pumpTime);
     }
   }
@@ -818,11 +817,15 @@ void flowRoutine() {
     }
 
   } else if (systemState == PUMPING) {                    // если качаем
+    //    static long tStart, tDiff, tDiffMax = 0;
+    //    tStart = millis();
     flowDebounceTick++;
 
-    if (flowDebounceTick % volumeDivider == 0) { // ёмкость увеличилась на 1мл
+    if (flowDebounceTick % ticks_ml == 0) { // ёмкость увеличилась на 1мл
       volumeCount++;
       printNum(volumeCount, ml);
+
+      //      tDiffMax = 0;
 
 #ifdef OLED
       volume_session++;
@@ -835,8 +838,8 @@ void flowRoutine() {
     volumeColor[curPumping]++;
     LEDchanged = true;
 
-    //if (FLOWtimer.isReady()) {                            // если налили (таймер)
-    if (volumeCount == shotVolume[curPumping]) {        // если налили (счётчик)
+    if (FLOWtimer.isReady()) {                            // если налили (таймер)
+      //if (volumeCount == shotVolume[curPumping]) {        // если налили (счётчик)
       pumpOFF();                                          // помпа выкл
       shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
 #ifdef OLED
@@ -852,6 +855,13 @@ void flowRoutine() {
         EEPROM.update(eeAddress._thisVolume, thisVolume);
       }
     }
+    //    tDiff = millis() - tStart;
+    //    if(tDiff > tDiffMax){
+    //      tDiffMax = tDiff;
+    //      disp.setFont(MAIN_FONT);
+    //      printStr("  ", Left, 0);
+    //      printInt(tDiffMax, Left, 0);
+    //    }
   } else if (systemState == WAIT) {
     volumeCount = 0;
     //#ifdef TM1637
@@ -897,7 +907,7 @@ void prePump() {
     if (FLOWdebounce.isReady()) {
       flowDebounceTick++;
 
-      if (flowDebounceTick % volumeDivider == 0) { // ёмкость увеличилась на 1мл
+      if (flowDebounceTick % ticks_ml == 0) { // ёмкость увеличилась на 1мл
         volumeCount++;
         printNum(volumeCount, ml);
       }
