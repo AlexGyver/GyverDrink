@@ -21,7 +21,7 @@ void readEEPROM() {
   for (byte i = 0; i < NUM_SHOTS; i++) shotVolume[i] = thisVolume;
 
   EEPROM.get(eeAddress._time50ml, time50ml);  // чтение значения таймера для 50мл
-  ticks_ml = time50ml / 20.0 / 50.0;
+  volumeTick = 20.0 * 50.0 / time50ml;
 
   for (byte i = 0; i < NUM_SHOTS; i++) shotPos[i] = EEPROM.read(eeAddress._shotPos + i);  // чтение позиций серво над рюмками
 

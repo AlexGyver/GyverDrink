@@ -260,7 +260,7 @@ void ftoa(float floatVal, char* floatStr, byte dec) { // преобразова�
 
   uint16_t int_part = (uint16_t)floatVal;
   float remainder = floatVal - (float)int_part;
-  floatStr[index++] = int_part + '0';             // warning! prints only one decimal before comma
+  floatStr[index++] = int_part + '0';             // prints only one decimal before comma
 
   if (dec > 0) floatStr[index++] = '.';
 
@@ -297,12 +297,21 @@ void printNum(uint16_t volume, int8_t postfix = 0) { //вывод чисел к�
   }
   else if ( (volume <= 9 && lastVol >= 10) || !timeoutState )
     printStr("  ", Left, 3 - shiftY);
-  lastVol = volume;
 
   if (postfix == 1) { // отображение мл
-    if (volume > 99) printInt(volume, Left, 3 - shiftY);
+    if (volume > 99) { // быстрый вывод трёхзначных чисел
+      static uint16_t tVolume;
+      (volume > 200) ? tVolume = volume - 200 : tVolume = volume - 100;
+      if ( (lastVol < 100) || (lastVol < 200 && volume >= 200) || (lastVol >= 200 && volume < 200) || volume == 109 || volume == 209 || volume == 200) printInt(volume, Left, 3 - shiftY); // вывод трёхзначного чисел 100, 109, 200 и 209
+      else if (tVolume > 9) printInt(tVolume, (disp.displayWidth() - strWidth("000")) / 2 + 12, 3 - shiftY);
+      else printInt(tVolume, (disp.displayWidth() - strWidth("00")) / 2 + 28, 3 - shiftY);
+    }
+
+    //    if (volume > 99) printInt(volume, Left, 3 - shiftY);
     else if (volume > 9) printInt(volume, (disp.displayWidth() - strWidth("000")) / 2, 3 - shiftY);
     else printInt(volume, (disp.displayWidth() - strWidth("00")) / 2 + 16, 3 - shiftY);
+
+
 #if(NUM_FONT == 0)
     disp.setFont(BigPostfix30x16);
 #else
@@ -324,6 +333,8 @@ void printNum(uint16_t volume, int8_t postfix = 0) { //вывод чисел к�
     printStr("&", Append, 3); // "°"
   }
   else printInt(volume, Center, 3 - shiftY); // отображение числа без постфикса
+
+  lastVol = volume;
 
   disp.setFont(MAIN_FONT);
 #if(MENU_LANG == 0)

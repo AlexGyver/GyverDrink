@@ -77,7 +77,7 @@ void btnTick() {
       curPumping = -1;                // снимаем выбор рюмки
 #ifdef OLED
       shots_session++;
-      volume_overall += volumeCount;
+      volume_overall += actualVolume;
       EEPROM.put(eeAddress._volume_overall, volume_overall);
       //      EEPROM.put(eeAddress._shots_session, shots_session);
       //      EEPROM.put(eeAddress._volume_session, volume_session);
@@ -155,7 +155,7 @@ void btnTick() {
   if (encBtn.holding() && (shotCount == 1) ) {
     if (workMode == AutoMode) return;
 #ifdef OLED
-    printNum(volumeCount, ml);
+    printNum(actualVolume, ml);
     progressBar(0);
 #endif
     prePump();

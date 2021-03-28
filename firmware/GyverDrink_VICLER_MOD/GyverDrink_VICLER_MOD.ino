@@ -1,7 +1,7 @@
 //GyverDrink VICLER_MOD
-#define VERSION 7.4
+#define VERSION 7.5
 #define DISPLAY_VERSION 1
-//20.03.2021
+//28.03.2021
 /*
   ==============================================================================================
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
@@ -188,9 +188,9 @@ uint8_t shotVolume[NUM_SHOTS];
 uint8_t initShotPos[] = {SHOT_POSITIONS};
 uint8_t shotPos[] = {SHOT_POSITIONS};
 const byte SW_pins[] = {SW_PINS};
-byte ticks_ml = time50ml / 20.0 / 50.0;  // time50ml / flowDebounce / 50ml. Количество тиков FlowDebounce за 1мл
-uint16_t flowDebounceTick = 0;
-uint8_t volumeCount = 0;
+float volumeTick = 20.0 * 50.0 / time50ml;  // volume in one FLOWdebounce timer tick
+uint8_t actualVolume = 0;
+float volumeCounter = 0;
 bool systemON = false;
 bool timeoutState = false;
 bool parking = true;
