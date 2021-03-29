@@ -299,15 +299,15 @@ void printNum(uint16_t volume, int8_t postfix = 0) { //вывод чисел к�
     printStr("   ", Left, 3 - shiftY);
 
   if (postfix == 1) { // отображение мл
-    if (volume > 99) { // быстрый вывод трёхзначных чисел
-      static uint16_t tVolume;
-      (volume > 200) ? tVolume = volume - 200 : tVolume = volume - 100;
-      if ( (lastVol < 100) || (lastVol < 200 && volume >= 200) || (lastVol >= 200 && volume < 200) || volume == 109 || volume == 209 || volume == 200) printInt(volume, Left, 3 - shiftY); // вывод трёхзначного чисел 100, 109, 200 и 209
-      else if (tVolume > 9) printInt(tVolume, (disp.displayWidth() - strWidth("000")) / 2 + 12, 3 - shiftY);
-      else printInt(tVolume, (disp.displayWidth() - strWidth("00")) / 2 + 28, 3 - shiftY);
-    }
+//    if (volume > 99) { // быстрый вывод трёхзначных чисел
+//      static uint16_t tVolume;
+//      (volume > 200) ? tVolume = volume - 200 : tVolume = volume - 100;
+//      if ( (lastVol < 100) || (lastVol < 200 && volume >= 200) || (lastVol >= 200 && volume < 200) || volume == 109 || volume == 209 || volume == 200) printInt(volume, Left, 3 - shiftY); // вывод трёхзначного чисел 100, 109, 200 и 209
+//      else if (tVolume > 9) printInt(tVolume, (disp.displayWidth() - strWidth("000")) / 2 + 12, 3 - shiftY);
+//      else printInt(tVolume, (disp.displayWidth() - strWidth("00")) / 2 + 28, 3 - shiftY);
+//    }
 
-    //    if (volume > 99) printInt(volume, Left, 3 - shiftY);
+    if (volume > 99) printInt(volume, Left, 3 - shiftY);
     else if (volume > 9) printInt(volume, (disp.displayWidth() - strWidth("000")) / 2, 3 - shiftY);
     else printInt(volume, (disp.displayWidth() - strWidth("00")) / 2 + 16, 3 - shiftY);
 
