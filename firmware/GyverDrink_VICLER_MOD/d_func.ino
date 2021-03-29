@@ -379,7 +379,7 @@ void serviceRoutine(serviceStates mode) {
     // сохраняем настройки таймера налива
     if (pumpTime > 0) {
       time50ml = pumpTime;
-      ticks_ml = time50ml / 20.0 / 50.0;
+      volumeTick = 20.0 * 50.0 / time50ml;
       EEPROM.put(eeAddress._time50ml, pumpTime);
     }
   }
@@ -637,10 +637,10 @@ void flowTick() {
           WAITtimer.reset();
           pumpOFF();                                                // помпу выкл
 #ifdef OLED
-          volume_overall += volumeCount;
+          volume_overall += actualVolume;
           EEPROM.put(eeAddress._volume_overall, volume_overall);
 #endif
-          volumeCount = 0;
+          actualVolume = 0;
         }
         shotCount--;
         if (systemState != PUMPING && systemState != MOVING && !showMenu) {
@@ -807,8 +807,8 @@ void flowRoutine() {
       delay(300);
       FLOWtimer.setInterval((long)shotVolume[curPumping] * time50ml / 50);  // перенастроили таймер
       FLOWtimer.reset();                                  // сброс таймера
-      volumeCount = 0;
-      flowDebounceTick = 0;
+      actualVolume = 0;
+      volumeCounter = 0;
       volumeColor[curPumping] = 0;
 #ifdef OLED
       progressBar(-1);
@@ -819,18 +819,18 @@ void flowRoutine() {
   } else if (systemState == PUMPING) {                    // если качаем
     //    static long tStart, tDiff, tDiffMax = 0;
     //    tStart = millis();
-    flowDebounceTick++;
 
-    if (flowDebounceTick % ticks_ml == 0) { // ёмкость увеличилась на 1мл
-      volumeCount++;
-      printNum(volumeCount, ml);
+    volumeCounter += volumeTick;
+    if ((byte)volumeCounter > actualVolume) {
+      actualVolume++;
+      printNum(actualVolume, ml);
 
       //      tDiffMax = 0;
 
 #ifdef OLED
       volume_session++;
       displayVolumeSession();
-      progressBar(volumeCount, shotVolume[curPumping]);
+      progressBar(actualVolume, shotVolume[curPumping]);
 #endif
     }
 
@@ -839,12 +839,11 @@ void flowRoutine() {
     LEDchanged = true;
 
     if (FLOWtimer.isReady()) {                            // если налили (таймер)
-      //if (volumeCount == shotVolume[curPumping]) {        // если налили (счётчик)
       pumpOFF();                                          // помпа выкл
       shotStates[curPumping] = READY;                     // налитая рюмка, статус: готов
 #ifdef OLED
       shots_session++;
-      volume_overall += volumeCount;
+      volume_overall += actualVolume;
       EEPROM.put(eeAddress._volume_overall, volume_overall);
 #endif
       curPumping = -1;                                    // снимаем выбор рюмки
@@ -855,18 +854,18 @@ void flowRoutine() {
         EEPROM.update(eeAddress._thisVolume, thisVolume);
       }
     }
+
     //    tDiff = millis() - tStart;
-    //    if(tDiff > tDiffMax){
+    //    if (tDiff > tDiffMax) {
     //      tDiffMax = tDiff;
     //      disp.setFont(MAIN_FONT);
     //      printStr("  ", Left, 0);
     //      printInt(tDiffMax, Left, 0);
     //    }
+
   } else if (systemState == WAIT) {
-    volumeCount = 0;
-    //#ifdef TM1637
+    actualVolume = 0;
     if (WAITtimer.isReady())
-      //#endif
       systemState = SEARCH;
   }
 }
@@ -901,15 +900,14 @@ void prePump() {
 
   pumpON(); // включаем помпу
   FLOWdebounce.reset();
-  flowDebounceTick = 0;
   while (!digitalRead(SW_pins[curPumping]) && !digitalRead(ENC_SW)) // пока стоит рюмка и зажат энкодер, продолжаем наливать
   {
     if (FLOWdebounce.isReady()) {
-      flowDebounceTick++;
 
-      if (flowDebounceTick % ticks_ml == 0) { // ёмкость увеличилась на 1мл
-        volumeCount++;
-        printNum(volumeCount, ml);
+      volumeCounter += volumeTick;
+      if ((byte)volumeCounter > actualVolume) {
+        actualVolume++;
+        printNum(actualVolume, ml);
       }
 
       strip.setLED(curPumping, mHSV(volumeColor[curPumping] + parameterList[leds_color], 255, 255));
@@ -938,10 +936,8 @@ void timeoutReset() {
     disp.setContrast(parameterList[oled_contrast]);
     disp.invertDisplay((bool)parameterList[invert_display]);
     if ( (parameterList[timeout_off] > 0) && !POWEROFFtimer.isOn() ) {
-      if (thisVolume < 100) {
-        disp.setFont(BIG_NUM_FONT); // очищаем большую иконку режима ожидания
-        printStr("  ", Center, 2);
-      }
+      dispSTBicon = false;
+      disp.clear();
       displayMode(workMode);
       progressBar(-1);
       if (!volumeChanged) displayVolume();
@@ -1019,13 +1015,23 @@ void timeoutTick() {
 #elif defined OLED
       if (parameterList[invert_display]) disp.invertDisplay(false);
       disp.clear();
-
-      disp.setFont(BigIcon36x40);
-      printStr("1", Center, 2);
+      dispSTBicon = true;
+      //      printStr("1", Center, 2);
 #endif
       LEDchanged = true;
       POWEROFFtimer.stop();
     }
+#ifdef OLED
+    if (dispSTBicon) {  // отображение большой иконки режима ожидания
+      if (timer100.isReady()) {
+        static int8_t xDir = 1, xPos = 0;
+        xPos += xDir;
+        if (xPos == 92 || xPos == 0) xDir *= -1;
+        disp.setFont(BigIcon36x40);
+        printStr("1", xPos, 2);
+      }
+    }
+#endif
   }
 }
 
