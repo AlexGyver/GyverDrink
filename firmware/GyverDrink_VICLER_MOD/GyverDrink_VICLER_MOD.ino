@@ -209,6 +209,7 @@ const int ledsColor = LEDS_COLOR / 360.0 * 255;
 const int manualModeStatusColor = MANUAL_MODE_STATUS_COLOR / 360.0 * 255;
 const int autoModeStatusColor = AUTO_MODE_STATUS_COLOR / 360.0 * 255;
 bool firstStartUp = false;
+bool dispSTBicon = false;
 
 
 #if(DISPLAY_TYPE < 3) // OLED

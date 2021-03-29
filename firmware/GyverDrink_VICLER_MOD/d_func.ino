@@ -936,10 +936,8 @@ void timeoutReset() {
     disp.setContrast(parameterList[oled_contrast]);
     disp.invertDisplay((bool)parameterList[invert_display]);
     if ( (parameterList[timeout_off] > 0) && !POWEROFFtimer.isOn() ) {
-      if (thisVolume < 100) {
-        disp.setFont(BIG_NUM_FONT); // очищаем большую иконку режима ожидания
-        printStr("   ", Center, 2);
-      }
+      dispSTBicon = false;
+      disp.clear();
       displayMode(workMode);
       progressBar(-1);
       if (!volumeChanged) displayVolume();
@@ -1017,13 +1015,23 @@ void timeoutTick() {
 #elif defined OLED
       if (parameterList[invert_display]) disp.invertDisplay(false);
       disp.clear();
-
-      disp.setFont(BigIcon36x40);
-      printStr("1", Center, 2);
+      dispSTBicon = true;
+      //      printStr("1", Center, 2);
 #endif
       LEDchanged = true;
       POWEROFFtimer.stop();
     }
+#ifdef OLED
+    if (dispSTBicon) {  // отображение большой иконки режима ожидания
+      if (timer100.isReady()) {
+        static int8_t xDir = 1, xPos = 0;
+        xPos += xDir;
+        if (xPos == 92 || xPos == 0) xDir *= -1;
+        disp.setFont(BigIcon36x40);
+        printStr("1", xPos, 2);
+      }
+    }
+#endif
   }
 }
 
