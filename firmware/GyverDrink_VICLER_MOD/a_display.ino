@@ -143,7 +143,7 @@ const char *MenuPages[][9] = {
     " Объ@м / сеанс",
     " Объ@м всего"
   },
-
+  //////////////////////////////////////////////////////////////////// сервисное меню
   { "##### Сервис #####",
     " Двигатель",
     " Помпа",
@@ -156,8 +156,8 @@ const char *MenuPages[][9] = {
   },
 
   {
-    "#####  Серво  #####",
-    " Установка позиций",
+    "###  Двигатель  ###",
+    " Калибровка",
     " Инверсия",
     " Скорость",
     " Авто парковка"
@@ -185,8 +185,8 @@ const char *MenuPages[][9] = {
 
   { "Statistics",
     " Shots",
-    " Volume session",
-    " Volume overall"
+    " Session",
+    " Overall"
   },
 
   { "Service",
@@ -260,7 +260,11 @@ void ftoa(float floatVal, char* floatStr, byte dec) { // преобразова�
 
   uint16_t int_part = (uint16_t)floatVal;
   float remainder = floatVal - (float)int_part;
-  floatStr[index++] = int_part + '0';             // prints only one decimal before comma
+  if (int_part < 10) floatStr[index++] = int_part + '0';
+  else {
+    floatStr[index++] = int_part / 10 + '0';
+    floatStr[index++] = int_part % 10 + '0';
+  }
 
   if (dec > 0) floatStr[index++] = '.';
 
@@ -578,23 +582,21 @@ void displayMenu() { // вывод страниц меню
       else  {
         float currValue = (currItem == 2) ? volume_session : volume_overall;
 #if(MENU_LANG == 0)
-        if (currValue < 100.0) {
-          if (currValue < 10) printInt(currValue, disp.displayWidth() - strWidth("0мл") - 1);
-          else printInt(currValue, disp.displayWidth() - strWidth("00мл") - 1);
-          printStr("мл");
-        }
-        else {
+        if (currValue < 10000.0) { // меньше 10л
           printFloat(currValue / 1000.0, 2, disp.displayWidth() - strWidth("0.00л") - 1);
           printStr("л");
         }
+        else {
+          printFloat(currValue / 1000.0, 2, disp.displayWidth() - strWidth("00.00л") - 1);
+          printStr("л");
+        }
 #else
-        if (currValue < 100.0) {
-          if (currValue < 10) printInt(currValue, disp.displayWidth() - strWidth("0ml") - 1);
-          else printInt(currValue, disp.displayWidth() - strWidth("00ml") - 1);
-          printStr("ml");
+        if (currValue < 10000.0) {
+          printFloat(currValue / 1000.0, 2, disp.displayWidth() - strWidth("0.00l"));
+          printStr("l");
         }
         else {
-          printFloat(currValue / 1000.0, 2, disp.displayWidth() - strWidth("0.00l"));
+          printFloat(currValue / 1000.0, 2, disp.displayWidth() - strWidth("00.00l"));
           printStr("l");
         }
 #endif

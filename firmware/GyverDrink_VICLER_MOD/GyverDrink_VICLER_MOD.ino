@@ -1,5 +1,5 @@
 //GyverDrink VICLER_MOD
-#define VERSION 7.5
+#define VERSION 7.6
 #define DISPLAY_VERSION 1
 //29.03.2021
 /*
