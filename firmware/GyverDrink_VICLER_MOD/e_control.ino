@@ -219,16 +219,32 @@ void btnTick() {
   }
 #endif
 
-#ifdef TM1637
+
   // сброс настроек
   if (btn.holdedFor(5)) {
     if (systemState == PUMPING) return;
+#if defined TM1637
     byte resetText[] = {_r, _E, _S, _E, _t};
     disp.runningString(resetText, sizeof(resetText), 150);
+#elif defined OLED
+    disp.clear();
+    disp.setFont(MAIN_FONT);
+#if(MENU_LANG == 0)
+    disp.setLetterSpacing(0);
+#endif
+    printStr("Сброс настроек", Center, 3);
+#endif
     while (!digitalRead(BTN_PIN));
     resetEEPROM();
     readEEPROM();
-    printNum(thisVolume, ml);
+#ifdef OLED
+    disp.clear();
+    showMenu = false;
+    lastMenuPage = NO_MENU;
+    timeoutReset();
+    progressBar(-1);
+    displayVolume();
+#endif
 #if (MOTOR_TYPE == 0)
     servoON();
     servo.attach(SERVO_PIN, parking_pos, SERVO_MIN_US, SERVO_MAX_US);
@@ -239,5 +255,4 @@ void btnTick() {
     while (stepper.getState());
 #endif
   }
-#endif
 }
