@@ -292,11 +292,11 @@ void printNum(uint16_t volume, int8_t postfix = 0) { //вывод чисел к�
   // очистка первой цифры если число уменьшилось с 1000 до 999, 100 до 99 или с 10 до 9
   if (volume <= 999 && lastVol >= 1000) printStr("    ", Center, 3 - shiftY);
   else if (volume <= 99 && lastVol >= 100) {
-    printStr(" ", Left, 3 - shiftY);
+    printStr("   ", Left, 3 - shiftY);
     printStr("  ", Right, 3 - shiftY);
   }
   else if ( (volume <= 9 && lastVol >= 10) || !timeoutState )
-    printStr("  ", Left, 3 - shiftY);
+    printStr("   ", Left, 3 - shiftY);
 
   if (postfix == 1) { // отображение мл
     if (volume > 99) { // быстрый вывод трёхзначных чисел
