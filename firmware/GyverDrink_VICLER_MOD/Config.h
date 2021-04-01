@@ -106,10 +106,9 @@
 #define DISP_SDA    A4       // сигнал SDA OLED дисплея
 #define DISP_SCK    A5       // сигнал SCK OLED дисплея
 // пины SPI
-#define DISP_CS     2        // сигнал CS OLED дисплея
+#define DISP_DC     0        // сигнал DC OLED дисплея
 #define DISP_MOSI   A4       // сигнал MOSI или SDA OLED дисплея
 #define DISP_CLK    A5       // сигнал CLK или SCL OLED дисплея
-#define DISP_DC     13       // сигнал DC OLED дисплея
 
 #define SW_PINS     A0, A1, A2, A3, 11, 12  // сигналы с датчиков наличия рюмок на OLED версии: от первой к последней рюмке
 
