@@ -1,7 +1,7 @@
 //GyverDrink VICLER_MOD
 #define VERSION 7.6
 #define DISPLAY_VERSION 1
-//01.04.2021
+//05.04.2021
 /*
   ==============================================================================================
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
@@ -193,7 +193,7 @@ uint8_t actualVolume = 0;
 float volumeCounter = 0;
 bool systemON = false;
 bool timeoutState = false;
-bool parking = true;
+bool parking = false;
 bool LEDbreathingState = false;
 bool LEDblinkState = false;
 float battery_voltage = 4.2;
@@ -289,4 +289,8 @@ struct EEPROMAddress
 
 #ifdef STATUS_LED
 #define LED leds[NUM_SHOTS]
+#endif
+
+#if (MOTOR_TYPE == 1) && defined STEPPER_ENDSTOP
+#define ENDSTOP_STATUS (!digitalRead(STEPPER_ENDSTOP))
 #endif

@@ -1,7 +1,9 @@
 
 timerMinim timer100(100);
+
 // обработка функций сервисного режима
 void serviceRoutine(serviceStates mode) {
+
 #ifdef TM1637
   byte serviceText[] = {_S, _E, _r, _U, _i, _C, _E};
   disp.runningString(serviceText, sizeof(serviceText), 150);
@@ -399,7 +401,7 @@ void serviceRoutine(serviceStates mode) {
     disp.clear();
     disp.setInvertMode(1);
     disp.setFont(MAIN_FONT);
-    static byte text_offset = (disp.displayWidth() - strWidth("Фактор: 0.000")) / 2;
+    static byte text_offset = (DISP_WIDTH - strWidth("Фактор: 0.000")) / 2;
 #if(MENU_LANG == 0)
     disp.setLetterSpacing(0);
     clearToEOL();
@@ -513,7 +515,7 @@ void editParameter(byte parameter, byte selectedRow) {
 #if (MENU_LANG == 0)
         clearToEOL('\'');
 #else
-        clearToEOL('.');//printStr(".", disp.displayWidth() - strWidth("000"));
+        clearToEOL('.');//printStr(".", DISP_WIDTH - strWidth("000"));
 #endif
         disp.setInvertMode(1);
       }
@@ -523,7 +525,7 @@ void editParameter(byte parameter, byte selectedRow) {
 #if (MENU_LANG == 0)
         clearToEOL('\'');
 #else
-        clearToEOL('.');//printStr(".", disp.displayWidth() - strWidth("00"));
+        clearToEOL('.');//printStr(".", DISP_WIDTH - strWidth("00"));
 #endif
         disp.setInvertMode(1);
       }
@@ -670,7 +672,7 @@ void flowTick() {
 void flowRoutine() {
   if (showMenu) return;
 
-  if (systemState == SEARCH) {                            // если поиск рюмки
+  if (systemState == SEARCH) {                                           // если поиск рюмки
     bool noGlass = true;
     for (byte i = 0; i < NUM_SHOTS; i++) {
       if (shotStates[i] == EMPTY && i != curPumping) {    // поиск
@@ -767,7 +769,7 @@ void flowRoutine() {
     }
     else if ( (workMode == ManualMode) && noGlass) systemON = false;     // если в ручном режиме, припаркованны и нет рюмок - отключаемся нахрен
   }
-  else if (systemState == MOVING) {                     // движение к рюмке
+  else if (systemState == MOVING) {                                          // движение к рюмке
 
 #if (MOTOR_TYPE == 0)
     if (servo.tick()) {                                   // если приехали
@@ -785,7 +787,7 @@ void flowRoutine() {
       disp.setFont(BIG_NUM_FONT);
       disp.setCursor(0, 2);
       clearToEOL();
-      byte targetX = (disp.displayWidth() - strWidth("00")) / 2 + 17;
+      byte targetX = (DISP_WIDTH - strWidth("00")) / 2 + 17;
       byte currX = 128;
       while (currX > targetX) {
         currX -= 3;
@@ -815,17 +817,17 @@ void flowRoutine() {
 #endif
       pumpON();                                           // НАЛИВАЙ!
     }
-
-  } else if (systemState == PUMPING) {                    // если качаем
-    //    static long tStart, tDiff, tDiffMax = 0;
-    //    tStart = millis();
+  }
+  else if (systemState == PUMPING) {                           // если качаем
+    static long tStart, tDiff, tDiffMax = 0;
+    tStart = millis();
 
     volumeCounter += volumeTick;
     if ((byte)volumeCounter > actualVolume) {
       actualVolume++;
       printNum(actualVolume, ml);
 
-      //      tDiffMax = 0;
+      tDiffMax = 0;
 
 #ifdef OLED
       volume_session++;
@@ -855,15 +857,15 @@ void flowRoutine() {
       }
     }
 
-    //    tDiff = millis() - tStart;
-    //    if (tDiff > tDiffMax) {
-    //      tDiffMax = tDiff;
-    //      disp.setFont(MAIN_FONT);
-    //      printStr("  ", Left, 0);
-    //      printInt(tDiffMax, Left, 0);
-    //    }
-
-  } else if (systemState == WAIT) {
+    tDiff = millis() - tStart;
+    if (tDiff > tDiffMax) {
+      tDiffMax = tDiff;
+      disp.setFont(MAIN_FONT);
+      printStr("  ", Left, 0);
+      printInt(tDiffMax, Left, 0);
+    }
+  }
+  else if (systemState == WAIT) {
     actualVolume = 0;
     if (WAITtimer.isReady())
       systemState = SEARCH;
@@ -884,6 +886,7 @@ void prePump() {
 #elif (MOTOR_TYPE == 1)
       if (abs(stepper.getCurrentDeg() - shotPos[i]) <= 3) break;
       stepper.setTargetDeg(shotPos[curPumping]);
+      volumeCounter = 0;
 #endif
       parking = false;
       break;
@@ -894,7 +897,7 @@ void prePump() {
   while (!servo.tick()); // едем к рюмке
   servoOFF();
 #elif (MOTOR_TYPE == 1)
-  while (stepper.getState());
+  while (stepper.tick());
 #endif
   delay(300); // небольшая задержка перед наливом
 
@@ -1061,10 +1064,32 @@ void motorTick() {
 #endif
   }
 #elif (MOTOR_TYPE == 1)
-  //stepper.tick();
+  stepper.tick();
 #endif
 }
 
+#if (MOTOR_TYPE == 1) && defined STEPPER_ENDSTOP
+bool homing() {
+  if (parking) return 0;
+
+  if (ENDSTOP_STATUS) {
+    stepper.brake();
+    stepper.setRunMode(FOLLOW_POS);
+    stepper.setCurrentDeg(parking_pos);
+    stepper.setMaxSpeedDeg(parameterList[motor_speed]);
+
+    parking = true;
+    return 0;
+  }
+  else if (!stepper.tick()) {
+    stepper.enable();
+    stepper.setRunMode(KEEP_SPEED);
+    stepper.setSpeedDeg(-STEPPER_HOMING_SPEED);
+  }
+
+  return 1;
+}
+#endif
 
 // отрисовка светодиодов по флагу (50мс)
 void LEDtick() {

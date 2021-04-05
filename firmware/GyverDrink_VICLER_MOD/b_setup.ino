@@ -88,7 +88,11 @@ void setup() {
   servo.setSpeed(parameterList[motor_speed]);
   servo.stop();
   servoOFF();
+  parking = true;
 #elif (MOTOR_TYPE == 1) // настройка шаговика
+#ifdef STEPPER_ENDSTOP
+  pinMode(STEPPER_ENDSTOP, INPUT_PULLUP);
+#endif
   stepper.setRunMode(FOLLOW_POS);
   stepper.setMaxSpeedDeg(parameterList[motor_speed]);
   stepper.setAccelerationDeg(STEPPER_ACCELERATION);
@@ -123,7 +127,7 @@ void setup() {
 #if(MENU_LANG == 0)
   disp.setLetterSpacing(0);
 #endif // MENU_LANG
-  static byte targetX = (disp.displayWidth() - strWidth(bootscreen)) / 2;
+  static byte targetX = (DISP_WIDTH - strWidth(bootscreen)) / 2;
   progressBar(-1);
 #elif defined ANALOG_METER
   timerMinim nextSym(1000 / RAINBOW_FPS);
@@ -134,6 +138,9 @@ void setup() {
 
   uint8_t startBrightness = RAINBOW_START_BRIGHTNESS;
   while (startBrightness) {
+#if (MOTOR_TYPE == 1) && defined STEPPER_ENDSTOP
+    homing();
+#endif
     if (nextColor.isReady()) {
       for (byte i = 0; i < NUM_SHOTS + statusLed; i++)
         leds[i] = mHSV(startBrightness + i * (255 / (NUM_SHOTS + statusLed) ), 255, startBrightness);
@@ -183,6 +190,10 @@ void setup() {
   if (workMode == ManualMode) LED = mHSV(manualModeStatusColor, 255, STATUS_LED);
   else LED = mHSV(autoModeStatusColor, 255, STATUS_LED);
   strip.show();
+#endif
+
+#if (MOTOR_TYPE == 1) && defined STEPPER_ENDSTOP
+  while (homing());
 #endif
 
   if (!digitalRead(BTN_PIN) || firstStartUp) { // вход в сервисное меню
