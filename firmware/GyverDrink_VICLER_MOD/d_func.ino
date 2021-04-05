@@ -895,6 +895,7 @@ void prePump() {
   if (curPumping == -1) return; // нет рюмок -> нет прокачки, ищем заново ^
 #if (MOTOR_TYPE == 0)
   while (!servo.tick()); // едем к рюмке
+  servo.stop();
   servoOFF();
 #elif (MOTOR_TYPE == 1)
   while (stepper.tick());
