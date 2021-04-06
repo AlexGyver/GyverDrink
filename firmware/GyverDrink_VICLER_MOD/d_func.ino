@@ -819,15 +819,15 @@ void flowRoutine() {
     }
   }
   else if (systemState == PUMPING) {                           // если качаем
-    static long tStart, tDiff, tDiffMax = 0;
-    tStart = millis();
+    //    static long tStart, tDiff, tDiffMax = 0;
+    //    tStart = millis();
 
     volumeCounter += volumeTick;
     if ((byte)volumeCounter > actualVolume) {
       actualVolume++;
       printNum(actualVolume, ml);
 
-      tDiffMax = 0;
+      //      tDiffMax = 0;
 
 #ifdef OLED
       volume_session++;
@@ -857,13 +857,13 @@ void flowRoutine() {
       }
     }
 
-    tDiff = millis() - tStart;
-    if (tDiff > tDiffMax) {
-      tDiffMax = tDiff;
-      disp.setFont(MAIN_FONT);
-      printStr("  ", Left, 0);
-      printInt(tDiffMax, Left, 0);
-    }
+    //    tDiff = millis() - tStart;
+    //    if (tDiff > tDiffMax) {
+    //      tDiffMax = tDiff;
+    //      disp.setFont(MAIN_FONT);
+    //      printStr("  ", Left, 0);
+    //      printInt(tDiffMax, Left, 0);
+    //    }
   }
   else if (systemState == WAIT) {
     actualVolume = 0;
