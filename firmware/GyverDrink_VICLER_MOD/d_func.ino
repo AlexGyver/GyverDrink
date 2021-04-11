@@ -886,8 +886,8 @@ void prePump() {
 #elif (MOTOR_TYPE == 1)
       if (abs(stepper.getCurrentDeg() - shotPos[i]) <= 3) break;
       stepper.setTargetDeg(shotPos[curPumping]);
-      volumeCounter = 0;
 #endif
+      volumeCounter = 0;
       parking = false;
       break;
     }

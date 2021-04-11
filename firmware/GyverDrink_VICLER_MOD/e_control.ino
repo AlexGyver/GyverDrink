@@ -113,7 +113,7 @@ void btnTick() {
       }
     }
     else {  // считаем количество нажатий только на основном экране. Время между кликами 200-300 мс
-      if ( (millis() - lastPressedMillis > 200) && (millis() - lastPressedMillis < 300) ) pressCount++;
+      if ( (millis() - lastPressedMillis > 100) && (millis() - lastPressedMillis < 500) ) pressCount++;
       else pressCount = 1;
       lastPressedMillis = millis();
     }
