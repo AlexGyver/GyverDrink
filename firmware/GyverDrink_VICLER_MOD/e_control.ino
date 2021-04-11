@@ -112,8 +112,8 @@ void btnTick() {
         timeoutState = true;
       }
     }
-    else {  // считаем количество нажатий только на основном экране. Максимальное время между кликами 500мс
-      if (millis() - lastPressedMillis < 500) pressCount++;
+    else {  // считаем количество нажатий только на основном экране. Время между кликами 200-300 мс
+      if ( (millis() - lastPressedMillis > 100) && (millis() - lastPressedMillis < 500) ) pressCount++;
       else pressCount = 1;
       lastPressedMillis = millis();
     }

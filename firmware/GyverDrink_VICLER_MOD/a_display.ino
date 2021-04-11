@@ -104,6 +104,8 @@ SSD1306AsciiWire disp;
 #define MAIN_FONT ZevvPeep8x16
 #endif
 
+#define DISP_WIDTH 128  // ширина дисплея в пикселях
+
 enum MenuPageName { // типы страниц меню
   NO_MENU = -1,
   MAIN_MENU_PAGE,         // основная страница
@@ -140,10 +142,10 @@ const char *MenuPages[][9] = {
 
   { "### Статистика  ###",
     " Рюмок",
-    " Объ@м / сеанс",
+    " Объ@м /сеанс",
     " Объ@м всего"
   },
-
+  //////////////////////////////////////////////////////////////////// сервисное меню
   { "##### Сервис #####",
     " Двигатель",
     " Помпа",
@@ -156,8 +158,8 @@ const char *MenuPages[][9] = {
   },
 
   {
-    "#####  Серво  #####",
-    " Установка позиций",
+    "###  Двигатель  ###",
+    " Калибровка",
     " Инверсия",
     " Скорость",
     " Авто парковка"
@@ -185,8 +187,8 @@ const char *MenuPages[][9] = {
 
   { "Statistics",
     " Shots",
-    " Volume session",
-    " Volume overall"
+    " Session",
+    " Overall"
   },
 
   { "Service",
@@ -230,15 +232,21 @@ enum text_position { // выравнивание текста на диспле�
 };
 
 void clearToEOL(const char ch = ' ') { // заполнение строки от актуальной позиции до правого края дисплея любым символом. По умолчанию используется пробел для очистки
-  byte i = 1 + (disp.displayWidth() - disp.col()) / disp.charWidth(ch);
+  byte i = 1 + (DISP_WIDTH - disp.col()) / disp.charWidth(ch);
   while (i--) disp.write(ch);
 }
 
 void printStr(const char str[], int8_t x = Append, int8_t y = Append) { // вывод текста с возможностью выравнивания
-  if (x == Left)    disp.setCol(0);
-  else if (x == Center)  disp.setCol( (disp.displayWidth() - strWidth(str)) / 2);
-  else if (x == Right)   disp.setCol(disp.displayWidth() - strWidth(str));
-  else if (x != Append)  disp.setCol(x);
+  switch (x) {
+    case Left: disp.setCol(0); break;
+    case Center: disp.setCol( (DISP_WIDTH - strWidth(str)) / 2); break;
+    case Right: disp.setCol(DISP_WIDTH - strWidth(str)); break;
+    default: disp.setCol(x); break;
+  }
+  //  if (x == Left)    disp.setCol(0);
+  //  else if (x == Center)  disp.setCol( (DISP_WIDTH - strWidth(str)) / 2);
+  //  else if (x == Right)   disp.setCol(DISP_WIDTH - strWidth(str));
+  //  else if (x != Append)  disp.setCol(x);
 
   if (y != Append)  disp.setRow(y);
 
@@ -260,7 +268,11 @@ void ftoa(float floatVal, char* floatStr, byte dec) { // преобразова�
 
   uint16_t int_part = (uint16_t)floatVal;
   float remainder = floatVal - (float)int_part;
-  floatStr[index++] = int_part + '0';             // prints only one decimal before comma
+  if (int_part < 10) floatStr[index++] = int_part + '0';
+  else {
+    floatStr[index++] = int_part / 10 + '0';
+    floatStr[index++] = int_part % 10 + '0';
+  }
 
   if (dec > 0) floatStr[index++] = '.';
 
@@ -298,42 +310,44 @@ void printNum(uint16_t volume, int8_t postfix = 0) { //вывод чисел к�
   else if ( (volume <= 9 && lastVol >= 10) || !timeoutState )
     printStr("   ", Left, 3 - shiftY);
 
-  if (postfix == 1) { // отображение мл
-    //    if (volume > 99) { // быстрый вывод трёхзначных чисел
-    //      static uint16_t tVolume;
-    //      (volume > 200) ? tVolume = volume - 200 : tVolume = volume - 100;
-    //      if ( (lastVol < 100) || (lastVol < 200 && volume >= 200) || (lastVol >= 200 && volume < 200) || volume == 109 || volume == 209 || volume == 200) printInt(volume, Left, 3 - shiftY); // вывод трёхзначного чисел 100, 109, 200 и 209
-    //      else if (tVolume > 9) printInt(tVolume, (disp.displayWidth() - strWidth("000")) / 2 + 12, 3 - shiftY);
-    //      else printInt(tVolume, (disp.displayWidth() - strWidth("00")) / 2 + 28, 3 - shiftY);
-    //    }
+  switch (postfix) {
+    case 1:
+      //    if (volume > 99) { // быстрый вывод трёхзначных чисел
+      //      static uint16_t tVolume;
+      //      (volume > 200) ? tVolume = volume - 200 : tVolume = volume - 100;
+      //      if ( (lastVol < 100) || (lastVol < 200 && volume >= 200) || (lastVol >= 200 && volume < 200) || volume == 109 || volume == 209 || volume == 200) printInt(volume, Left, 3 - shiftY); // вывод трёхзначного чисел 100, 109, 200 и 209
+      //      else if (tVolume > 9) printInt(tVolume, (DISP_WIDTH - strWidth("000")) / 2 + 12, 3 - shiftY);
+      //      else printInt(tVolume, (DISP_WIDTH - strWidth("00")) / 2 + 28, 3 - shiftY);
+      //    }
 
-    if (volume > 99) printInt(volume, Left, 3 - shiftY);
-    else if (volume > 9) printInt(volume, (disp.displayWidth() - strWidth("000")) / 2, 3 - shiftY);
-    else printInt(volume, (disp.displayWidth() - strWidth("00")) / 2 + 16, 3 - shiftY);
+      if (volume > 99) printInt(volume, Left, 3 - shiftY);
+      else if (volume > 9) printInt(volume, (DISP_WIDTH - strWidth("000")) / 2, 3 - shiftY);
+      else printInt(volume, (DISP_WIDTH - strWidth("00")) / 2 + 16, 3 - shiftY);
 
 
 #if(NUM_FONT == 0)
-    disp.setFont(BigPostfix30x16);
+      disp.setFont(BigPostfix30x16);
 #else
-    disp.setFont(BigPostfix30x16_2);
+      disp.setFont(BigPostfix30x16_2);
 #endif
-    printStr("%", Append, 5); // "ml"
+      printStr("%", Append, 5); // "ml"
 
-    if (!showMenu) displayVolumeSession();
-  }
-  else if (postfix == 2) { // отображение угла
-    if (volume > 99) printInt(volume, (disp.displayWidth() - strWidth("000")) / 2 - 16, 3 - shiftY);
-    else if (volume > 9) printInt(volume, (disp.displayWidth() - strWidth("00")) / 2, 3 - shiftY);
-    else printInt(volume, (disp.displayWidth() - strWidth("0")) / 2 + 16, 3 - shiftY);
+      if (!showMenu) displayVolumeSession();
+      break;
+    case 2:
+      if (volume > 99) printInt(volume, (DISP_WIDTH - strWidth("000")) / 2 - 16, 3 - shiftY);
+      else if (volume > 9) printInt(volume, (DISP_WIDTH - strWidth("00")) / 2, 3 - shiftY);
+      else printInt(volume, (DISP_WIDTH - strWidth("0")) / 2 + 16, 3 - shiftY);
 #if(NUM_FONT == 0)
-    disp.setFont(BigPostfix30x16);
+      disp.setFont(BigPostfix30x16);
 #else
-    disp.setFont(BigPostfix30x16_2);
+      disp.setFont(BigPostfix30x16_2);
 #endif
-    printStr("&", Append, 3); // "°"
-  }
-  else printInt(volume, Center, 3 - shiftY); // отображение числа без постфикса
+      printStr("&", Append, 3); // "°"
+      break;
 
+    default: printInt(volume, Center, 3 - shiftY); break; // отображение числа без постфикса
+  }
   lastVol = volume;
 
   disp.setFont(MAIN_FONT);
@@ -350,7 +364,7 @@ void progressBar(int16_t value, uint16_t maximum = MAX_VOLUME) { // прогре
 
   if (value == -1) { // если параметр -1, сбрасываем бар и рисуем пунктирную линию на всю ширину дисплея
     disp.setCursor(0, 7); // седьмая строка (самая нижняя)
-    for (int i = 0; i < disp.displayWidth(); i++) {
+    for (int i = 0; i < DISP_WIDTH; i++) {
       if (i % 2 == 0) disp.write('.'); // в каждом чётном пикселе точка
       else disp.write(' ');            // в нечётном пусто
     }
@@ -373,7 +387,7 @@ void progressBar(int16_t value, uint16_t maximum = MAX_VOLUME) { // прогре
   }
   else if (targetX < currX) { // целевая позиция меньше актуальной. Заполняем пунктирной линией до целевого пикселя
     do {
-      disp.setCursor(min(currX, disp.displayWidth() - 1), 7);
+      disp.setCursor(min(currX, DISP_WIDTH - 1), 7);
       if (currX % 2 == 0) {
         disp.write('.');
         if (value == thisVolume) delay(5);
@@ -389,9 +403,9 @@ void displayVolumeSession() {
 #if DISPLAY_SESSION_VOLUME
   disp.setFont(MAIN_FONT);
 #if(MENU_LANG == 0)
-  const byte offsetX = disp.displayWidth() - strWidth("0.00л") - 1;
+  const byte offsetX = DISP_WIDTH - strWidth("0.00л") - 1;
 #else
-  const byte offsetX = disp.displayWidth() - strWidth("0.00l") + 5;
+  const byte offsetX = DISP_WIDTH - strWidth("0.00l") + 5;
 #endif
   disp.setLetterSpacing(0);
   if (volume_session > 0) {
@@ -454,63 +468,66 @@ void displayMenu() { // вывод страниц меню
 #endif
 
   if (itemSelected) { // нажали на пункт в меню
-    if (menuPage == MAIN_MENU_PAGE) { // выбор елемента на главной странице Меню
-      if (menuItem == 1) { // нажали на режим
-        workMode = (workModes)!workMode;
-        timeoutReset();
-        itemSelected = 0;
-        showMenu = false;
-        disp.clear();
-        lastMenuPage = NO_MENU;
-        progressBar(-1);
-        displayVolume();
-        displayMode(workMode);
+    switch (menuPage) {
+      case MAIN_MENU_PAGE:  // выбор елемента на главной странице Меню
+        if (menuItem == 1) { // нажали на режим
+          workMode = (workModes)!workMode;
+          timeoutReset();
+          itemSelected = 0;
+          showMenu = false;
+          disp.clear();
+          lastMenuPage = NO_MENU;
+          progressBar(-1);
+          displayVolume();
+          displayMode(workMode);
 
 #if (SAVE_MODE == 1)
-        EEPROM.update(eeAddress._workMode, workMode);
+          EEPROM.update(eeAddress._workMode, workMode);
 #endif
-        return; // выходим из меню
-      }
-      else {
-        menuPage = (MenuPageName)(menuItem - 1);
-        menuItem = 1;
-      }
-    }
-    else if (menuPage == SETTINGS_PAGE) { // выбор елемента на странице настройки
-      editParameter(menuItem - 1, selectedRow);
-      if (!timeoutState) { // произошёл вход в режим ожидания
-        itemSelected = 0;
-        return;
-      }
-    }
-    else if (menuPage == SERVICE_PAGE)  { // выбор елемента на странице сервисного меню
-      if (menuItem == menuItemsNum[menuPage]) { // последний пункт -> сброс настроек
-        resetEEPROM();
-        readEEPROM();
-      }
-      else if (menuItem == 1) menuPage = SERVO_CALIBRATION_PAGE; // выбор первого пункта -> переходим на страницу серво
+          return; // выходим из меню
+        }
+        else {
+          menuPage = (MenuPageName)(menuItem - 1);
+          menuItem = 1;
+        }
+        break;
+      case SETTINGS_PAGE: // выбор елемента на странице настройки
+        editParameter(menuItem - 1, selectedRow);
+        if (!timeoutState) { // произошёл вход в режим ожидания
+          itemSelected = 0;
+          return;
+        }
+        break;
+      case SERVICE_PAGE:  // выбор елемента на странице сервисного меню
+        if (menuItem == menuItemsNum[menuPage]) { // последний пункт -> сброс настроек
+          resetEEPROM();
+          readEEPROM();
+        }
+        else if (menuItem == 1) menuPage = SERVO_CALIBRATION_PAGE; // выбор первого пункта -> переходим на страницу серво
 #ifndef BATTERY_PIN
-      else if (menuItem == 3) editParameter(keep_power, selectedRow); // выбор
+        else if (menuItem == 3) editParameter(keep_power, selectedRow); // выбор
 #endif
-      else { // иначе запускаем обработку выбранного этапа калибровки
-        serviceRoutine((serviceStates)(menuItem - 1));
-        lastMenuPage = NO_MENU;
-      }
-    }
-    else if (menuPage == STATISTICS_PAGE) { // выбор елемента на странице статистики
-      if (menuItem == 1) shots_session = 0; // сбрасываем количетво рюмок
-      else if (menuItem == 2) volume_session = 0; // сбрасываем объём
-      else if (menuItem == 3) {
-        volume_overall = 0;
-        EEPROM.put(eeAddress._volume_overall, 0);
-      }
-    }
-    else if (menuPage == SERVO_CALIBRATION_PAGE) { // выбор елемента на странице настройки сервопривода
-      if (menuItem == 1) { // выбрали первый пункт -> начало этапа калибровки серво
-        serviceRoutine(POSITION);
-        lastMenuPage = NO_MENU;
-      }
-      else editParameter(menuItem - 2 + 8, selectedRow); // запускаем обработчик изменения параметра. -2 отступ (заголовок и первый пункт страницы). +8 начало параметров для сервисного меню в массиве parameterList
+        else { // иначе запускаем обработку выбранного этапа калибровки
+          serviceRoutine((serviceStates)(menuItem - 1));
+          lastMenuPage = NO_MENU;
+        }
+        break;
+      case STATISTICS_PAGE: // выбор елемента на странице статистики
+        if (menuItem == 1) shots_session = 0; // сбрасываем количетво рюмок
+        else if (menuItem == 2) volume_session = 0; // сбрасываем объём
+        else if (menuItem == 3) {
+          volume_overall = 0;
+          EEPROM.put(eeAddress._volume_overall, 0);
+        }
+        break;
+      case SERVO_CALIBRATION_PAGE:  // выбор елемента на странице настройки сервопривода
+        if (menuItem == 1) { // выбрали первый пункт -> начало этапа калибровки серво
+          serviceRoutine(POSITION);
+          lastMenuPage = NO_MENU;
+        }
+        else editParameter(menuItem - 2 + 8, selectedRow); // запускаем обработчик изменения параметра. -2 отступ (заголовок и первый пункт страницы). +8 начало параметров для сервисного меню в массиве parameterList
+        break;
+      default: break;
     }
     itemSelected = 0; // флаг на успешную обработку нажатия на пункт меню.
   }
@@ -546,90 +563,94 @@ void displayMenu() { // вывод страниц меню
     }
     else  disp.setInvertMode(0);
 
-    if (menuPage == MAIN_MENU_PAGE && currItem == 1)  {
-#if(MENU_LANG == 0)
-      if (workMode == ManualMode) MenuPages[menuPage][currItem] = " Авто режим";
-      else  MenuPages[menuPage][currItem] = " Ручной режим";
-#else
-      if (workMode == ManualMode) MenuPages[menuPage][currItem] = " Auto mode";
-      else  MenuPages[menuPage][currItem] = " Manual mode";
-#endif
-    }
+    static byte parameter;
 
-    if (menuPage == SETTINGS_PAGE)  {
-      printStr(MenuPages[menuPage][currItem]);
-      clearToEOL();
-      byte parameter = currItem - 1;
+    switch (menuPage) {
+
+      case MAIN_MENU_PAGE:
+        if (currItem == 1) {
 #if(MENU_LANG == 0)
-      if ( (parameter == rainbow_flow) || (parameter == invert_display) ) {
-        if (parameterList[parameter] == 0) printStr("(", Right);
-        else printStr(")", Right);
-      }
-      else printInt(parameterList[parameter], Right);
+          if (workMode == ManualMode) MenuPages[menuPage][currItem] = " Авто режим";
+          else  MenuPages[menuPage][currItem] = " Ручной режим";
 #else
-      printInt(parameterList[parameter], Right);
+          if (workMode == ManualMode) MenuPages[menuPage][currItem] = " Auto mode";
+          else  MenuPages[menuPage][currItem] = " Manual mode";
 #endif
-      disp.write('\n');
-    }
-    else if (menuPage == STATISTICS_PAGE) {
-      printStr(MenuPages[menuPage][currItem]);
-      clearToEOL();
-      if (currItem == 1)  printInt(shots_session, Right);
-      else  {
-        float currValue = (currItem == 2) ? volume_session : volume_overall;
+        }
+        printStr(MenuPages[menuPage][currItem]);
+        clearToEOL(' ');
+        disp.write('\n');
+        break;
+
+      case SETTINGS_PAGE:
+        printStr(MenuPages[menuPage][currItem]);
+        clearToEOL();
+        parameter = currItem - 1;
 #if(MENU_LANG == 0)
-        if (currValue < 100.0) {
-          if (currValue < 10) printInt(currValue, disp.displayWidth() - strWidth("0мл") - 1);
-          else printInt(currValue, disp.displayWidth() - strWidth("00мл") - 1);
-          printStr("мл");
+        if ( (parameter == rainbow_flow) || (parameter == invert_display) ) {
+          if (parameterList[parameter] == 0) printStr("(", Right);
+          else printStr(")", Right);
         }
-        else {
-          printFloat(currValue / 1000.0, 2, disp.displayWidth() - strWidth("0.00л") - 1);
-          printStr("л");
-        }
+        else printInt(parameterList[parameter], Right);
 #else
-        if (currValue < 100.0) {
-          if (currValue < 10) printInt(currValue, disp.displayWidth() - strWidth("0ml") - 1);
-          else printInt(currValue, disp.displayWidth() - strWidth("00ml") - 1);
-          printStr("ml");
-        }
-        else {
-          printFloat(currValue / 1000.0, 2, disp.displayWidth() - strWidth("0.00l"));
-          printStr("l");
-        }
-#endif
-      }
-      disp.write('\n');
-    }
-    else if (menuPage == SERVICE_PAGE) {
-      printStr(MenuPages[menuPage][currItem]);
-      clearToEOL();
-#ifndef BATTERY_PIN
-      if (currItem == 3) // пункт Поддержание питания
-        printInt(parameterList[keep_power], Right); // вывод значения таймера для поддержания питания
-#endif
-      disp.write('\n');
-    }
-    else if (menuPage == SERVO_CALIBRATION_PAGE) {
-      printStr(MenuPages[menuPage][currItem]);
-      clearToEOL();
-      byte parameter = currItem - 2 + 8;
-#if(MENU_LANG == 0)
-      if ( (parameter == motor_reverse) || (parameter == auto_parking) ) {
-        if (parameterList[parameter] == 0) printStr("(", Right);
-        else printStr(")", Right);
-      }
-      if ( (parameter == motor_speed) || (parameter == keep_power) )
         printInt(parameterList[parameter], Right);
-#else
-      if (currItem > 1) printInt(parameterList[parameter], Right);
 #endif
-      disp.write('\n');
-    }
-    else  {
-      printStr(MenuPages[menuPage][currItem]);
-      clearToEOL(' ');
-      disp.write('\n');
+        disp.write('\n');
+        break;
+      case STATISTICS_PAGE:
+        printStr(MenuPages[menuPage][currItem]);
+        clearToEOL();
+        if (currItem == 1)  printInt(shots_session, Right);
+        else  {
+          float currValue = (currItem == 2) ? volume_session : volume_overall;
+#if(MENU_LANG == 0)
+          if (currValue < 10000.0) { // меньше 10л
+            printFloat(currValue / 1000.0, 2, DISP_WIDTH - strWidth("0.00л") - 1);
+            printStr("л");
+          }
+          else {
+            printFloat(currValue / 1000.0, 2, DISP_WIDTH - strWidth("00.00л") - 1);
+            printStr("л");
+          }
+#else
+          if (currValue < 10000.0) {
+            printFloat(currValue / 1000.0, 2, DISP_WIDTH - strWidth("0.00l"));
+            printStr("l");
+          }
+          else {
+            printFloat(currValue / 1000.0, 2, DISP_WIDTH - strWidth("00.00l"));
+            printStr("l");
+          }
+#endif
+        }
+        disp.write('\n');
+        break;
+      case SERVICE_PAGE:
+        printStr(MenuPages[menuPage][currItem]);
+        clearToEOL();
+#ifndef BATTERY_PIN
+        if (currItem == 3) // пункт Поддержание питания
+          printInt(parameterList[keep_power], Right); // вывод значения таймера для поддержания питания
+#endif
+        disp.write('\n');
+        break;
+      case SERVO_CALIBRATION_PAGE:
+        printStr(MenuPages[menuPage][currItem]);
+        clearToEOL();
+        parameter = currItem - 2 + 8;
+#if(MENU_LANG == 0)
+        if ( (parameter == motor_reverse) || (parameter == auto_parking) ) {
+          if (parameterList[parameter] == 0) printStr("(", Right);
+          else printStr(")", Right);
+        }
+        if ( (parameter == motor_speed) || (parameter == keep_power) )
+          printInt(parameterList[parameter], Right);
+#else
+        if (currItem > 1) printInt(parameterList[parameter], Right);
+#endif
+        disp.write('\n');
+        break;
+      default: break;
     }
   }
   disp.setInvertMode(0);

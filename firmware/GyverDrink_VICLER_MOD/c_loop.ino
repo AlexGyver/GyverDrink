@@ -15,15 +15,18 @@
 //}
 
 void loop() {
+  while (1) {
+
 #ifdef BATTERY_PIN
-  while (!battery_watchdog() && !showMenu);
+    while (!battery_watchdog() && !showMenu);
 #endif
-  encTick();
-  btnTick();
-  flowTick();
-  LEDtick();
-  timeoutTick();
-  motorTick();
-  keepPowerTick();
-  //CPS();
+    encTick();
+    btnTick();
+    flowTick();
+    LEDtick();
+    timeoutTick();
+    motorTick();
+    keepPowerTick();
+    //CPS();
+  }
 }

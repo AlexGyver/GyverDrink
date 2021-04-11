@@ -1,7 +1,7 @@
 //GyverDrink VICLER_MOD
-#define VERSION 7.5
+#define VERSION 7.6
 #define DISPLAY_VERSION 1
-//29.03.2021
+//11.04.2021
 /*
   ==============================================================================================
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
@@ -18,13 +18,13 @@
         Подключение по I2C:  SCK -> A5
                              SDA -> A4
                              RES -> RST
-                             DC  -> подтянуть к GND
-                             CS  -> подтянуть к GND
+                             DC  -> GND
+                             CS  -> GND
         Подключение по SPI:  CLK -> A5
                              SDA -> A4
                              RES -> RST
-                             DC  -> 13
-                             CS  -> 2
+                             DC  -> 0
+                             CS  -> GND
 
         4х символьный, 7-сегментный на контроллере TM1637.
         Подключение:  DIO -> 11
@@ -193,7 +193,7 @@ uint8_t actualVolume = 0;
 float volumeCounter = 0;
 bool systemON = false;
 bool timeoutState = false;
-bool parking = true;
+bool parking = false;
 bool LEDbreathingState = false;
 bool LEDblinkState = false;
 float battery_voltage = 4.2;
@@ -289,4 +289,8 @@ struct EEPROMAddress
 
 #ifdef STATUS_LED
 #define LED leds[NUM_SHOTS]
+#endif
+
+#if (MOTOR_TYPE == 1) && defined STEPPER_ENDSTOP
+#define ENDSTOP_STATUS (!digitalRead(STEPPER_ENDSTOP))
 #endif

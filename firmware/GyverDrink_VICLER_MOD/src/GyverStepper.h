@@ -142,7 +142,7 @@ uint32_t stepTime;
 #define MIN_STEPPER_SPEED (1.0f/3600)	// 1 шаг в час
 
 #ifndef DRIVER_STEP_TIME
-#define DRIVER_STEP_TIME 4
+#define DRIVER_STEP_TIME 1
 #endif
 
 #include <Arduino.h>
