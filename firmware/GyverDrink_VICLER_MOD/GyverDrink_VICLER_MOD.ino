@@ -1,7 +1,7 @@
 //GyverDrink VICLER_MOD
-#define VERSION 7.6
+#define VERSION 7.7
 #define DISPLAY_VERSION 1
-//11.04.2021
+//20.05.2021
 /*
   ==============================================================================================
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
@@ -133,10 +133,9 @@
 #if (MOTOR_TYPE == 0)
 #include "src/ServoSmoothMinim.h"
 #elif (MOTOR_TYPE == 1)
-
 #include "src/GyverStepper.h"
-#include "src/GyverTimers/GyverTimers.h"
 #endif
+#include "src/GyverTimers/GyverTimers.h"
 #include "src/microLED/microLED.h"
 #include "src/encUniversalMinim.h"
 #include "src/buttonMinim.h"
@@ -158,9 +157,9 @@ ServoSmoothMinim servo;
 GStepper<STEPPER2WIRE> stepper(STEPS_PER_REVOLUTION * MICROSTEPS, STEPPER_STEP, STEPPER_DIR, STEPPER_EN);
 #endif
 encMinim enc(ENC_CLK, ENC_DT, ENC_SW, ENCODER_DIR, ENCODER_TYPE); // пин clk, пин dt, пин sw, направление (0/1), тип (0/1)
-
 buttonMinim btn(BTN_PIN);
 buttonMinim encBtn(ENC_SW);
+
 timerMinim LEDtimer(30);
 timerMinim FLOWdebounce(20);
 timerMinim FLOWtimer(2000);
@@ -254,7 +253,7 @@ uint8_t parameterList[] = {
 
 
 // расчёт адрессных ячеек для сохранения параметров
-struct EEPROMAddress
+const struct EEPROMAddress
 {
   const byte _thisVolume = 0;
   const byte _time50ml = _thisVolume + sizeof(thisVolume);
@@ -279,6 +278,8 @@ struct EEPROMAddress
   const byte _volume_overall = _oled_contrast + sizeof(parameterList[oled_contrast]);
 #endif
 } eeAddress;
+
+
 
 //╞══════════════════════════════════════════════════════════════════════════════╡MACROS╞══════════════════════════════════════════════════════════════════════════════╡
 

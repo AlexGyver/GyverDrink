@@ -748,7 +748,11 @@ void flowRoutine() {
           progressBar(thisVolume, parameterList[max_volume]);
           displayVolumeSession();
 #endif
+//          WAITtimer.reset();
+//          pinMode(13, OUTPUT);
+//          digitalWrite(13, 1);
         }
+//        if (WAITtimer.isReady()) digitalWrite (13, 0);
 #if (MOTOR_TYPE == 0)
         if (servo.tick()) {                               // едем до упора
           servo.stop();
