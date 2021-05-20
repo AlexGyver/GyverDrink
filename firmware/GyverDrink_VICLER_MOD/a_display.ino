@@ -321,8 +321,8 @@ void printNum(uint16_t volume, int8_t postfix = 0) { //вывод чисел к�
       //    }
 
       if (volume > 99) printInt(volume, Left, 3 - shiftY);
-      else if (volume > 9) printInt(volume, (DISP_WIDTH - strWidth("000")) / 2, 3 - shiftY);
-      else printInt(volume, (DISP_WIDTH - strWidth("00")) / 2 + 16, 3 - shiftY);
+      else if (volume > 9) printInt(volume, (DISP_WIDTH - 90) / 2, 3 - shiftY);
+      else printInt(volume, (DISP_WIDTH - 60) / 2 + 16, 3 - shiftY);
 
 
 #if(NUM_FONT == 0)
@@ -335,9 +335,9 @@ void printNum(uint16_t volume, int8_t postfix = 0) { //вывод чисел к�
       if (!showMenu) displayVolumeSession();
       break;
     case 2:
-      if (volume > 99) printInt(volume, (DISP_WIDTH - strWidth("000")) / 2 - 16, 3 - shiftY);
-      else if (volume > 9) printInt(volume, (DISP_WIDTH - strWidth("00")) / 2, 3 - shiftY);
-      else printInt(volume, (DISP_WIDTH - strWidth("0")) / 2 + 16, 3 - shiftY);
+      if (volume > 99) printInt(volume, (DISP_WIDTH - 90) / 2 - 16, 3 - shiftY);
+      else if (volume > 9) printInt(volume, (DISP_WIDTH - 60) / 2, 3 - shiftY);
+      else printInt(volume, (DISP_WIDTH - 30) / 2 + 16, 3 - shiftY);
 #if(NUM_FONT == 0)
       disp.setFont(BigPostfix30x16);
 #else
@@ -356,7 +356,7 @@ void printNum(uint16_t volume, int8_t postfix = 0) { //вывод чисел к�
 #endif
 }
 
-void progressBar(int16_t value, uint16_t maximum = MAX_VOLUME) { // прогресс-бар для визуального отображения объёма
+void progressBar(int16_t value, uint8_t maximum = MAX_VOLUME) { // прогресс-бар для визуального отображения объёма
   disp.setFont(ProgBar);                  // активируем шрифт. Состоит из одного деления прогресс-бара
   disp.setLetterSpacing(0);               // отключаем пробелы между символами шрифта, т.к. они уже встроенны в шрифт
   static int16_t currX = 0, targetX = 0;  // актуальная и целевая позиция координаты Х на дисплее
@@ -403,7 +403,7 @@ void displayVolumeSession() {
 #if DISPLAY_SESSION_VOLUME
   disp.setFont(MAIN_FONT);
 #if(MENU_LANG == 0)
-  const byte offsetX = DISP_WIDTH - strWidth("0.00л") - 1;
+  const byte offsetX = DISP_WIDTH - 33 - 1;
 #else
   const byte offsetX = DISP_WIDTH - strWidth("0.00l") + 5;
 #endif
@@ -605,11 +605,11 @@ void displayMenu() { // вывод страниц меню
           float currValue = (currItem == 2) ? volume_session : volume_overall;
 #if(MENU_LANG == 0)
           if (currValue < 10000.0) { // меньше 10л
-            printFloat(currValue / 1000.0, 2, DISP_WIDTH - strWidth("0.00л") - 1);
+            printFloat(currValue / 1000.0, 2, DISP_WIDTH - 34 - 1);
             printStr("л");
           }
           else {
-            printFloat(currValue / 1000.0, 2, DISP_WIDTH - strWidth("00.00л") - 1);
+            printFloat(currValue / 1000.0, 2, DISP_WIDTH - 42 - 1);
             printStr("л");
           }
 #else

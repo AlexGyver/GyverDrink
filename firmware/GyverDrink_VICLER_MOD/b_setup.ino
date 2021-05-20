@@ -1,5 +1,5 @@
 void setup() {
-  //Serial.begin(115200);
+  //Serial.begin(9600);
   // старт дисплея
 #ifdef TM1637
   disp.clear();
@@ -89,6 +89,7 @@ void setup() {
   servo.stop();
   servoOFF();
   parking = true;
+  Timer2.setPeriod(5000);
 #elif (MOTOR_TYPE == 1) // настройка шаговика
 #ifdef STEPPER_ENDSTOP
   pinMode(STEPPER_ENDSTOP, INPUT_PULLUP);
@@ -100,10 +101,10 @@ void setup() {
   stepper.setCurrentDeg(parking_pos);
   stepper.autoPower(MOTOR_AUTO_POWER);
   stepper.disable();
-
   Timer2.setPeriod(stepper.getMinPeriod() / 2);
-  Timer2.enableISR();
 #endif
+
+  Timer2.enableISR();
 
   /* - Стартовая анимация. Значение ANIMATION_FPS задаёт количество кадров в секунду (чем больше - тем быстрее анимация)
         Всего доступно 8 видов анимации. Выбирается в ANIMATION_NUM от 0 до 7.
@@ -193,7 +194,10 @@ void setup() {
 #endif
 
 #if (MOTOR_TYPE == 1) && defined STEPPER_ENDSTOP
+#ifdef STEPPER_ENDSTOP
   while (homing());
+#endif
+  stepper.setTargetDeg(parking_pos);
 #endif
 
   if (!digitalRead(BTN_PIN) || firstStartUp) { // вход в сервисное меню
@@ -229,8 +233,12 @@ void setup() {
   TIMEOUTtimer.start();
 }
 
-#if (MOTOR_TYPE == 1)
+//#if (MOTOR_TYPE == 1)
 ISR(TIMER2_A) {
-  stepper.tick(); // тикаем тут
-}
+#if (MOTOR_TYPE == 0)
+  servo.tick();
+#else
+  stepper.tick();
 #endif
+}
+//#endif

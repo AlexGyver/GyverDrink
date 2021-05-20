@@ -64,7 +64,7 @@ void encTick() {
 // активация/остановка налива
 void btnTick() {
 #ifdef OLED
-  static byte pressCount = 1; // счётчик нажатий
+  static byte pressCount = 0; // счётчик нажатий
   static long lastPressedMillis = 0; // время последнего нажатия на кнопку
 #endif
 
@@ -112,7 +112,7 @@ void btnTick() {
         timeoutState = true;
       }
     }
-    else {  // считаем количество нажатий только на основном экране. Время между кликами 200-300 мс
+    else {  // считаем количество нажатий только на основном экране. Время между кликами 100-500 мс
       if ( (millis() - lastPressedMillis > 100) && (millis() - lastPressedMillis < 500) ) pressCount++;
       else pressCount = 1;
       lastPressedMillis = millis();
