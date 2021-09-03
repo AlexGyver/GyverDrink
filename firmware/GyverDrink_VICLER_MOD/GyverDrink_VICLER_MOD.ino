@@ -1,7 +1,7 @@
 //GyverDrink VICLER_MOD
-#define VERSION 7.7
+#define VERSION 7.8
 #define DISPLAY_VERSION 1
-//20.05.2021
+//03.09.2021
 /*
   ==============================================================================================
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
@@ -163,7 +163,7 @@ buttonMinim encBtn(ENC_SW);
 timerMinim LEDtimer(30);
 timerMinim FLOWdebounce(20);
 timerMinim FLOWtimer(2000);
-timerMinim WAITtimer(500);
+timerMinim WAITtimer(PAUSE_TIME);
 timerMinim TIMEOUTtimer(TIMEOUT_STBY * 1000L); // таймаут режима ожидания
 timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
 timerMinim KEEP_POWERtimer(KEEP_POWER * 1000L);
