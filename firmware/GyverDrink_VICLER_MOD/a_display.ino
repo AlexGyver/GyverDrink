@@ -169,44 +169,45 @@ const char *MenuPages[][9] = {
 
 #else
 const char *MenuPages[][9] = {
-  { "Menu",
+  { "      Menu      ",
     "",
     " Settings",
-    " Statistics"
+    " Stats"
   },
 
   { "Settings",
     "timeout off",
     "stby time",
-    "stby light",
+    "led bright.",
     "led color",
-    "rainbow flow",
-    "invert display",
+    "color flow",
+    "disp invert",
     "disp contrast",
     "max volume",
   },
 
-  { "Statistics",
+  { "Stats",
     " Shots",
     " Session",
-    " Overall"
+    " Total"
   },
 
   { "Service",
-    " Servo",
+    " Motor",
     " Pump",
 #ifdef BATTERY_PIN
     " Battery",
 #else
     " Keep power",
 #endif
-    " Reset"
+    " Reset",
+    " Exit"
   },
 
   {
     " Servo ",
     " Calibration",
-    " Inverse",
+    " Invert",
     " Speed",
     " Auto parking"
   }
