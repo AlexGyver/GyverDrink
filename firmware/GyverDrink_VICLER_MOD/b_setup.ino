@@ -201,7 +201,7 @@ void setup() {
   stepper.setTargetDeg(parking_pos);
 #endif
 
-  if (!digitalRead(BTN_PIN) || firstStartUp) { // вход в сервисное меню
+  if (!digitalRead(BTN_PIN) || serviceBoot) { // вход в сервисное меню
 #ifdef TM1637
     serviceRoutine(serviceState);
   }

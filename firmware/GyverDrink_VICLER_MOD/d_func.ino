@@ -809,7 +809,10 @@ void flowRoutine() {
 #endif
 
       systemState = PUMPING;                              // режим - наливание
-      if (volume_session == 0) prepump_volume = PREPUMP_VOLUME; // если самая первая рюмка - учитываем прокачку
+      if (prepumped == 0) {
+        prepump_volume = PREPUMP_VOLUME; // если самая первая рюмка - учитываем прокачку
+        prepumped = true;
+      }
       else prepump_volume = 0;
       delay(300);
       FLOWtimer.setInterval((long)(shotVolume[curPumping] + prepump_volume) * time50ml / 50);  // перенастроили таймер
@@ -905,7 +908,7 @@ void prePump() {
 #elif (MOTOR_TYPE == 1)
   while (stepper.tick());
 #endif
-  delay(300); // небольшая задержка перед наливом
+  delay(100); // небольшая задержка перед наливом
 
   pumpON(); // включаем помпу
   FLOWdebounce.reset();
