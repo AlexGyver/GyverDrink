@@ -42,17 +42,17 @@
 <a id="chapter-3"></a>
 ## Материалы и компоненты
 ### Ссылки оставлены на магазины, с которых я закупаюсь уже не один год
-- Arduino NANO https://ali.ski/allgN
-- Адресная лента (под нарезку) https://ali.ski/xIkXAq
-- Адресные модули поштучно https://ali.ski/cGc-uI
-- Энкодер https://ali.ski/KZTbG
-- Кнопка https://ali.ski/GRWZU
-- Дисплей https://ali.ski/-lC8C
-- Концевики https://ali.ski/f9qTis
-- Драйвер https://ali.ski/pjXPVR
-- Серво https://ali.ski/iWDe1i
-- Модуль USB https://ali.ski/5qKhEX
-- Помпа https://ali.ski/MU0lo  https://ali.ski/C_LOCk
+- Arduino NANO https://ali.ski/QeCP0t
+- Адресная лента (под нарезку) https://ali.ski/jHiVH
+- Адресные модули поштучно https://ali.ski/Fi_wm
+- Энкодер https://ali.ski/LUPzE
+- Кнопка https://ali.ski/25Ygho
+- Дисплей https://ali.ski/a7zkbY
+- Концевики https://ali.ski/24PWCi
+- Драйвер https://ali.ski/31K2Pn
+- Серво https://ali.ski/aizZQn
+- Модуль USB https://ali.ski/P_Taq
+- Помпа https://ali.ski/zetxb  https://ali.ski/TQYUbB
 
 ## Вам скорее всего пригодится
 * [Всё для пайки (паяльники и примочки)](http://alexgyver.ru/all-for-soldering/)
