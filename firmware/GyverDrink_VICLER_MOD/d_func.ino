@@ -748,11 +748,7 @@ void flowRoutine() {
           progressBar(thisVolume, parameterList[max_volume]);
           displayVolumeSession();
 #endif
-          //          WAITtimer.reset();
-          //          pinMode(13, OUTPUT);
-          //          digitalWrite(13, 1);
         }
-        //        if (WAITtimer.isReady()) digitalWrite (13, 0);
 #if (MOTOR_TYPE == 0)
         if (servo.tick()) {                               // едем до упора
           servo.stop();
@@ -768,6 +764,10 @@ void flowRoutine() {
           else LED = mHSV(autoModeStatusColor, 255, STATUS_LED);
           LEDchanged = true;
 #endif
+//          pinMode(13, OUTPUT);
+//          digitalWrite(13, 1);
+//          delay(300);
+//          digitalWrite(13, 0);
         }
       }
     }
@@ -809,7 +809,7 @@ void flowRoutine() {
 #endif
 
       systemState = PUMPING;                              // режим - наливание
-      if (prepumped == 0) {
+      if (!prepumped) {
         prepump_volume = PREPUMP_VOLUME; // если самая первая рюмка - учитываем прокачку
         prepumped = true;
       }

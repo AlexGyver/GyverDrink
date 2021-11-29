@@ -73,6 +73,7 @@ void printNum(uint16_t num, int8_t mode = 0) {
     for (byte i = lastVal; i > value; i--) analogWrite(ANALOG_METER_PIN, i - err_vector[i]);
 
   lastVal = value;
+  mode = mode;
 }
 
 /* для совместимости */
