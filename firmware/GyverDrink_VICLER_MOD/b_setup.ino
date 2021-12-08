@@ -86,6 +86,7 @@ void setup() {
   servo.attach(SERVO_PIN, parking_pos, SERVO_MIN_US, SERVO_MAX_US);
   delay(500);
   servo.setSpeed(parameterList[motor_speed]);
+  servo.setAccel(MOTOR_ACCEL);
   servo.stop();
   servoOFF();
   parking = true;
@@ -96,7 +97,7 @@ void setup() {
 #endif
   stepper.setRunMode(FOLLOW_POS);
   stepper.setMaxSpeedDeg(parameterList[motor_speed]);
-  stepper.setAccelerationDeg(STEPPER_ACCELERATION);
+  stepper.setAccelerationDeg(MOTOR_ACCEL);
   stepper.reverse(parameterList[motor_reverse]);
   stepper.setCurrentDeg(parking_pos);
   stepper.autoPower(MOTOR_AUTO_POWER);
@@ -200,7 +201,7 @@ void setup() {
   stepper.setTargetDeg(parking_pos);
 #endif
 
-  if (!digitalRead(BTN_PIN) || firstStartUp) { // вход в сервисное меню
+  if (!digitalRead(BTN_PIN) || serviceBoot) { // вход в сервисное меню
 #ifdef TM1637
     serviceRoutine(serviceState);
   }

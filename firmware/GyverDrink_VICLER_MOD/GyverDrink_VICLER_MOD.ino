@@ -1,7 +1,7 @@
 //GyverDrink VICLER_MOD
-#define VERSION 7.7
+#define VERSION 7.8
 #define DISPLAY_VERSION 1
-//20.05.2021
+//29.11.2021
 /*
   ==============================================================================================
   Модифицированная версия прошивки к проекту "Наливатор by AlexGyver" с расширенным функционалом
@@ -163,12 +163,11 @@ buttonMinim encBtn(ENC_SW);
 timerMinim LEDtimer(30);
 timerMinim FLOWdebounce(20);
 timerMinim FLOWtimer(2000);
-timerMinim WAITtimer(500);
+timerMinim WAITtimer(PAUSE_TIME);
 timerMinim TIMEOUTtimer(TIMEOUT_STBY * 1000L); // таймаут режима ожидания
 timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
 timerMinim KEEP_POWERtimer(KEEP_POWER * 1000L);
 
-#define BATTERY_LOW    3.0   // минимальное напряжение аккумулятора
 
 #define INIT_VOLUME 25
 bool LEDchanged = false;
@@ -207,8 +206,10 @@ byte volumeColor[NUM_SHOTS];
 const int ledsColor = LEDS_COLOR / 360.0 * 255;
 const int manualModeStatusColor = MANUAL_MODE_STATUS_COLOR / 360.0 * 255;
 const int autoModeStatusColor = AUTO_MODE_STATUS_COLOR / 360.0 * 255;
-bool firstStartUp = false;
+bool prepumped = false;
+bool serviceBoot = false;
 bool dispSTBicon = false;
+
 
 
 #if(DISPLAY_TYPE < 3) // OLED

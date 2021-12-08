@@ -73,6 +73,7 @@ void printNum(uint16_t num, int8_t mode = 0) {
     for (byte i = lastVal; i > value; i--) analogWrite(ANALOG_METER_PIN, i - err_vector[i]);
 
   lastVal = value;
+  mode = mode;
 }
 
 /* для совместимости */
@@ -119,7 +120,7 @@ MenuPageName menuPage = MAIN_MENU_PAGE; // актуальная страница
 byte lastMenuPage = NO_MENU;            // последняя отображаемая страница. Нужна для предотвращения повторного вывода заголовка одной и той же страницы во время прокрутки.
 bool itemSelected = 0;                  // флаг нажатия на пункт меню
 
-uint8_t menuItemsNum[] = {3, 8, 3, 4, 4}; // количество строк на каждой странице без заголовка
+uint8_t menuItemsNum[] = {3, 8, 3, 5, 4}; // количество строк на каждой странице без заголовка
 
 #if(MENU_LANG == 0)
 const char *MenuPages[][9] = {
@@ -154,7 +155,8 @@ const char *MenuPages[][9] = {
 #else
     " Поддерж. питания",
 #endif
-    " Сброс"
+    " Сброс",
+    " Выход"
   },
 
   {
@@ -168,44 +170,45 @@ const char *MenuPages[][9] = {
 
 #else
 const char *MenuPages[][9] = {
-  { "Menu",
+  { "      Menu      ",
     "",
     " Settings",
-    " Statistics"
+    " Stats"
   },
 
   { "Settings",
     "timeout off",
     "stby time",
-    "stby light",
+    "led bright.",
     "led color",
-    "rainbow flow",
-    "invert display",
+    "color flow",
+    "disp invert",
     "disp contrast",
     "max volume",
   },
 
-  { "Statistics",
+  { "Stats",
     " Shots",
     " Session",
-    " Overall"
+    " Total"
   },
 
   { "Service",
-    " Servo",
+    " Motor",
     " Pump",
 #ifdef BATTERY_PIN
     " Battery",
 #else
     " Keep power",
 #endif
-    " Reset"
+    " Reset",
+    " Exit"
   },
 
   {
     " Servo ",
     " Calibration",
-    " Inverse",
+    " Invert",
     " Speed",
     " Auto parking"
   }
@@ -499,7 +502,7 @@ void displayMenu() { // вывод страниц меню
         }
         break;
       case SERVICE_PAGE:  // выбор елемента на странице сервисного меню
-        if (menuItem == menuItemsNum[menuPage]) { // последний пункт -> сброс настроек
+        if (menuItem == menuItemsNum[menuPage] - 1) { // предпоследний пункт -> сброс настроек
           resetEEPROM();
           readEEPROM();
         }
@@ -507,6 +510,19 @@ void displayMenu() { // вывод страниц меню
 #ifndef BATTERY_PIN
         else if (menuItem == 3) editParameter(keep_power, selectedRow); // выбор
 #endif
+        else if (menuItem == menuItemsNum[menuPage]) { // последний пункт ->  выход из сервис режима
+          disp.clear();
+          showMenu = 0;
+          menuItem = 1;
+          itemSelected = 0;
+          lastMenuPage = NO_MENU;
+          menuPage = MAIN_MENU_PAGE;
+          progressBar(-1);
+          displayMode(workMode);
+          displayVolume();
+          timeoutState = true;
+          return;
+        }
         else { // иначе запускаем обработку выбранного этапа калибровки
           serviceRoutine((serviceStates)(menuItem - 1));
           lastMenuPage = NO_MENU;

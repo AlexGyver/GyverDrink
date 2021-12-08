@@ -64,8 +64,8 @@ void encTick() {
 // активация/остановка налива
 void btnTick() {
 #ifdef OLED
-  static byte pressCount = 0; // счётчик нажатий
-  static long lastPressedMillis = 0; // время последнего нажатия на кнопку
+  //  static byte pressCount = 0; // счётчик нажатий
+  //  static long lastPressedMillis = 0; // время последнего нажатия на кнопку
 #endif
 
   if (btn.pressed()) { // нажатие на основную кнопку
@@ -78,9 +78,8 @@ void btnTick() {
 #ifdef OLED
       shots_session++;
       volume_overall += actualVolume;
+      displayVolume();
       EEPROM.put(eeAddress._volume_overall, volume_overall);
-      //      EEPROM.put(eeAddress._shots_session, shots_session);
-      //      EEPROM.put(eeAddress._volume_session, volume_session);
 #endif
       systemState = WAIT; // режим работы - ждать
       WAITtimer.reset();
@@ -112,18 +111,20 @@ void btnTick() {
         timeoutState = true;
       }
     }
-    else {  // считаем количество нажатий только на основном экране. Время между кликами 100-500 мс
-      if ( (millis() - lastPressedMillis > 100) && (millis() - lastPressedMillis < 500) ) pressCount++;
-      else pressCount = 1;
-      lastPressedMillis = millis();
-    }
+    //    else {  // считаем количество нажатий только на основном экране. Время между кликами 100-500 мс
+    //      if ( (millis() - lastPressedMillis > 100) && (millis() - lastPressedMillis < 500) ) pressCount++;
+    //      else pressCount = 1;
+    //      lastPressedMillis = millis();
+    //    }
 
 #endif
   }
 
   // смена режима/вход в меню
+  //if (btn.holded() || (encBtn.holded() && shotCount == 0)) {
   if (btn.holded()) {
     if (systemState == PUMPING) return;
+    timeoutReset();
 #ifdef TM1637
     workMode = (workModes)!workMode;
     if (thisVolume < 100) {                                // объём меньше 100
@@ -148,7 +149,6 @@ void btnTick() {
 #elif defined ANALOG_METER
     workMode = (workModes)!workMode;
 #endif /* ANALOG_METER */
-    timeoutReset();
   }
 
   // промывка
@@ -170,10 +170,28 @@ void btnTick() {
 #endif
 
   // выбор рюмки
-  if (encBtn.clicked() && !showMenu) {
+  if (encBtn.clicked() && !showMenu) {  // нажали на энкодер не в меню
+    if (systemState == PUMPING) { // если нажали на энкодер во время налива - останавливаем налив
+      pumpOFF();                      // помпа выкл
+      shotStates[curPumping] = READY; // налитая рюмка, статус: готов
+      curPumping = -1;                // снимаем выбор рюмки
+#ifdef OLED
+      shots_session++;
+      volume_overall += actualVolume;
+      displayVolume();
+      EEPROM.put(eeAddress._volume_overall, volume_overall);
+      //      EEPROM.put(eeAddress._shots_session, shots_session);
+      //      EEPROM.put(eeAddress._volume_session, volume_session);
+#endif
+      systemState = WAIT; // режим работы - ждать
+      WAITtimer.reset();
+      timeoutReset();
+      return;
+    }
 
-    if (shotCount < 2) return;
+    if (shotCount < 2) return;  // если стоит только одна стопка, выходим из функции
 
+    // выбор объёма определённой рюмки
     for (int8_t i = selectShot + 1; i <= NUM_SHOTS; i++) {
       if (i == NUM_SHOTS) {
         selectShot = -1;
@@ -210,14 +228,14 @@ void btnTick() {
     timeoutReset();
   }
 
-#ifdef OLED
-  if (pressCount == 2) {
-    workMode = (workModes)!workMode;
-    displayMode(workMode);
-    timeoutReset();
-    pressCount = 0;
-  }
-#endif
+  //#ifdef OLED
+  //  if (pressCount == 2) {
+  //    workMode = (workModes)!workMode;
+  //    displayMode(workMode);
+  //    timeoutReset();
+  //    pressCount = 0;
+  //  }
+  //#endif
 
 
   // сброс настроек

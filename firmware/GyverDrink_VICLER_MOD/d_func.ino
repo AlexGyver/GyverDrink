@@ -166,7 +166,7 @@ void serviceRoutine(serviceStates mode) {
         stepper.setMaxSpeedDeg(60);
         stepper.setTargetDeg(servoPos);
         while (stepper.tick());
-        stepper.setAccelerationDeg(STEPPER_ACCELERATION);
+        stepper.setAccelerationDeg(MOTOR_ACCEL);
         stepper.setMaxSpeedDeg(parameterList[motor_speed]);
 #endif
         if (shotCount == 0) parking_pos = servoPos;
@@ -495,9 +495,9 @@ void editParameter(byte parameter, byte selectedRow) {
       if (enc.isRightH()) parameterList[parameter] -= 5;
 
       if (parameterList[timeout_off] > 15) parameterList[timeout_off] = 0;
-#if (MOTOR_TYPE == 0)
-      if (parameterList[motor_speed] > 100) parameterList[motor_speed] = 0;
-#endif
+      //#if (MOTOR_TYPE == 0)
+      //      if (parameterList[motor_speed] > 100) parameterList[motor_speed] = 0;
+      //#endif
 
       if (parameterList[stby_time] > 0) {
         TIMEOUTtimer.setInterval(parameterList[stby_time] * 1000L); // таймаут режима ожидания
@@ -671,7 +671,7 @@ void flowTick() {
 // поиск и заливка
 void flowRoutine() {
   if (showMenu) return;
-
+  static byte prepump_volume = 0;
   if (systemState == SEARCH) {                                           // если поиск рюмки
     bool noGlass = true;
     for (byte i = 0; i < NUM_SHOTS; i++) {
@@ -748,11 +748,7 @@ void flowRoutine() {
           progressBar(thisVolume, parameterList[max_volume]);
           displayVolumeSession();
 #endif
-//          WAITtimer.reset();
-//          pinMode(13, OUTPUT);
-//          digitalWrite(13, 1);
         }
-//        if (WAITtimer.isReady()) digitalWrite (13, 0);
 #if (MOTOR_TYPE == 0)
         if (servo.tick()) {                               // едем до упора
           servo.stop();
@@ -768,13 +764,16 @@ void flowRoutine() {
           else LED = mHSV(autoModeStatusColor, 255, STATUS_LED);
           LEDchanged = true;
 #endif
+//          pinMode(13, OUTPUT);
+//          digitalWrite(13, 1);
+//          delay(300);
+//          digitalWrite(13, 0);
         }
       }
     }
     else if ( (workMode == ManualMode) && noGlass) systemON = false;     // если в ручном режиме, припаркованны и нет рюмок - отключаемся нахрен
   }
   else if (systemState == MOVING) {                                          // движение к рюмке
-
 #if (MOTOR_TYPE == 0)
     if (servo.tick()) {                                   // если приехали
 #elif (MOTOR_TYPE == 1)
@@ -810,8 +809,13 @@ void flowRoutine() {
 #endif
 
       systemState = PUMPING;                              // режим - наливание
+      if (!prepumped) {
+        prepump_volume = PREPUMP_VOLUME; // если самая первая рюмка - учитываем прокачку
+        prepumped = true;
+      }
+      else prepump_volume = 0;
       delay(300);
-      FLOWtimer.setInterval((long)shotVolume[curPumping] * time50ml / 50);  // перенастроили таймер
+      FLOWtimer.setInterval((long)(shotVolume[curPumping] + prepump_volume) * time50ml / 50);  // перенастроили таймер
       FLOWtimer.reset();                                  // сброс таймера
       actualVolume = 0;
       volumeCounter = 0;
@@ -827,7 +831,7 @@ void flowRoutine() {
     //    tStart = millis();
 
     volumeCounter += volumeTick;
-    if ((byte)volumeCounter > actualVolume) {
+    if ((byte)volumeCounter > actualVolume + prepump_volume) {
       actualVolume++;
       printNum(actualVolume, ml);
 
@@ -904,7 +908,7 @@ void prePump() {
 #elif (MOTOR_TYPE == 1)
   while (stepper.tick());
 #endif
-  delay(300); // небольшая задержка перед наливом
+  delay(100); // небольшая задержка перед наливом
 
   pumpON(); // включаем помпу
   FLOWdebounce.reset();
