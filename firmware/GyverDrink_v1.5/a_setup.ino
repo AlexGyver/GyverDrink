@@ -10,6 +10,10 @@ void setup() {
   }
   EEPROM.get(0, thisVolume);
 
+  Timer2.setPeriod(DISP_PERIOD);  // Заводим Timer 2 на прерывания с нужным периодом
+  Timer2.enableISR();             // Включаем прерывания Timer 2
+  DEBUG("timer2 init");
+
   // тыкаем ленту
   strip.setBrightness(130);
   strip.clear();
@@ -19,13 +23,13 @@ void setup() {
   // настройка пинов
   pinMode(PUMP_POWER, 1);
   pinMode(SERVO_POWER, 1);
-  for (byte i = 0; i < NUM_SHOTS; i++) {
+  for (byte i = 0; i < CUM_SHOTS; i++) {
     if (SWITCH_LEVEL == 0) pinMode(SW_pins[i], INPUT_PULLUP);
   }
 
   // старт дисплея
   disp.clear();
-  disp.brightness(7);
+  // disp.brightnessDepth(7); // DA_K
   DEBUG("disp init");
 
   // настройка серво

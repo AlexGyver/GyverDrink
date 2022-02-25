@@ -30,7 +30,8 @@ buttonMinim::buttonMinim(uint8_t pin) {
 }
 
 void buttonMinim::tick() {
-  boolean btnState = digitalRead(_pin);
+  auto btnStateRaw = analogRead(_pin);
+  boolean btnState = btnStateRaw > 200; // arduino uno only maybe 
   if (!btnState && !flags.btnFlag && ((uint32_t)millis() - _btnTimer > 90)) {
     flags.btnFlag = true;
     _btnTimer = millis();

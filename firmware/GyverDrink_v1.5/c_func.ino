@@ -1,10 +1,13 @@
 // различные функции
+boolean analogReadBool (int pin) {
+  return analogRead (pin) > 200;
+}
 
 void serviceMode() {
-  if (!digitalRead(BTN_PIN)) {
+  if (!analogReadBool(BTN_PIN)) {
     byte serviceText[] = {_S, _E, _r, _U, _i, _C, _E};
-    disp.runningString(serviceText, sizeof(serviceText), 150);
-    while (!digitalRead(BTN_PIN));  // ждём отпускания
+    disp.runningString((int8_t *)serviceText, sizeof(serviceText), 150); // DA_K: добавил (int_t *)
+    while (!analogReadBool(BTN_PIN));  // ждём отпускания
     delay(200);
     servoON();
     int servoPos = 0;
@@ -14,11 +17,11 @@ void serviceMode() {
     bool flag;
     for (;;) {
       servo.tick();
-      enc.tick();
+      // enc.tick(); now it seems to be workable without this. - DA_K
 
       if (timer100.isReady()) {   // период 100 мс
         // работа помпы со счётчиком
-        if (!digitalRead(ENC_SW)) {
+        if (/*!digitalRead(ENC_SW)*/ !analogReadBool (ENC_BUTTON)) {
           if (flag) pumpTime += 100;
           else pumpTime = 0;
           disp.displayInt(pumpTime);
@@ -30,8 +33,8 @@ void serviceMode() {
         }
 
         // зажигаем светодиоды от кнопок
-        for (byte i = 0; i < NUM_SHOTS; i++) {
-          if (!digitalRead(SW_pins[i])) {
+        for (byte i = 0; i < CUM_SHOTS; i++) {
+          if (!analogReadBool(SW_pins[i])) {         // ! digital-analog change
             strip.setLED(i, mCOLOR(GREEN));
           } else {
             strip.setLED(i, mCOLOR(BLACK));
@@ -45,14 +48,18 @@ void serviceMode() {
         pumpTime = 0;
         if (enc.isLeft()) {
           servoPos += 5;
+          DEBUG("   turn LEFT ");
         }
         if (enc.isRight()) {
           servoPos -= 5;
+          DEBUG("   turn RIGHT");
         }
         servoPos = constrain(servoPos, 0, 180);
         disp.displayInt(servoPos);
         servo.setTargetDeg(servoPos);
       }
+      else
+        DEBUG("no turn");
 
       if (btn.holded()) {
         servo.setTargetDeg(0);
@@ -78,8 +85,8 @@ void dispMode() {
 // наливайка, опрос кнопок
 void flowTick() {
   if (FLOWdebounce.isReady()) {
-    for (byte i = 0; i < NUM_SHOTS; i++) {
-      bool swState = !digitalRead(SW_pins[i]) ^ SWITCH_LEVEL;
+    for (byte i = 0; i < CUM_SHOTS; i++) {
+      bool swState = !analogReadBool(SW_pins[i]) ^ SWITCH_LEVEL;
       if (swState && shotStates[i] == NO_GLASS) {  // поставили пустую рюмку
         timeoutReset();                                             // сброс таймаута
         shotStates[i] = EMPTY;                                      // флаг на заправку
@@ -120,7 +127,7 @@ void flowTick() {
 void flowRoutnie() {
   if (systemState == SEARCH) {                            // если поиск рюмки
     bool noGlass = true;
-    for (byte i = 0; i < NUM_SHOTS; i++) {
+    for (byte i = 0; i < CUM_SHOTS; i++) {
       if (shotStates[i] == EMPTY && i != curPumping) {    // поиск
         noGlass = false;                                  // флаг что нашли хоть одну рюмку
         parking = false;
@@ -191,7 +198,7 @@ void timeoutReset() {
   timeoutState = true;
   TIMEOUTtimer.reset();
   TIMEOUTtimer.start();
-  DEBUG("timeout reset");
+  // !!! DEBUG("timeout reset");
 }
 
 // сам таймаут
@@ -229,4 +236,8 @@ void jerkServo() {
     servoOFF();
     disp.brightness(1);
   }
+}
+
+ISR(TIMER2_A) {        // Прерывание Timer 2
+  disp.tickManual();   // Обслуживание динамической индикации дисплея
 }

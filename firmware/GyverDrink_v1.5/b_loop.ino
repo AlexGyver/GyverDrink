@@ -4,6 +4,7 @@ void loop() {
   encTick();
   btnTick();
   flowTick();
-  LEDtick();
+  LEDtick(); // in c_func
   timeoutTick();
+  // disp.displayInt (1111);
 }

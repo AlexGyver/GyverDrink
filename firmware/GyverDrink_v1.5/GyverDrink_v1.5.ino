@@ -15,7 +15,7 @@
    Версия 1.1:
    - Поправлена работа системы при выборе некорректного объёма
    - Исправлены ошибки при наливании больших объёмов
-   - Исправлен баг с остановкой наливания при убирании другой рюмки
+   - Исправлен баг с остановкой наливания при убирании другой рю++мки
 
    Версия 1.2:
    - Исправлено ограничение выбора объёма
@@ -34,10 +34,14 @@
 */
 
 // ======== НАСТРОЙКИ ========
-#define NUM_SHOTS 4       // количество рюмок (оно же кол-во светодиодов и кнопок!)
+#define CUM_SHOTS 4       // количество рюмок (оно же кол-во светодиодов и кнопок!)
 #define TIMEOUT_OFF 5     // таймаут на выключение (перестаёт дёргать привод), минут
 #define SWITCH_LEVEL 0    // кнопки 1 - высокий сигнал при замыкании, 0 - низкий
 #define INVERSE_SERVO 0   // инвертировать направление вращения серво
+#define DISP595_BRIGHTNESS 1 // Для подключения программной регулирвоки яркости дисплея
+#define DISP595_BRIGHTNESS_DEPTH 7
+#define DISP_PERIOD 500  // Период динамической индикации в мкс (500-6000). Взял поменьше, потму что используется регулировка яркости
+
 
 // положение серво над центрами рюмок
 const byte shotPos[] = {25, 60, 95, 145, 60, 60};
@@ -55,36 +59,44 @@ const long time50ml = 5500;
 #define SERVO_POWER 4
 #define SERVO_PIN 5
 #define LED_PIN 6
-#define BTN_PIN 7
-#define ENC_SW 8
-#define ENC_DT 9
-#define ENC_CLK 10
+#define BTN_PIN A4
+#define ENC_SW 10 // кнопка
+#define ENC_DT 9 // импульсы направления энкодера
+#define ENC_CLK 8 // импульсы отсчёта энкодера 
 #define DISP_DIO 11
-#define DISP_CLK 12
-const byte SW_pins[] = {A0, A1, A2, A3, A4, A5};
+#define DISP_RCLK 12
+#define DISP_SCLK 13
+
+// encoder
+#define ENC_BUTTON A3
+const byte SW_pins[] = {7, 8, 9, 10}; // {A0, A1, A2, A3, A4, A5};
 
 // =========== ЛИБЫ ===========
-#include <GyverTM1637.h>
+// #include <GyverTM1637.h>
 #include <ServoSmooth.h>
 #include <microLED.h>
 #include <EEPROM.h>
-#include "encUniversalMinim.h"
+#include <GyverTimers.h>
+#include <SevenSegmentsDisp.h>
+#include "DaKarakumEncoder.h"
 #include "buttonMinim.h"
 #include "timer2Minim.h"
 
 // =========== ДАТА ===========
 #define COLOR_DEBTH 2   // цветовая глубина: 1, 2, 3 (в байтах)
-LEDdata leds[NUM_SHOTS];  // буфер ленты типа LEDdata (размер зависит от COLOR_DEBTH)
-microLED strip(leds, NUM_SHOTS, LED_PIN);  // объект лента
+LEDdata leds[CUM_SHOTS];  // буфер ленты типа LEDdata (размер зависит от COLOR_DEBTH)
+microLED strip(leds, CUM_SHOTS, LED_PIN);  // объект лента
 
-GyverTM1637 disp(DISP_CLK, DISP_DIO);
+Disp595 disp(DISP_DIO, DISP_SCLK, DISP_RCLK);
 
 // пин clk, пин dt, пин sw, направление (0/1), тип (0/1)
-encMinim enc(ENC_CLK, ENC_DT, ENC_SW, 1, 1);
+// encMinim enc(ENC_CLK, ENC_DT, ENC_SW, 1, 1); DA_K: changed lib
+DaKarakumEncoder enc; // A1 A2 A3
+
 
 ServoSmooth servo;
 
-buttonMinim btn(BTN_PIN);
+buttonMinim btn (BTN_PIN);
 buttonMinim encBtn(ENC_SW);
 timerMinim LEDtimer(100);
 timerMinim FLOWdebounce(20);
@@ -96,8 +108,9 @@ timerMinim POWEROFFtimer(TIMEOUT_OFF * 60000L);
 bool LEDchanged = false;
 bool pumping = false;
 int8_t curPumping = -1;
+int INITIAL_MODE = 0;
 
-enum {NO_GLASS, EMPTY, IN_PROCESS, READY} shotStates[NUM_SHOTS];
+enum {NO_GLASS, EMPTY, IN_PROCESS, READY} shotStates[CUM_SHOTS];
 enum {SEARCH, MOVING, WAIT, PUMPING} systemState;
 bool workMode = false;  // 0 manual, 1 auto
 int thisVolume = 50;
